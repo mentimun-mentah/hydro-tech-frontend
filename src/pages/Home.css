@@ -1,0 +1,20 @@
+.header-dashboard {
+  margin-bottom: 20px;
+}
+.header-date {
+  color: #93999E!important;
+}
+.apexcharts-canvas {
+  width: 100% !important;
+}
+.apexcharts-canvas, .apexcharts-canvas svg {
+  width: 100% !important;
+  /* height: 100% !important; */
+}
+.chart {
+  width: 100% !important;
+  height: 100% !important;
+}
+.card-dashboard .ant-card-body {
+  height: 100% !important;
+}

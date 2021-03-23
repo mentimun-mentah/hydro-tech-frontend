@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --white: #ffffff;
+  --white-smoke: #fafafa;
+  --purple: #556BB7;
+}
+
+::selection {
+  color: var(--white-smoke)!important;
+  background: #B6B9C7!important;
+}
+
+html {
+  background-color: var(--white-smoke);
+}
+body {
+  margin: 0;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 600;
+  background-color: var(--white-smoke)!important;
+}
+
+.ant-btn, .ant-input-number, .ant-input-number-input {
+  border-radius: .5rem!important;
+}
+
+.ant-btn-primary {
+  background: var(--purple)!important;
+  border-color: var(--purple)!important;
+}
+
+.ant-input-number-handler-wrap {
+  display: none!important;
+}
+
+.ant-input-number:hover {
+  border-color: #B6B9C7!important;
+  border-right-width: 0px !important;
+}
+
+.ant-input-number:focus, .ant-input-number-focused {
+  border-color: #B6B9C7!important;
+}
+
+.ant-input-number-focused {
+  box-shadow: 0 0 0 2px #B6B9C733!important;
+}
+
+.ant-card.radius1rem {
+  border-radius: 1rem;
+}
+
+.shadow1 {
+  box-shadow: rgb(0 0 0 / 8%) 3px 8px 20px;
+}

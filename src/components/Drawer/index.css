@@ -1,0 +1,9 @@
+.overlay-drawer-mask {
+  backdrop-filter: blur(1.3px);
+  background-color: rgba(0, 0, 0, 0.45);
+}
+
+.ant-drawer-content {
+  border-top-left-radius: 1rem!important;
+  border-top-right-radius: 1rem!important;
+}
