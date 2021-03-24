@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --white: #ffffff;
+  --white-smoke: #fafafa;
+  --purple: #556BB7;
+  --blue: #1890ff;
+}
+
+::selection {
+  color: var(--white-smoke)!important;
+  background: #B6B9C7!important;
+}
+
+html {
+  background-color: var(--white-smoke);
+  --antd-wave-shadow-color: var(--white-smoke)!important;
+}
+body {
+  margin: 0;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 600;
+  background-color: var(--white-smoke)!important;
+}
+
+.ant-btn, .ant-input-number, .ant-input-number-input, .ant-input, .ant-input-password {
+  border-radius: .5rem!important;
+}
+
+.ant-btn-blue {
+  color: var(--white)!important;
+  background: var(--blue)!important;
+  border-color: var(--blue)!important;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 12%);
+  -webkit-box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+}
+
+.ant-btn-primary {
+  background: var(--purple)!important;
+  border-color: var(--purple)!important;
+}
+
+.ant-input-number-handler-wrap {
+  display: none!important;
+}
+
+.ant-input-number:hover {
+  border-color: #B6B9C7!important;
+  border-right-width: 0px !important;
+}
+
+.ant-input-number:focus, .ant-input-number-focusedm, .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+  border-color: #B6B9C7!important;
+}
+
+.ant-input-number-focused, .ant-input-affix-wrapper:focus, .ant-input-affix-wrapper-focused, .ant-input:focus, .ant-input-focused {
+  box-shadow: 0 0 0 2px #B6B9C733!important;
+  border-color: #B6B9C7!important;
+}
+
+.ant-card.radius1rem {
+  border-radius: 1rem;
+}
+
+.ant-switch-checked {
+  background-color: var(--purple)!important;
+}
+.ant-switch-checked:focus {
+  box-shadow: 0 0 0 2px rgb(85 107 183 / 17%)!important;
+}
+
+.ant-input:hover, .ant-btn:hover, .ant-btn:focus {
+  border-color: #B6B9C7!important;
+}
+
+.ant-input-password > .ant-input:focus {
+  box-shadow: none!important;
+}
+
+.shadow1 {
+  box-shadow: rgb(0 0 0 / 8%) 3px 8px 20px;
+}

@@ -43,15 +43,22 @@
   border-right: unset !important;
 }
 
-.ant-menu {
+.ant-menu, .ant-menu-item a {
   color: #93999E!important;
 }
 
-.ant-menu-item-selected {
+.ant-menu-item-selected, 
+.ant-menu-item-selected a:hover, 
+.ant-menu-item-selected a {
   color: #07091A!important;
 }
 
-.ant-menu-item:hover, .ant-menu-item-active, .ant-menu:not(.ant-menu-inline) .ant-menu-submenu-open, .ant-menu-submenu-active, .ant-menu-submenu-title:hover {
+.ant-menu-item:hover, 
+.ant-menu-item a:hover, 
+.ant-menu-item-active, 
+.ant-menu:not(.ant-menu-inline) .ant-menu-submenu-open, 
+.ant-menu-submenu-active, .ant-menu-submenu-title:hover,
+.ant-menu-item-selected a:hover {
   color: #07091A!important;
 }
 

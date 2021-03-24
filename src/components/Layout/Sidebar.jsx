@@ -2,6 +2,7 @@ import './Sidebar.css';
 import { useState } from 'react'
 import { Layout, Menu } from 'antd'
 import { AnimatePresence, motion } from 'framer-motion'
+import { Link } from "react-router-dom";
 
 import * as menus from 'App'
 
@@ -13,11 +14,7 @@ const SplitText = ({ children, ...rest }) => {
         key={children + i}
         style={{ display: 'inline-block', overflow: 'hidden' }}
       >
-        <motion.div
-          {...rest}
-          custom={i}
-          style={{ display: 'inline-block', willChange: 'transform' }}
-        >
+        <motion.div {...rest} custom={i} style={{ display: 'inline-block', willChange: 'transform' }}>
           {word + (i !== words.length - 1 ? '\u00A0' : '')}
         </motion.div>
       </div>
@@ -97,7 +94,9 @@ const SidebarContainer = ({ children, setShowReport, setShowSetting, activeMenu,
               onSelect={val => setActiveMenu(val.key)}
             >
               <Menu.Item key={menus.HOME} icon={<i className="far fa-house-flood" />}>
-                Home
+                <Link to="/dashboard">
+                  Dashboard
+                </Link>
               </Menu.Item>
               <Menu.Item key={menus.REPORT} icon={<i className="far fa-clipboard-list" />} onClick={() => setShowReport(true)}>
                 Report
@@ -106,7 +105,24 @@ const SidebarContainer = ({ children, setShowReport, setShowSetting, activeMenu,
                 Settings
               </Menu.Item>
               <Menu.Item key={menus.LOGOUT} icon={<i className="far fa-sign-out" />}>
-                Log Out
+                <Link to="/">
+                  Log Out
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="/login" icon={<i className="far fa-sign-in" />}>
+                <Link to="/login">
+                  Sign in
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="/register" icon={<i className="far fa-sign-in" />}>
+                <Link to="/register">
+                  Register
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="/forgot-password" icon={<i className="far fa-sign-in" />}>
+                <Link to="/forgot-password">
+                  Forgot Password
+                </Link>
               </Menu.Item>
             </Menu>
           </div>
