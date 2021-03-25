@@ -93,7 +93,12 @@ const SidebarContainer = ({ children, setShowReport, setShowSetting, activeMenu,
               selectedKeys={[activeMenu]}
               onSelect={val => setActiveMenu(val.key)}
             >
-              <Menu.Item key={menus.HOME} icon={<i className="far fa-house-flood" />}>
+              <Menu.Item key={menus.HOME} icon={<i className="far fa-door-open" />}>
+                <Link to="/">
+                  Home
+                </Link>
+              </Menu.Item>
+              <Menu.Item key={menus.DASHBOARD} icon={<i className="far fa-house-flood" />}>
                 <Link to="/dashboard">
                   Dashboard
                 </Link>

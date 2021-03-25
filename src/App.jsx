@@ -6,12 +6,13 @@ import Drawer from 'components/Drawer'
 import Layout from 'components/Layout'
 import SettingDrawer from 'components/Drawer/SettingDrawer'
 
-import Dashboard from 'pages/dashboard/'
+import Home from 'pages/home'
 import Login from 'pages/login/'
 import Register from 'pages/register/'
+import Dashboard from 'pages/dashboard/'
 import ForgotPassword from 'pages/forgot-password/'
 
-export const HOME = "HOME", REPORT = "REPORT", SETTING = "SETTING", LOGOUT = "LOGOUT"
+export const HOME = "HOME", REPORT = "REPORT", SETTING = "SETTING", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD"
 
 const App = () => {
   const [wsClient, setWsClient] = useState()
@@ -65,9 +66,10 @@ const App = () => {
         setShowSetting={setShowSetting}
       >
         <Switch>
-          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/" component={Home} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/forgot-password" component={ForgotPassword} />
         </Switch>
       </Layout>
