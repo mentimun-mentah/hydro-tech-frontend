@@ -40,137 +40,139 @@ const RegisterContainer = ({ changeView }) => {
   return(
     <>
       <section className="content">
-        <main className="main-content-sidebar">
-          <div className="auth-content">
-            <AnimatePresence exitBeforeEnter>
-              {loading ? (
-                <div className="text-center">
-                  <Image width={100} src={Loader1} preview={false} alt="loader" />
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h2">
-                    <SplitText
-                      animate="visible"
-                      initial={{ x: '100%' }}
-                      variants={{ visible: i => ({ x: 0, transition: { delay: i * .2 } }) }}
-                    >
-                      {text}
-                    </SplitText>
-                  </motion.div> 
-                </div>
-              ):(
-                <>
-                  <Steps current={current} size="small" className="mb2">
-                    {steps.map(item => (
-                      <Steps.Step key={item.title} title={item.title} />
-                    ))}
-                  </Steps>
+        <motion.div initial={{ opacity: 0, x: -100 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 100 }}>
+          <main className="main-content-sidebar">
+            <div className="auth-content">
+              <AnimatePresence exitBeforeEnter>
+                {loading ? (
+                  <div className="text-center">
+                    <Image width={100} src={Loader1} preview={false} alt="loader" />
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h2">
+                      <SplitText
+                        animate="visible"
+                        initial={{ x: '100%' }}
+                        variants={{ visible: i => ({ x: 0, transition: { delay: i * .2 } }) }}
+                      >
+                        {text}
+                      </SplitText>
+                    </motion.div> 
+                  </div>
+                ):(
+                  <>
+                    <Steps current={current} size="small" className="mb2">
+                      {steps.map(item => (
+                        <Steps.Step key={item.title} title={item.title} />
+                      ))}
+                    </Steps>
 
-                  {current == 0 && (
-                    <>
-                      <h2 className="auth-content-title forgot-title">Register to Hydro</h2>
-                      <SocialLogin text="Register" />
-                      <Divider plain>Or</Divider>
+                    {current == 0 && (
+                      <>
+                        <h2 className="auth-content-title forgot-title">Register to Hydro</h2>
+                        <SocialLogin text="Register" />
+                        <Divider plain>Or</Divider>
 
-                      <Form name="login" layout="vertical">
-                        <Form.Item label="Username" name="username">
-                          <Input placeholder="Username" size="large" />
-                        </Form.Item>
-                        <Form.Item label="Email" name="email">
-                          <Input placeholder="Email" size="large" />
-                        </Form.Item>
-                        <Form.Item 
-                          label="Password"
-                          name="password"
-                          className="input-with-right-child"
-                        >
-                          <Input.Password placeholder="Password" size="large" />
-                        </Form.Item>
-                        <Form.Item 
-                          label="Confirmation Password"
-                          name="password"
-                          className="input-with-right-child"
-                        >
-                          <Input.Password placeholder="Confirmation Password" size="large" />
-                        </Form.Item>
-
-                        <Form.Item name="agreement">
-                          <div className="text-secondary">
-                            <span>By registering, I agree to the</span>
-                            <a className="text-tridatu" href="#a"> Terms and Conditions</a>
-                            <span> and </span>
-                            <a className="text-tridatu" href="#b"> Privacy Policy</a>
-                          </div>
-                        </Form.Item>
-
-                        <Form.Item>
-                          <Button block type="primary" size="large" onClick={next}>
-                            <b>Create Account</b>
-                          </Button>
-                        </Form.Item>
-
-                        <span>Already a member?</span>
-                        <a onClick={() => changeView(LOGIN)}> Sign In</a>
-                      </Form>
-                    </>
-                  )}
-
-                  {current == 1 && (
-                    <>
-                      <h1 className="bold"> Hi, Ackerman, Choose what plants you will plant </h1>
-
-                      <Form>
-                        <Form.Item>
-                          <div className="plantlist-container">
-                            {plantList.map(data => (
-                              <motion.div
-                                key={data} 
-                                whileHover={{ y: -4 }}
-                                whileTap={{ scale: 0.98, y: 0 }}
-                                className="card-plantlist"
-                              >
-                                <Card 
-                                  className={`radius1rem card-body-p-1 ${plantSelected === data && "card-plantlist-selected"}`}
-                                  onClick={() => setPlantSelected(data)}
-                                >
-                                  <Row gutter={[10,10]}>
-                                    <Col className="col-image-plantlist noselect">
-                                      <Image width={60} src={Lecttuce} preview={false} alt="plant" className="align-sub noselect" />
-                                    </Col>
-                                    <Col className="col-detail-plantlist">
-                                      <h2 className="mb0 h4 bold title-plantlist">{data}</h2>
-                                      <p className="mb0 subtitle-plantlist h6 noselect">
-                                        <span className="bold text-orange">{Math.floor(Math.random() * 100)} </span>Days to grow
-                                      </p>
-                                      <p className="mb0 subtitle-plantlist h6 noselect">
-                                        Difficulty level
-                                        <span className="bold text-orange"> Simple</span>
-                                      </p>
-                                    </Col>
-                                  </Row>
-                                </Card>
-                              </motion.div>
-                            ))}
-                          </div>
-                        </Form.Item>
-
-                        <Form.Item>
-                          <Button block 
-                            size="large" 
-                            type="primary" 
-                            onClick={onFinish}
-                            disabled={plantSelected === ""}
+                        <Form name="login" layout="vertical">
+                          <Form.Item label="Username" name="username">
+                            <Input placeholder="Username" size="large" />
+                          </Form.Item>
+                          <Form.Item label="Email" name="email">
+                            <Input placeholder="Email" size="large" />
+                          </Form.Item>
+                          <Form.Item 
+                            label="Password"
+                            name="password"
+                            className="input-with-right-child"
                           >
-                            <b>Finish</b>
-                          </Button>
-                        </Form.Item>
-                      </Form>
-                    </>
+                            <Input.Password placeholder="Password" size="large" />
+                          </Form.Item>
+                          <Form.Item 
+                            label="Confirmation Password"
+                            name="password"
+                            className="input-with-right-child"
+                          >
+                            <Input.Password placeholder="Confirmation Password" size="large" />
+                          </Form.Item>
 
-                  )}
-                </>
-              )}
-            </AnimatePresence>
-          </div>
-        </main>
+                          <Form.Item name="agreement">
+                            <div className="text-secondary">
+                              <span>By registering, I agree to the</span>
+                              <a className="text-tridatu" href="#a"> Terms and Conditions</a>
+                              <span> and </span>
+                              <a className="text-tridatu" href="#b"> Privacy Policy</a>
+                            </div>
+                          </Form.Item>
+
+                          <Form.Item>
+                            <Button block type="primary" size="large" onClick={next}>
+                              <b>Create Account</b>
+                            </Button>
+                          </Form.Item>
+
+                          <span>Already a member?</span>
+                          <a onClick={() => changeView(LOGIN)}> Sign In</a>
+                        </Form>
+                      </>
+                    )}
+
+                    {current == 1 && (
+                      <>
+                        <h1 className="bold"> Hi, Ackerman, Choose what plants you will plant </h1>
+
+                        <Form>
+                          <Form.Item>
+                            <div className="plantlist-container">
+                              {plantList.map(data => (
+                                <motion.div
+                                  key={data} 
+                                  whileHover={{ y: -4 }}
+                                  whileTap={{ scale: 0.98, y: 0 }}
+                                  className="card-plantlist"
+                                >
+                                  <Card 
+                                    className={`radius1rem card-body-p-1 ${plantSelected === data && "card-plantlist-selected"}`}
+                                    onClick={() => setPlantSelected(data)}
+                                  >
+                                    <Row gutter={[10,10]}>
+                                      <Col className="col-image-plantlist noselect">
+                                        <Image width={60} src={Lecttuce} preview={false} alt="plant" className="align-sub noselect" />
+                                      </Col>
+                                      <Col className="col-detail-plantlist">
+                                        <h2 className="mb0 h4 bold title-plantlist">{data}</h2>
+                                        <p className="mb0 subtitle-plantlist h6 noselect">
+                                          <span className="bold text-orange">{Math.floor(Math.random() * 100)} </span>Days to grow
+                                        </p>
+                                        <p className="mb0 subtitle-plantlist h6 noselect">
+                                          Difficulty level
+                                          <span className="bold text-orange"> Simple</span>
+                                        </p>
+                                      </Col>
+                                    </Row>
+                                  </Card>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </Form.Item>
+
+                          <Form.Item>
+                            <Button block 
+                              size="large" 
+                              type="primary" 
+                              onClick={onFinish}
+                              disabled={plantSelected === ""}
+                            >
+                              <b>Finish</b>
+                            </Button>
+                          </Form.Item>
+                        </Form>
+                      </>
+
+                    )}
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          </main>
+        </motion.div>
       </section>
 
       <style jsx>{`
