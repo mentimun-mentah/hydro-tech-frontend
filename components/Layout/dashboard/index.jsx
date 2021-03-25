@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Layout, Menu } from 'antd'
 import { AnimatePresence, motion } from 'framer-motion'
 
+import Link from 'next/link'
+
 import Style from './style'
 import SplitText from './SplitText'
 
@@ -75,11 +77,14 @@ const SidebarContainer = ({ children /*, setShowReport, setShowSetting, activeMe
               theme="light" 
               mode="inline" 
               inlineIndent={15} 
+              defaultSelectedKeys={[DASHBOARD]}
               // selectedKeys={[activeMenu]}
               // onSelect={val => setActiveMenu(val.key)}
             >
               <Menu.Item key={HOME} icon={<i className="far fa-door-open" />}>
-                Home
+                <Link href="/">
+                  <a>Home</a>
+                </Link>
               </Menu.Item>
               <Menu.Item key={DASHBOARD} icon={<i className="far fa-house-flood" />}>
                 Dashboard

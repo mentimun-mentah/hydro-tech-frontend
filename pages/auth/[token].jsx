@@ -38,9 +38,7 @@ const ResetPassword = () => {
                 </Form.Item>
 
                 <span>Already a member?</span>
-                <Link href="/auth">
-                  <a> Sign In</a>
-                </Link>
+                <Link href="/auth"><a> Sign In</a></Link>
               </Form>
             </div>
           </main>
