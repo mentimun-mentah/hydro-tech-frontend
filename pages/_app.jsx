@@ -8,6 +8,7 @@ const App = ({ Component, pageProps }) => {
       <Head>
         <meta charSet="UTF-8" />
         <title>HYDRO X TECH</title>
+        <link rel="icon" href="/static/images/logo.png" />
         <meta name="robots" content="index, follow" />
         <meta name="description" content="HYDRO x TECH" />
         <link rel="stylesheet" href="/static/css/global.css" />
