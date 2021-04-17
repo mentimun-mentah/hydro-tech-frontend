@@ -98,7 +98,7 @@ const Reports = () => {
           <Row gutter={[20, 20]}>
             <Col xl={24} lg={24} md={24} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <Tabs defaultActiveKey="3" onChange={val => console.log(val)}>
+                <Tabs defaultActiveKey="1" onChange={val => console.log(val)}>
                   <Tabs.TabPane tab="Progress" key="1">
                     <div className="header-dashboard">
                       <h4 className="h4 bold mb0">{moment().format("MMMM YYYY")}</h4>
