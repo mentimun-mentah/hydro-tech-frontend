@@ -53,14 +53,14 @@
   text-transform: uppercase;
   letter-spacing: 0.2em;
 }
-.left-align {
-  text-align: left;
+.text-left {
+  text-align: left!important;
 }
 .text-center {
-  text-align: center;
+  text-align: center!important;
 }
-.right-align {
-  text-align: right;
+.text-right- {
+  text-align: right!important;
 }
 .justify {
   text-align: justify;

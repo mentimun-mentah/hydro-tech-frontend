@@ -21,14 +21,11 @@ const initStatistic = { kind: "", sh: "0", tds: "0", ldr: "0", ta: "0", ph: "0" 
 const initDataSeries = [ { name: "pH", data: [] } ]
 
 const Dashboard = () => {
-  /*PH*/
-  const [statistic, setStatistic] = useState([initStatistic])
   const [seriesPh, setSeriesPh] = useState(initDataSeries)
-  /*PH*/
-
+  const [statistic, setStatistic] = useState([initStatistic])
 
   useEffect(() => {
-    setInterval(() => {
+    const interval = setInterval(() => {
       //ldr = cahaya, ta = tinggi air, ph = power of hydrogen, tds = nutrisi, sh = suhu
       const ph = ((Math.random() * (15 - 7) + 1) + 7).toFixed(2)
       const ta = Math.floor((Math.random() * (98- 70) + 1) + 70).toString()
@@ -48,9 +45,13 @@ const Dashboard = () => {
         data.push({x,y})
         setSeriesPh([{...seriesPh[0], data}])
 
-        ApexCharts && ApexCharts.exec("realtime", "updateSeries", seriesPh)
+        if(ApexCharts && ApexCharts.exec){
+          ApexCharts && ApexCharts.exec("realtime", "updateSeries", seriesPh)
+        }
       }
     }, 1000)
+
+    return () => clearInterval(interval)
   }, [])
 
   const statisticLength = statistic.length
@@ -61,7 +62,6 @@ const Dashboard = () => {
         <h1 className="h1 bold mb0">Monitoring Status</h1>
         <span className="header-date">{moment().format("dddd, DD MMMM YYYY")}</span>
       </div>
-
 
       <Layout>
         <Layout.Content>

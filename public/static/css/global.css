@@ -14,6 +14,7 @@
   --salmon: #ffc19e;
   --salmon-1: #ffbe76;
   --orange: #f0932b;
+  --danger: #dc3545;
 }
 
 ::selection {
@@ -90,6 +91,23 @@ body {
 .ant-input-number-focused, .ant-input-affix-wrapper:focus, .ant-input-affix-wrapper-focused, .ant-input:focus, .ant-input-focused {
   box-shadow: 0 0 0 2px #B6B9C733!important;
   border-color: var(--grey-0)!important;
+}
+
+.ant-form-item-has-error .ant-input:focus, 
+.ant-form-item-has-error .ant-input-affix-wrapper:focus, 
+.ant-form-item-has-error .ant-input-focused, 
+.ant-form-item-has-error .ant-input-affix-wrapper-focused {
+  outline: 0;
+  border-right-width: 1px !important;
+  border-color: var(--danger)!important;
+  box-shadow: 0 0 0 2px rgb(255 77 79 / 20%)!important;
+}
+
+.ant-form-item-has-error .ant-input, 
+.ant-form-item-has-error .ant-input-affix-wrapper, 
+.ant-form-item-has-error .ant-input:hover, 
+.ant-form-item-has-error .ant-input-affix-wrapper:hover {
+  border-color: var(--danger)!important;
 }
 
 .ant-card.radius1rem {
@@ -179,4 +197,13 @@ body {
 
 .text-black {
   color: var(--black)!important;
+}
+
+.text-danger {
+  color: var(--danger)!important;
+}
+
+.form-text {
+  display: block;
+  margin-top: .25rem;
 }

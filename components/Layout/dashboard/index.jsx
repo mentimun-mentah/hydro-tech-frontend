@@ -123,6 +123,13 @@ const SidebarContainer = ({ children }) => {
               >
                 Accounts
               </Menu.Item>
+              <Menu.Item 
+                key={ACCOUNTS+"a"} 
+                icon={<i className="far fa-user" />} 
+                onClick={() => router.push('/live')}
+              >
+                Camera
+              </Menu.Item>
               <Menu.Item key={LOGOUT} icon={<i className="far fa-sign-out" />}>
                 <a href="/">
                   Log Out

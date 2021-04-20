@@ -46,12 +46,11 @@ export const optionsPH = {
   tooltip: {
     enabled: true,
     custom: ({series, seriesIndex, dataPointIndex}) => {
-      console.log(series, seriesIndex, dataPointIndex)
       return(
-      '<div class="text-center">'+
+      '<div class="text-center bold">'+
         '<p style="margin-bottom: 0;color:var(--grey-1); font-size: 12px!important; margin-top:5px;">'
         + series[seriesIndex][dataPointIndex] + 
-        '<span class="bold" style="color:var(--grey-1)"> pH</span></p>'+
+        '<span style="color:var(--grey-1)"> pH</span></p>'+
       '</div>'
       )
     },
