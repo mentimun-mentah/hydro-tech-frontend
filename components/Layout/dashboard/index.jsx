@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Style from './style'
 import SplitText from './SplitText'
 
-const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS"
+const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", ACCOUNTS = "ACCOUNTS"
 
 const SidebarContainer = ({ children }) => {
   const router = useRouter()
@@ -108,6 +108,20 @@ const SidebarContainer = ({ children }) => {
                 onClick={() => router.push('/dashboard/reports')}
               >
                 Reports
+              </Menu.Item>
+              <Menu.Item 
+                key={PLANTS} 
+                icon={<i className="far fa-seedling" />} 
+                onClick={() => router.push('/dashboard/plants')}
+              >
+                Plants
+              </Menu.Item>
+              <Menu.Item 
+                key={ACCOUNTS} 
+                icon={<i className="far fa-user" />} 
+                onClick={() => router.push('/dashboard/accounts')}
+              >
+                Accounts
               </Menu.Item>
               <Menu.Item key={LOGOUT} icon={<i className="far fa-sign-out" />}>
                 <a href="/">

@@ -1,6 +1,6 @@
 export const optionsPH = {
   chart: {
-    id: 'phrealtime',
+    id: 'realtime',
     foreColor: '#93999E',
     zoom: { enabled: false },
     toolbar: { show: false },
@@ -43,6 +43,19 @@ export const optionsPH = {
     axisTicks: { show: false },
     tooltip: { enabled: false },
   },
+  tooltip: {
+    enabled: true,
+    custom: ({series, seriesIndex, dataPointIndex}) => {
+      console.log(series, seriesIndex, dataPointIndex)
+      return(
+      '<div class="text-center">'+
+        '<p style="margin-bottom: 0;color:var(--grey-1); font-size: 12px!important; margin-top:5px;">'
+        + series[seriesIndex][dataPointIndex] + 
+        '<span class="bold" style="color:var(--grey-1)"> pH</span></p>'+
+      '</div>'
+      )
+    },
+  }
 }
 
 export const optionsGrowth = {

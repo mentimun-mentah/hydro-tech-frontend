@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Layout, Card, Row, Col, Image, Tag, Radio, Tabs, Badge, Timeline } from 'antd'
-import { optionsPH, series, optionsGrowth } from 'components/Dashboard/apexOption'
+import { Layout, Card, Row, Col, Image, Tag } from 'antd'
+import { optionsPH } from 'components/Dashboard/apexOption'
 import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData } from 'components/Dashboard/apexOption'
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
@@ -17,49 +17,17 @@ const Lecttuce = '/static/images/plant/lecttuce.png'
 const Temperature = '/static/images/temperature.gif'
 
 const DAY = "DAY", WEEK = "WEEK"
-const initStatistic = { sh: "0", tds: "0", ldr: "0", ta: "0", ph: "0" }
-const initDataSeries = [ { data: [] } ]
-const initPhSeries = [ { name: "PH", data: [2, 4, 3, 6, 4, 9] } ]
-
-const progressData = [
-  {date: 11, sub: "Planted - Location updated"},
-  {date: 14, sub: "Growing - Early phase"},
-  {date: 17, sub: "Growing - Leaves blooming"},
-  {date: 19, sub: "Growing - Leaves bloom - Expected"},
-  {date: 21, sub: "Growing - Early phase ii - Expected"},
-]
+const initStatistic = { kind: "", sh: "0", tds: "0", ldr: "0", ta: "0", ph: "0" }
+const initDataSeries = [ { name: "pH", data: [] } ]
 
 const Dashboard = () => {
   /*PH*/
   const [statistic, setStatistic] = useState([initStatistic])
-  const [seriesPh, setSeriesPh] = useState(initPhSeries)
+  const [seriesPh, setSeriesPh] = useState(initDataSeries)
   /*PH*/
-  
-  const [selectedGrowth, setSelectedGrowth] = useState(WEEK)
-  const [selectedGrowthOption, setSelectedGrowthOption] = useState(optionsGrowth)
-  const [selectedGrowthSeries, setSelectedGrowthSeries] = useState(seriesWeekGrowth)
 
-  /*FUNCTION FOR CHANGING GROWTH SELECTION*/
-  const onChangeSelectedGrowthHanlder = e => {
-    setSelectedGrowth(e.target.value)
-  }
-  /*FUNCTION FOR CHANGING GROWTH SELECTION*/
 
   useEffect(() => {
-    if(selectedGrowth === WEEK) {
-      const dataOption = { ...optionsGrowth, ...optionsWeekGrowthData }
-      setSelectedGrowthOption(dataOption)
-      setSelectedGrowthSeries(seriesWeekGrowth)
-    }
-    if(selectedGrowth === DAY) {
-      const dataOption = { ...optionsGrowth, ...optionsDayGrowthData }
-      setSelectedGrowthOption(dataOption)
-      setSelectedGrowthSeries(seriesDayGrowth)
-    }
-  }, [selectedGrowth])
-
-  useEffect(() => {
-    return false
     setInterval(() => {
       //ldr = cahaya, ta = tinggi air, ph = power of hydrogen, tds = nutrisi, sh = suhu
       const ph = ((Math.random() * (15 - 7) + 1) + 7).toFixed(2)
@@ -68,42 +36,25 @@ const Dashboard = () => {
       const ldr = Math.floor((Math.random() * (600 - 500) + 1) + 500).toString()
       const tds = Math.floor((Math.random() * (1000 - 800) + 1) + 800).toString()
 
-      const dataFromArduino = { key: Math.random(), report: {sh: sh, tds: tds, ldr: ldr, ta: ta, ph: ph }}
-      setStatistic(oldState => [...oldState, dataFromArduino])
+      const dataFromArduino = { kind: "IoT", sh: sh, tds: tds, ldr: ldr, ta: ta, ph: ph }
 
       if(dataFromArduino.hasOwnProperty("kind") && dataFromArduino.kind.toLowerCase() === "iot"){
-        delete dataFromArduino.kind
         setStatistic(oldState => [...oldState, dataFromArduino])
 
         const x = Math.floor(new Date().getTime() / 1000)
         const y = +dataFromArduino['ph']
 
+        let { data } = seriesPh[0]
+        data.push({x,y})
+        setSeriesPh([{...seriesPh[0], data}])
 
-        // let { data } = seriesPh[0]
-        // data.push(y)
-        // setSeriesPh([{...seriesPh[0], data}])
-
-        // ApexCharts && ApexCharts.exec("realtime", "updateSeries", seriesPh)
-
-        // if(ApexCharts && ApexCharts.exec){
-        //   ApexCharts.exec("realtime", "updateSeries", seriesPh)
-        // }
-
-        // let { data } = seriesPh[0]
-        // data.push({x, y})
-
+        ApexCharts && ApexCharts.exec("realtime", "updateSeries", seriesPh)
       }
-      // for(let [key, val] of Object.entries(data)){
-      //   console.log(key, val)
-      // }
-
-    }, 500)
-
+    }, 1000)
   }, [])
 
-  console.log(JSON.stringify(statistic))
-
-
+  const statisticLength = statistic.length
+  
   return(
     <>
       <div className="header-dashboard">
@@ -111,13 +62,14 @@ const Dashboard = () => {
         <span className="header-date">{moment().format("dddd, DD MMMM YYYY")}</span>
       </div>
 
+
       <Layout>
         <Layout.Content>
 
           <Row gutter={[20, 20]}>
             <Col lg={16} md={24} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <h2 className="h2 bold mb1 line-height-1">0 pH</h2>
+                <h2 className="h2 bold mb1 line-height-1">{statistic[statisticLength-1].ph} pH</h2>
                 <span className="header-date">Power of Hydrogen</span>
                 <div className="chart">
                   <Chart type="area" series={seriesPh} options={optionsPH} height={465} />
@@ -135,7 +87,7 @@ const Dashboard = () => {
                     </h2>
                     <div className="text-center items-center mt2">
                       <Image width={120} src={Temperature} preview={false} alt="temperature" className="ml5" />
-                      <h3 className="h2 bold mb0 mt2">26&#176;<span className="regular header-date">C</span></h3>
+                      <h3 className="h2 bold mb0 mt2">{statistic[statisticLength-1].sh}&#176;<span className="regular header-date">C</span></h3>
                     </div>
                   </Card>
                 </Col>
@@ -148,7 +100,7 @@ const Dashboard = () => {
                     </h2>
                     <div className="text-center items-center mt1">
                       <Image width={140} src={WaterTank} preview={false} alt="water-tank" className="mln1" />
-                      <h3 className="h2 bold mb0">80%</h3>
+                      <h3 className="h2 bold mb0">{statistic[statisticLength-1].ta}%</h3>
                       <h4 className="h3 header-date mb0">Remaining</h4>
                     </div>
                   </Card>
@@ -181,7 +133,7 @@ const Dashboard = () => {
                 </h2>
                 <div className="text-center items-center mt2">
                   <Image width={100} src={Plant} preview={false} alt="plant" />
-                  <h3 className="h2 bold mb0">6<span className="regular header-date"> ppm</span></h3>
+                  <h3 className="h2 bold mb0">{statistic[statisticLength-1].tds}<span className="regular header-date"> ppm</span></h3>
                 </div>
               </Card>
             </Col>
@@ -193,7 +145,7 @@ const Dashboard = () => {
                 </h2>
                 <div className="text-center items-center mt2">
                   <Image width={100} src={Sun} preview={false} alt="temperature" />
-                  <h3 className="h2 bold mb0">6<span className="regular header-date"> lux</span></h3>
+                  <h3 className="h2 bold mb0">{statistic[statisticLength-1].ldr}<span className="regular header-date"> lux</span></h3>
                 </div>
               </Card>
             </Col>

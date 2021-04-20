@@ -1,0 +1,29 @@
+.joystick {
+  position: relative;
+  border-radius: 50%;
+  z-index: 0;
+  box-sizing: border-box;
+}
+
+.knob {
+  position: absolute;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.28);
+  border-radius: 50%;
+  z-index: 1;
+  transition: 0.04s ease all;
+  box-sizing: border-box;
+}
+
+.joystick-touchable {
+  position:absolute;
+  left:0; top:0; right:0; bottom:0;
+  width:100%; height:100%;
+}
+
+.joystick-touchable.active {
+  position: fixed;
+  left:0; top:0; right:0; top:0;
+  width:100vw; height:100vh;
+  z-index: 999;
+  overflow: hidden;
+}

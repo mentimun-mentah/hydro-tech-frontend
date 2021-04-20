@@ -36,7 +36,7 @@ body {
   background-color: var(--white-smoke)!important;
 }
 
-.ant-btn, .ant-input-number, .ant-input-number-input, .ant-input, .ant-input-password {
+.ant-btn, .ant-input-number, .ant-input-number-input, .ant-input, .ant-input-password, .ant-select-selector {
   border-radius: .5rem!important;
 }
 
@@ -153,6 +153,30 @@ body {
   color: var(--salmon)!important;
 }
 
+.text-salmon-1 {
+  color: var(--salmon-1)!important;
+}
+
 .text-orange {
   color: var(--orange)!important;
+}
+
+.text-grey {
+  color: var(--grey)!important;
+}
+
+.text-grey-0 {
+  color: var(--grey-0)!important;
+}
+
+.text-grey-1 {
+  color: var(--grey-1)!important;
+}
+
+.text-grey-2 {
+  color: var(--grey-2)!important;
+}
+
+.text-black {
+  color: var(--black)!important;
 }
