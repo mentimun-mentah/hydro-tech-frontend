@@ -22,6 +22,13 @@ const style = css`
   width: 50px!important;
 }
 
+:global(.ant-layout-sider-custom .ant-layout-sider-children) {
+  top: 0;
+  height: 100vh;
+  width: inherit;
+  position: fixed;
+}
+
 :global(.ant-layout-sider-has-trigger) {
   padding-bottom: 78px!important;
 }
@@ -32,6 +39,16 @@ const style = css`
 
 :global(.ant-menu-inline) {
   border-right: unset !important;
+}
+
+:global(.ant-menu-scroll) {
+  overflow: scroll;
+  height: calc(100vh - 48px - 70px - 30px);
+}
+
+:global(.ant-menu-scroll::-webkit-scrollbar) {
+  width: 0;  /* Remove scrollbar space */
+  background: transparent;  /* Optional: just make scrollbar invisible */
 }
 
 :global(.ant-menu-inline-collapsed) {

@@ -4,6 +4,7 @@
   --white: #ffffff;
   --white-smoke: #fafafa;
   --purple: #556BB7;
+  --purple-1: #556bb7cf;
   --blue: #1890ff;
   --grey: #93999E;
   --grey-0: #B6B9C7;
@@ -13,6 +14,7 @@
   --salmon: #ffc19e;
   --salmon-1: #ffbe76;
   --orange: #f0932b;
+  --danger: #dc3545;
 }
 
 ::selection {
@@ -35,7 +37,7 @@ body {
   background-color: var(--white-smoke)!important;
 }
 
-.ant-btn, .ant-input-number, .ant-input-number-input, .ant-input, .ant-input-password {
+.ant-btn, .ant-input-number, .ant-input-number-input, .ant-input, .ant-input-password, .ant-select-selector {
   border-radius: .5rem!important;
 }
 
@@ -91,12 +93,32 @@ body {
   border-color: var(--grey-0)!important;
 }
 
+.ant-form-item-has-error .ant-input:focus, 
+.ant-form-item-has-error .ant-input-affix-wrapper:focus, 
+.ant-form-item-has-error .ant-input-focused, 
+.ant-form-item-has-error .ant-input-affix-wrapper-focused {
+  outline: 0;
+  border-right-width: 1px !important;
+  border-color: var(--danger)!important;
+  box-shadow: 0 0 0 2px rgb(255 77 79 / 20%)!important;
+}
+
+.ant-form-item-has-error .ant-input, 
+.ant-form-item-has-error .ant-input-affix-wrapper, 
+.ant-form-item-has-error .ant-input:hover, 
+.ant-form-item-has-error .ant-input-affix-wrapper:hover {
+  border-color: var(--danger)!important;
+}
+
 .ant-card.radius1rem {
   border-radius: 1rem;
 }
 
 .ant-switch-checked {
   background-color: var(--purple)!important;
+}
+.ant-switch-checked-1 {
+  background-color: var(--purple-1)!important;
 }
 .ant-switch-checked:focus {
   box-shadow: 0 0 0 2px rgb(85 107 183 / 17%)!important;
@@ -116,6 +138,31 @@ body {
   margin-bottom: 20px!important;
 }
 
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):focus-within {
+  box-shadow: 0 0 0 2px rgb(85 107 183 / 17%)!important;
+}
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled):first-child {
+  border-color: var(--purple)!important;
+}
+.ant-radio-button-wrapper-checked:not([class*=' ant-radio-button-wrapper-disabled']).ant-radio-button-wrapper:first-child {
+  color: var(--purple)!important;
+  border-right-color: var(--purple)!important;
+}
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled)::before {
+  background-color: var(--purple)!important;
+}
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled){
+  color: var(--purple)!important;
+  border-color: var(--purple)!important;
+}
+.ant-radio-button-wrapper:hover {
+  color: var(--purple)!important;
+  cursor: pointer;
+}
+.ant-radio-button-wrapper {
+  color: var(--grey-1)!important;
+}
+
 .shadow1 {
   box-shadow: rgb(0 0 0 / 8%) 3px 8px 20px;
 }
@@ -124,6 +171,39 @@ body {
   color: var(--salmon)!important;
 }
 
+.text-salmon-1 {
+  color: var(--salmon-1)!important;
+}
+
 .text-orange {
   color: var(--orange)!important;
+}
+
+.text-grey {
+  color: var(--grey)!important;
+}
+
+.text-grey-0 {
+  color: var(--grey-0)!important;
+}
+
+.text-grey-1 {
+  color: var(--grey-1)!important;
+}
+
+.text-grey-2 {
+  color: var(--grey-2)!important;
+}
+
+.text-black {
+  color: var(--black)!important;
+}
+
+.text-danger {
+  color: var(--danger)!important;
+}
+
+.form-text {
+  display: block;
+  margin-top: .25rem;
 }

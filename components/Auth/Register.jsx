@@ -2,9 +2,16 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Form, Input, Button, Divider, Image, Row, Col, Steps, Card } from 'antd'
+import { LoadingOutlined } from '@ant-design/icons'
 
+import { deepCopy } from 'lib/utility'
+import { resNotification } from 'lib/axios'
+import { formRegister, formRegisterIsValid } from 'formdata/register'
+
+import axios from 'lib/axios'
 import SocialLogin from './SocialButton'
 import Style from 'components/Auth/style'
+import ErrorMessage from 'components/ErrorMessage'
 import SplitText from 'components/Layout/dashboard/SplitText'
 
 const Loader1 = '/static/images/loader-1.gif'
@@ -18,10 +25,13 @@ const LOGIN = "LOGIN"
 
 const RegisterContainer = ({ changeView }) => {
   const router = useRouter()
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [register, setRegister] = useState(formRegister)
   const [plantSelected, setPlantSelected] = useState("")
   const [text, setText] = useState("Setting up your profile")
+
+  const { username, email, password, confirm_password } = register
 
   const next = () => {
     setCurrent(current + 1);
@@ -37,6 +47,67 @@ const RegisterContainer = ({ changeView }) => {
     }, 2500)
   }
 
+  const onChangeHandler = e => {
+    const name = e.target.name
+    const value = e.target.value
+
+    const data = {
+      ...register,
+      [name]: {
+        ...register[name],
+        value: value,
+        isValid: true,
+        message: null,
+      },
+    };
+    setRegister(data)
+  }
+
+  const enterPressHandler = e => {
+    if(e.keyCode === 13) onSubmitHandler(e)
+  }
+
+  const onSubmitHandler = e => {
+    e.preventDefault()
+    if(formRegisterIsValid(register, setRegister)) {
+      setLoading(true)
+      const data = {
+        username: username.value,
+        email: email.value,
+        password: password.value,
+        confirm_password: confirm_password.value,
+      };
+      axios.post("/users/register", data)
+        .then((res) => {
+          setLoading(false)
+          resNotification("success", res.data.detail)
+          setTimeout(() => {
+            next()
+          }, 1000)
+        })
+        .catch((err) => {
+          setLoading(false)
+          const state = deepCopy(register)
+          const errDetail = err.response.data.detail
+          if (typeof errDetail === "string") {
+            state.email.value = state.email.value
+            state.email.isValid = false
+            state.email.message = errDetail
+          } else {
+            errDetail.map((data) => {
+              const key = data.loc[data.loc.length - 1]
+              if(state[key]) {
+                state[key].value = state[key].value
+                state[key].isValid = false
+                state[key].message = data.msg
+              }
+            });
+          }
+          setRegister(state)
+        });
+    }
+  }
+
   return(
     <>
       <section className="content">
@@ -44,7 +115,7 @@ const RegisterContainer = ({ changeView }) => {
           <main className="main-content-sidebar">
             <div className="auth-content">
               <AnimatePresence exitBeforeEnter>
-                {loading ? (
+                {current !== 0 && loading ? (
                   <div className="text-center">
                     <Image width={100} src={Loader1} preview={false} alt="loader" />
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h2">
@@ -71,26 +142,62 @@ const RegisterContainer = ({ changeView }) => {
                         <SocialLogin text="Register" />
                         <Divider plain>Or</Divider>
 
-                        <Form name="login" layout="vertical">
-                          <Form.Item label="Username" name="username">
-                            <Input placeholder="Username" size="large" />
+                        <Form name="login" layout="vertical" onKeyUp={enterPressHandler}>
+                          <Form.Item 
+                            label="Username"
+                            className="m-b-10"
+                            validateStatus={!username.isValid && username.message && "error"}
+                          >
+                            <Input 
+                              size="large" 
+                              name="username"
+                              placeholder="Username" 
+                              value={username.value}
+                              onChange={onChangeHandler}
+                            />
+                            <ErrorMessage item={username} />
                           </Form.Item>
-                          <Form.Item label="Email" name="email">
-                            <Input placeholder="Email" size="large" />
+                          <Form.Item 
+                            label="Email"
+                            className="m-b-10"
+                            validateStatus={!email.isValid && email.message && "error"}
+                          >
+                            <Input 
+                              size="large"
+                              name="email"
+                              placeholder="Email"
+                              value={email.value}
+                              onChange={onChangeHandler}
+                            />
+                            <ErrorMessage item={email} />
                           </Form.Item>
                           <Form.Item 
                             label="Password"
-                            name="password"
-                            className="input-with-right-child"
+                            className="m-b-10"
+                            validateStatus={!password.isValid && password.message && "error"}
                           >
-                            <Input.Password placeholder="Password" size="large" />
+                            <Input.Password 
+                              size="large" 
+                              name="password"
+                              placeholder="Password"
+                              value={password.value}
+                              onChange={onChangeHandler}
+                            />
+                            <ErrorMessage item={password} />
                           </Form.Item>
                           <Form.Item 
                             label="Confirmation Password"
-                            name="password"
-                            className="input-with-right-child"
+                            className="m-b-10"
+                            validateStatus={!confirm_password.isValid && confirm_password.message && "error"}
                           >
-                            <Input.Password placeholder="Confirmation Password" size="large" />
+                            <Input.Password 
+                              size="large" 
+                              name="confirm_password"
+                              placeholder="Confirmation Password" 
+                              value={confirm_password.value}
+                              onChange={onChangeHandler}
+                            />
+                            <ErrorMessage item={confirm_password} />
                           </Form.Item>
 
                           <Form.Item name="agreement">
@@ -103,13 +210,17 @@ const RegisterContainer = ({ changeView }) => {
                           </Form.Item>
 
                           <Form.Item>
-                            <Button block type="primary" size="large" onClick={next}>
-                              <b>Create Account</b>
+                            <Button block type="primary" size="large" onClick={onSubmitHandler}>
+                              <b>
+                                {loading && <LoadingOutlined className="m-r-5" /> }Create Account
+                              </b>
                             </Button>
                           </Form.Item>
 
-                          <span>Already a member?</span>
-                          <a onClick={() => changeView(LOGIN)}> Sign In</a>
+                          <div className="m-b-10">
+                            <span>Already a member?</span>
+                            <a onClick={() => changeView(LOGIN)}> Sign In</a>
+                          </div>
                         </Form>
                       </>
                     )}

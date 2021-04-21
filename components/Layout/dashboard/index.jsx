@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { Layout, Menu } from 'antd'
+import { useRouter } from 'next/router'
 import { AnimatePresence, motion } from 'framer-motion'
-
-import Link from 'next/link'
 
 import Style from './style'
 import SplitText from './SplitText'
 
-const HOME = "HOME", REPORT = "REPORT", SETTING = "SETTING", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD"
+const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", ACCOUNTS = "ACCOUNTS"
 
-const SidebarContainer = ({ children /*, setShowReport, setShowSetting, activeMenu, setActiveMenu */ }) => {
+const SidebarContainer = ({ children }) => {
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
 
   return(
@@ -20,6 +20,7 @@ const SidebarContainer = ({ children /*, setShowReport, setShowSetting, activeMe
           theme="light"
           collapsed={collapsed} 
           data-testid="sidebar"
+          className="ant-layout-sider-custom"
           onCollapse={val => setCollapsed(val)}
           trigger={
             <i 
@@ -74,26 +75,60 @@ const SidebarContainer = ({ children /*, setShowReport, setShowSetting, activeMe
             </div>
 
             <Menu 
-              theme="light" 
               mode="inline" 
+              theme="light" 
               inlineIndent={15} 
-              defaultSelectedKeys={[DASHBOARD]}
-              // selectedKeys={[activeMenu]}
-              // onSelect={val => setActiveMenu(val.key)}
+              className="ant-menu-scroll"
+              defaultSelectedKeys={[router.pathname.split("/")[router.pathname.split("/").length - 1].toUpperCase()]}
             >
-              <Menu.Item key={HOME} icon={<i className="far fa-door-open" />}>
-                <Link href="/">
-                  <a>Home</a>
-                </Link>
+              <Menu.Item 
+                key={HOME} 
+                icon={<i className="far fa-door-open" />}
+                onClick={() => router.push('/')}
+              >
+                Home
               </Menu.Item>
-              <Menu.Item key={DASHBOARD} icon={<i className="far fa-house-flood" />}>
+              <Menu.Item 
+                key={DASHBOARD} 
+                icon={<i className="far fa-house-flood" />}
+                onClick={() => router.push('/dashboard')}
+              >
                 Dashboard
               </Menu.Item>
-              <Menu.Item key={REPORT} icon={<i className="far fa-clipboard-list" />} onClick={() => console.log(true)}>
-                Report
+              <Menu.Item 
+                key={CONTROLS} 
+                icon={<i className="far fa-cog" />} 
+                onClick={() => router.push('/dashboard/controls')}
+              >
+                Controls
               </Menu.Item>
-              <Menu.Item key={SETTING} icon={<i className="far fa-cog" />} onClick={() => console.log(true)}>
-                Settings
+              <Menu.Item 
+                key={REPORTS} 
+                icon={<i className="far fa-clipboard-list" />} 
+                onClick={() => router.push('/dashboard/reports')}
+              >
+                Reports
+              </Menu.Item>
+              <Menu.Item 
+                key={PLANTS} 
+                icon={<i className="far fa-seedling" />} 
+                onClick={() => router.push('/dashboard/plants')}
+              >
+                Plants
+              </Menu.Item>
+              <Menu.Item 
+                key={ACCOUNTS} 
+                icon={<i className="far fa-user" />} 
+                onClick={() => router.push('/dashboard/accounts')}
+              >
+                Accounts
+              </Menu.Item>
+              <Menu.Item 
+                key={ACCOUNTS+"a"} 
+                icon={<i className="far fa-user" />} 
+                onClick={() => router.push('/live')}
+              >
+                Camera
               </Menu.Item>
               <Menu.Item key={LOGOUT} icon={<i className="far fa-sign-out" />}>
                 <a href="/">
