@@ -131,10 +131,10 @@
 .clearfix:after {
   clear: both;
 }
-.left {
-  float: left;
+.float-left {
+  float: left!important;
 }
-.right {
+.float-right {
   float: right!important;
 }
 .fit {

@@ -1,4 +1,4 @@
-import { Image } from 'antd'
+import { Image, Button } from 'antd'
 import { useState, useEffect, useCallback } from 'react'
 import { Joystick } from 'react-joystick-component'
 import { w3cwebsocket as W3CWebSocket } from 'websocket'
@@ -18,28 +18,32 @@ const LiveCam = () => {
     setPosition({ vertical: y*4, horizontal: x*4 })
   }
 
-  useEffect(() => {
-    const wsConnect = () => {
-      setWsClient(ws)
-      ws.onopen = () => { 
-        ws.send("Connected"); console.log("WS Connected") 
-        nookies.set(null, 'wsReadyState', 1, {
-          maxAge: 30 * 24 * 60 * 60,
-          path: '/'
-        })
-      }
-
-      ws.onclose = e => {
-        console.log('Disconected.\nReconnect will be attempted in 1 second.', e.reason);
-        setTimeout(() => {
-          wsConnect();
-        }, 1000);
-      };
+  const wsConnect = () => {
+    setWsClient(ws)
+    ws.onopen = () => { 
+      ws.send("Connected"); console.log("WS Connected") 
+      nookies.set(null, 'wsReadyState', 1, {
+        maxAge: 30 * 24 * 60 * 60,
+        path: '/'
+      })
     }
+
+    ws.onclose = e => {
+      console.log('Disconected.\nReconnect will be attempted in 1 second.', e.reason);
+      setTimeout(() => {
+        wsConnect();
+      }, 1000);
+    };
+  }
+
+  useEffect(() => {
+  }, [])
+
+  useEffect(() => {
     if(ws.readyState == 3 || ws.readyState == 2 || ws.readyState == 0) {
       wsConnect()
     }
-  }, [])
+  }, [ws.readyState])
 
   useEffect(() => {
     let v = vertical
@@ -59,11 +63,22 @@ const LiveCam = () => {
     }
   }, [position])
 
+  const captureHandler = () => {
+    const data = `kind:capture_image`
+    if(ws && ws.send && ws.readyState !== 0) {
+      ws.send(data)
+    }
+  }
+
   return (
     <>
       <div style={{maxHeight: '100vh', maxWidth: '100vw'}}>
         <div className="joystick-container">
           <Joystick size={90} throttle={100} baseColor="#00000057" stickColor="#0000008a" move={onJoyStickMoved} />
+        </div>
+
+        <div className="text-center m-t-80">
+          <Button onClick={captureHandler}>Capture</Button>
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+import { withAuth } from 'lib/withAuth'
 import { useState, useEffect } from 'react'
 import { Layout, Card, Row, Col, Image, Tag } from 'antd'
 import { optionsPH } from 'components/Dashboard/apexOption'
@@ -159,4 +160,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default withAuth(Dashboard)

@@ -23,9 +23,4 @@ const App = ({ Component, pageProps }) => {
   )
 }
 
-App.getInitialProps = async ({ Component, ctx, router }) => {
-  const pageProps = Component.getInitialProps ? await Component.getInitialProps(ctx) : {};
-  return { pageProps };
-};
-
 export default App

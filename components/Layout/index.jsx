@@ -5,7 +5,7 @@ import DasboardLayout from './dashboard'
 
 const Layout = ({ children }) => {
   const router = useRouter()
-  const isAuth = router.pathname.startsWith('/auth')
+  const isAuth = router.pathname.startsWith('/auth') || router.pathname.startsWith('/password-reset')
   const isDashboard = router.pathname.startsWith('/dashboard')
 
   let layout = <>{children}</>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/router'
 import { Form, Input, Button } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 
@@ -13,9 +14,10 @@ import Style from 'components/Auth/style'
 import ErrorMessage from 'components/ErrorMessage'
 
 const ResetPassword = () => {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [token, setToken] = useState("c526b5fe60d54173a5922ae1dc459c14")
   const [reset, setReset] = useState(formReset)
+
   const { email, password, confirm_password } = reset
 
   /* INPUT CHANGE FUNCTION */
@@ -46,6 +48,7 @@ const ResetPassword = () => {
         password: password.value,
         confirm_password: confirm_password.value,
       }
+      const { token } = router.query;
       axios.put(`/users/password-reset/${token}`, data)
         .then((res) => {
           setLoading(false);
@@ -74,6 +77,7 @@ const ResetPassword = () => {
         })
     }
   }
+  /* SUBMIT FORM FUNCTION */
 
   return(
     <>

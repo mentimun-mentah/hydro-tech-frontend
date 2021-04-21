@@ -4,10 +4,10 @@ import { Form, Input, Button, Divider, Image, Row, Col, Steps, Card } from 'antd
 
 import Login from 'components/Auth/Login'
 import Register from 'components/Auth/Register'
-import ResetPassword from 'components/Auth/ResetPassword'
 import ForgotPassword from 'components/Auth/ForgotPassword'
+import ResendVerification from 'components/Auth/ResendVerification'
 
-const LOGIN = "LOGIN", REGISTER = "REGISTER", RESET_PASSWORD = "RESET_PASSWORD", FORGOT_PASSWORD = "FORGOT_PASSWORD"
+const LOGIN = "LOGIN", REGISTER = "REGISTER", FORGOT_PASSWORD = "FORGOT_PASSWORD", RESEND_VERIFICATION = "RESEND_VERIFICATION"
 
 const Auth = () => {
   const [active, setActive] = useState(LOGIN)
@@ -27,8 +27,8 @@ const Auth = () => {
           <ForgotPassword changeView={setActive} />
         )}
 
-        {active === RESET_PASSWORD && (
-          <ResetPassword changeView={setActive} />
+        {active === RESEND_VERIFICATION && (
+          <ResendVerification changeView={setActive} />
         )}
       </AnimatePresence>
     </>
