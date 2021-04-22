@@ -132,7 +132,7 @@ const ResetPassword = () => {
 
                 <Form.Item>
                   <Button block type="primary" size="large" onClick={onSubmitHandler} disabled={loading}>
-                    {loading ? <LoadingOutlined className="m-r-5" /> : <b>Change Password</b>}
+                    {loading ? <LoadingOutlined /> : <b>Change Password</b>}
                   </Button>
                 </Form.Item>
 

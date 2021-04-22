@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/router'
+import { useDispatch } from 'react-redux'
 import { LoadingOutlined } from '@ant-design/icons'
 import { Form, Input, Button, Divider, Row, Col } from 'antd'
 
@@ -9,6 +10,7 @@ import { formLogin, formLoginIsValid } from 'formdata/login'
 
 import axios from 'lib/axios'
 import SocialLogin from './SocialButton'
+import * as actions from 'store/actions'
 import Style from 'components/Auth/style'
 import ErrorMessage from 'components/ErrorMessage'
 
@@ -16,6 +18,8 @@ const REGISTER = "REGISTER", FORGOT_PASSWORD = "FORGOT_PASSWORD", RESEND_VERIFIC
 
 const LoginContainer = ({ changeView }) => {
   const router = useRouter()
+  const dispatch = useDispatch()
+
   const [loading, setLoading] = useState(false)
   const [login, setLogin] = useState(formLogin)
 
@@ -51,6 +55,7 @@ const LoginContainer = ({ changeView }) => {
       axios.post("/users/login", data)
         .then(() => {
           setLoading(false)
+          dispatch(actions.getUser())
           router.replace("/dashboard")
         })
         .catch((err) => {
@@ -132,7 +137,7 @@ const LoginContainer = ({ changeView }) => {
 
                 <Form.Item>
                   <Button block type="primary" size="large" onClick={onSubmitHandler} disabled={loading}>
-                    {loading ? <LoadingOutlined className="m-r-5" /> : <b>Sign In</b>}
+                    {loading ? <LoadingOutlined /> : <b>Sign In</b>}
                   </Button>
                 </Form.Item>
 

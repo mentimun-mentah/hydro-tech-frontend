@@ -47,6 +47,7 @@ const RegisterContainer = ({ changeView }) => {
     }, 2500)
   }
 
+  /* INPUT CHANGE FUNCTION */
   const onChangeHandler = e => {
     const name = e.target.name
     const value = e.target.value
@@ -62,6 +63,7 @@ const RegisterContainer = ({ changeView }) => {
     };
     setRegister(data)
   }
+  /* INPUT CHANGE FUNCTION */
 
   /* SUBMIT FORM FUNCTION */
   const onSubmitHandler = e => {
@@ -209,7 +211,7 @@ const RegisterContainer = ({ changeView }) => {
 
                           <Form.Item>
                             <Button block type="primary" size="large" onClick={onSubmitHandler} disabled={loading}>
-                              {loading ? <LoadingOutlined className="m-r-5" /> : <b>Create Account</b>}
+                              {loading ? <LoadingOutlined /> : <b>Create Account</b>}
                             </Button>
                           </Form.Item>
 

@@ -113,7 +113,7 @@ const Plants = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: ".2" }}
-            className="overlay-drawer"
+            className="overlay-blur"
           />
         )}
       </AnimatePresence>
@@ -122,15 +122,6 @@ const Plants = () => {
       <style jsx>{`
         .text-shadow-detail{
           text-shadow: 1px 1px 2px #fff;
-        }
-        :global(.overlay-drawer){
-          top: 0;
-          left: 0;
-          bottom: 0;
-          width: 100vw;
-          height: 100vh;
-          position: fixed;
-          backdrop-filter: blur(3px);
         }
       `}</style>
     </>

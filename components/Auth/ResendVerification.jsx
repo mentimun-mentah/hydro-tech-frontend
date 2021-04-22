@@ -105,7 +105,7 @@ const ResendVerification = ({ changeView }) => {
 
                   <Form.Item>
                     <Button block type="primary" size="large" onClick={onSubmitHandler} disabled={loading}>
-                      {loading ? <LoadingOutlined className="m-r-5" /> : <b>Send</b>}
+                      {loading ? <LoadingOutlined /> : <b>Send</b>}
                     </Button>
                   </Form.Item>
 
