@@ -103,9 +103,9 @@ const Dashboard = () => {
 
     ws.onclose = e => {
       console.log('Disconected.\nReconnect will be attempted in 1 second.', e.reason);
-      // setTimeout(() => {
-      //   wsConnect();
-      // }, 1000);
+      setTimeout(() => {
+        wsConnect();
+      }, 1000);
     };
   }
 

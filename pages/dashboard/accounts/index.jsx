@@ -18,7 +18,7 @@ const Accounts = () => {
         <Layout.Content>
           <Row gutter={[20, 20]} justify="center">
             <Col xl={16} lg={18} md={24} sm={24}>
-              <Tabs type="card" centered defaultActiveKey="4">
+              <Tabs type="card" centered defaultActiveKey="1">
 
                 <Tabs.TabPane tab="Profile" key="1">
                   <Profile />
