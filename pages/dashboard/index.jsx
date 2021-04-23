@@ -80,11 +80,10 @@ const Dashboard = () => {
 
     return () => clearInterval(interval)
   }, [])
-
-
+  
   const wsConnect = () => {
-    return false
-    ws = new W3CWebSocket(`ws://192.168.18.86:8000/dashboard/ws`)
+    //token = csrf_token
+    ws = new W3CWebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MTkyNDk2LCJuYmYiOjE2MTkxOTI0OTYsImp0aSI6IjIyZmFlOWVlLTAzZTktNDdhYi05NDk1LWVkYTNlMzE4MmIxOSIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI4MzU1ZTIwYy05NzZmLTRlOTEtOGQ2Ny0xMmNlYjZlZjJmYzAifQ.bh9ldyCibLzNZPnJnG9pZOr_Wz9d66hBGNssmPdmu8k`)
 
     ws.onopen = () => { 
       ws.send("Connected"); console.log("Connected") 
@@ -121,14 +120,14 @@ const Dashboard = () => {
   /*MODAL CAMERA*/
   const onShowModalCamHandler = () => {
     setShowModalCam(true)
-    if(ws && ws.send && ws.readyState !== 0) {
+    if(ws && ws.send && ws.readyState == 1) {
       ws.send(`kind:live_cam_true`)
     }
   }
 
   const onCloseModalCamHandler = () => {
     setShowModalCam(false)
-    if(ws && ws.send && ws.readyState !== 0) {
+    if(ws && ws.send && ws.readyState == 1) {
       ws.send(`kind:live_cam_false`)
       setImage("")
     }
@@ -143,27 +142,27 @@ const Dashboard = () => {
     if(showModalCam) document.body.classList.add("overflow-hidden")
     else document.body.classList.remove("overflow-hidden")
   }, [showModalCam])
-  // }, [])
 
   const onJoyStickMoved = ({ x, y }) => {
     const center   = 90
     let horizontal = x*2
     let vertical   = y*2
+
     if(horizontal == 0) horizontal = center
-    if(horizontal > 0)  horizontal = center + x*2
-    if(horizontal < 0)  horizontal = center - Math.abs(x*2)
+    if(horizontal > 0)  horizontal = center - x*2
+    if(horizontal < 0)  horizontal = center + Math.abs(x*2)
 
     if(vertical == 0) vertical = center
-    if(vertical > 0)  vertical = center + y*2
-    if(vertical < 0)  vertical = center - Math.abs(y*2)
+    if(vertical > 0)  vertical = center - y*2
+    if(vertical < 0)  vertical = center + Math.abs(y*2)
 
-    console.log(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`)
+    console.log(`horizontal: ${horizontal}, vertical: ${vertical}`)
+
     if(ws && ws.send && ws.readyState == 1 && showModalCam) {
       ws.send(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`)
     }
   }
   /*MODAL CAMERA*/
-
   
   return(
     <>
@@ -284,9 +283,6 @@ const Dashboard = () => {
             <div className="fs-14 m-b-10">
               Connecting to camera...
             </div> 
-            <div className="joystick-container">
-              <Joystick size={90} throttle={100} baseColor="#00000057" stickColor="#0000008a" move={onJoyStickMoved} />
-            </div>
           </motion.div>
         ) : (
           <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
