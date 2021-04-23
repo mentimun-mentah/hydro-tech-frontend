@@ -1,4 +1,4 @@
-import { Image, Button, Modal } from 'antd'
+import { Image, Button, Modal, Space } from 'antd'
 import { motion, useDragControls } from "framer-motion"
 import { useDispatch } from 'react-redux'
 import { Joystick } from 'react-joystick-component'
@@ -9,7 +9,7 @@ import nookies from 'nookies'
 import * as actions from 'store/actions'
 
 // let ws = new WebSocket(`ws://localhost:9898/ws`)
-const ws = new W3CWebSocket(`ws://192.168.18.87:8000/dashboard/ws`)
+const ws = new W3CWebSocket(`ws://192.168.18.37:8000/dashboard/ws`)
 
 const max_width_height = 90
 const LiveCam = () => {
@@ -131,6 +131,12 @@ const LiveCam = () => {
           <Image width={500} src={image} />
         </div>
 
+        <Space>
+          <Button onClick={captureHandler}>Capture</Button>
+          <Button onClick={liveCamHandler}>Live</Button>
+          <Button onClick={stopLiveCamHandler}>Stop Live</Button>
+        </Space>
+
         <small>
           <pre>{JSON.stringify(tes, null, 2)}</pre>
         </small>
@@ -167,7 +173,7 @@ const LiveCam = () => {
         footer={null}
         maskClosable={false}
         className="modal-modif noselect"
-        visible={true}
+        visible={false}
         bodyStyle={{paddingTop: "0px"}}
         closeIcon={<i className="fas fa-times" />}
         maskStyle={{backgroundColor: "rgba(0, 0, 0, 0.45)"}}

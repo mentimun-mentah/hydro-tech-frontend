@@ -89,7 +89,7 @@ const Dashboard = () => {
   }
 
   const wsConnect = () => {
-    ws = new W3CWebSocket(`ws://192.168.18.83:8000/dashboard/ws`)
+    ws = new W3CWebSocket(`wss://192.168.18.83:8000/dashboard/ws`)
 
     ws.onopen = () => { 
       ws.send("Connected"); console.log("WS Connected") 
@@ -108,9 +108,9 @@ const Dashboard = () => {
 
     ws.onclose = e => {
       console.log('Disconected.\nReconnect will be attempted in 1 second.', e.reason);
-      // setTimeout(() => {
-      //   wsConnect();
-      // }, 1000);
+      setTimeout(() => {
+        wsConnect();
+      }, 1000);
     };
   }
 
