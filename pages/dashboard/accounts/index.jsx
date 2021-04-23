@@ -7,7 +7,6 @@ import Password from 'components/Accounts/Password'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
 const Accounts = () => {
-
   return (
     <>
       <div className="header-dashboard">
@@ -18,7 +17,7 @@ const Accounts = () => {
         <Layout.Content>
           <Row gutter={[20, 20]} justify="center">
             <Col xl={16} lg={18} md={24} sm={24}>
-              <Tabs type="card" centered defaultActiveKey="2">
+              <Tabs type="card" centered defaultActiveKey="1">
 
                 <Tabs.TabPane tab="Profile" key="1">
                   <Profile />
@@ -31,6 +30,7 @@ const Accounts = () => {
                 <Tabs.TabPane tab="Plant" key="3">
                   Plant
                 </Tabs.TabPane>
+
               </Tabs>
             </Col>
           </Row>

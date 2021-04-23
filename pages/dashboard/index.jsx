@@ -129,8 +129,8 @@ const Dashboard = () => {
       if(showModalCam) ws.send(`kind:live_cam_true`)
       else ws.send(`kind:live_cam_false`)
     }
-  // }, [showModalCam])
-  }, [])
+  }, [showModalCam])
+  // }, [])
 
   useEffect(() => {
     let v = vertical
@@ -291,6 +291,9 @@ const Dashboard = () => {
             <div className="fs-14 m-b-10">
               Connecting to camera...
             </div> 
+            <div className="joystick-container">
+              <Joystick size={90} throttle={100} baseColor="#00000057" stickColor="#0000008a" move={onJoyStickMoved} />
+            </div>
           </motion.div>
         ) : (
           <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>

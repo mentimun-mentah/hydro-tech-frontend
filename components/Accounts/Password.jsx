@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { withAuth } from 'lib/withAuth'
+import { useSelector } from 'react-redux'
 import { LoadingOutlined } from '@ant-design/icons'
-import { useDispatch, useSelector } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Button, Form, Input, Row, Col, Modal } from 'antd'
 
@@ -9,13 +9,10 @@ import { jsonHeaderHandler, signature_exp, formErrorMessage } from 'lib/axios'
 import { formConfigPassword, formVerifyPassword, formConfigPasswordIsValid, formVerifyPasswordIsValid } from 'formdata/configPassword'
 
 import axios from 'lib/axios'
-import isIn from 'validator/lib/isIn'
-import * as actions from 'store/actions'
 import ErrorMessage from 'components/ErrorMessage'
+import { deepCopy, enterPressHandler } from 'lib/utility'
 
 const PasswordContainer = () => {
-  const dispatch = useDispatch()
-
   const user = useSelector(state => state.auth.user)
 
   const isUpdate = user !== null ? user.password : false
@@ -46,7 +43,7 @@ const PasswordContainer = () => {
     const value = e.target.value
     const data = {
       ...verifyPassword,
-      verifyPassword: {
+      verify_password: {
         ...verifyPassword["verify_password"],
         value: value, isValid: true, message: null,
       },
@@ -81,26 +78,23 @@ const PasswordContainer = () => {
         })
         .catch((err) => {
           setLoading(false);
+          const state = deepCopy(formPassword)
           const errDetail = err.response.data.detail;
           const freshRequired = "Fresh token required";
           if (typeof errDetail === "string" && errDetail === freshRequired) {
             setShowConfirmPassword(true);
           }
           else if (typeof errDetail === "string" && errDetail) {
-            const state = JSON.parse(JSON.stringify(formPassword));
             if(isUpdate){
               state.old_password.value = state.old_password.value;
               state.old_password.isValid = false;
               state.old_password.message = errDetail;
-              setFormPassword(state);
             } else {
               state.password.value = state.password.value;
               state.password.isValid = false;
               state.password.message = errDetail;
-              setFormPassword(state);
             }
           } else {
-            const state = JSON.parse(JSON.stringify(formPassword));
             errDetail.map((data) => {
               const key = data.loc[data.loc.length - 1];
               if (state[key]) {
@@ -109,16 +103,61 @@ const PasswordContainer = () => {
                 state[key].message = data.msg;
               }
             });
-            setFormPassword(state);
           }
+          setFormPassword(state);
         })
-      console.log(JSON.stringify(data, null, 2))
+    }
+  }
+
+  const submitVerifyPassword = e => {
+    e.persist()
+    if(formVerifyPasswordIsValid(verifyPassword, setVerifyPassword)){
+      setLoading(true)
+      const data = { password: verify_password.value }
+      axios.post("/users/fresh-token", data, jsonHeaderHandler())
+        .then(() => {
+          setLoading(true)
+          onSubmitHandler(e)
+          setShowConfirmPassword(false)
+          setVerifyPassword(formVerifyPassword)
+        })
+        .catch(err => {
+          const state = deepCopy(verifyPassword)
+          const errDetail = err.response.data.detail;
+          if(typeof errDetail === "string" && errDetail === signature_exp) {
+            axios.post("/users/fresh-token", data, jsonHeaderHandler())
+              .then(() => {
+                setLoading(true)
+                onSubmitHandler(e)
+                setShowConfirmPassword(false)
+                setVerifyPassword(formVerifyPassword)
+              })
+          }
+          if(typeof errDetail === "string" && errDetail !== signature_exp) {
+            setLoading(false);
+            state.verify_password.value = state.verify_password.value;
+            state.verify_password.isValid = false;
+            state.verify_password.message = errDetail;
+          } 
+          if(typeof errDetail !== "string") {
+            setLoading(false);
+            errDetail.map((data) => {
+              let key = data.loc[data.loc.length - 1] === "password" ? "verify_password" : "verify_password";
+              if(state[key]) {
+                state[key].value = state[key].value;
+                state[key].isValid = false;
+                state[key].message = data.msg;
+              }
+            });
+          }
+          setVerifyPassword(state);
+        })
     }
   }
 
   return (
     <>
-      <Form layout="vertical">
+      <Form layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
         <Row gutter={[20, 20]}>
           {isUpdate && (
             <Col lg={24} md={24} sm={24} xs={24}>
@@ -172,8 +211,8 @@ const PasswordContainer = () => {
           </Col>
           <Col lg={24}>
             <Form.Item className="mb0">
-              <Button size="large" block type="primary" onClick={onSubmitHandler}>
-                Save
+              <Button size="large" type="primary" disabled={loading} onClick={onSubmitHandler} style={{ width: 80 }}>
+                {!showConfirmPassword && loading ? <LoadingOutlined /> : <b>Save</b>}
               </Button>
             </Form.Item>
           </Col>
@@ -195,12 +234,12 @@ const PasswordContainer = () => {
         onOk={() => setShowConfirmPassword(false)}
         onCancel={() => setShowConfirmPassword(false)}
       >
-        <p className="text-muted fs-12-s">
+        <p className="text-muted">
           Enter your current password to confirm changing your password.
         </p>
-        <Form layout="vertical">
+        <Form layout="vertical" onKeyUp={e => enterPressHandler(e, submitVerifyPassword)}>
           <Form.Item 
-            className="mb0"
+            className="m-b-15"
             label="Password"
             validateStatus={!verify_password.isValid && verify_password.message && "error"}
           >
@@ -212,6 +251,11 @@ const PasswordContainer = () => {
               onChange={onVerifyChangeHandler}
             />
             <ErrorMessage item={verify_password} />
+          </Form.Item>
+          <Form.Item className="mb0">
+            <Button size="large" block type="primary" onClick={submitVerifyPassword}>
+              {showConfirmPassword && loading ? <LoadingOutlined /> : <b>Confirm Password</b>}
+            </Button>
           </Form.Item>
         </Form>
       </Modal>
