@@ -1,10 +1,11 @@
-import { useState } from 'react'
-import { Layout, Card, Row, Col, Image, Drawer } from 'antd'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { Layout, Card, Row, Col, Image, Drawer, Grid } from 'antd'
 
 import moment from 'moment'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
+const useBreakpoint = Grid.useBreakpoint
 const Sprout = '/static/images/sprout.svg'
 const Bayam = '/static/images/plant/bayam.png'
 const Kailan = '/static/images/plant/kailan-2.png'
@@ -23,10 +24,19 @@ const plantList = [
 ]
 
 const Plants = () => {
+  const screens = useBreakpoint()
+
+  const [isMobile, setIsMobile] = useState(false)
   const [visibleDrawer, setVisibleDrawer] = useState(false)
 
   const onShowDrawer = () => setVisibleDrawer(true)
   const onCloseDrawer = () => setVisibleDrawer(false)
+
+  useEffect(() => {
+    let mounted = true
+    if(mounted && screens.xs) setIsMobile(true)
+    else setIsMobile(false)
+  }, [screens])
 
   return (
     <>
@@ -40,7 +50,7 @@ const Plants = () => {
           <AnimatePresence exitBeforeEnter>
             <Row gutter={[20, 20]}>
               {plantList.map((plant, i) => (
-                <Col lg={8} md={8} sm={24} xs={24} key={i}>
+                <Col lg={8} md={8} sm={12} xs={24} key={i}>
                   <Card bordered={false} className="radius1rem shadow1 h-100">
                     <motion.div
                       key={i}
@@ -69,7 +79,7 @@ const Plants = () => {
       </Layout>
 
       <Drawer
-        width="400"
+        width={isMobile? "80%" : "400" }
         onClose={onCloseDrawer}
         visible={visibleDrawer}
         closeIcon={<i className="far fa-times"></i>}
@@ -113,7 +123,7 @@ const Plants = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: ".2" }}
-            className="overlay-drawer"
+            className="overlay-blur"
           />
         )}
       </AnimatePresence>
@@ -122,15 +132,6 @@ const Plants = () => {
       <style jsx>{`
         .text-shadow-detail{
           text-shadow: 1px 1px 2px #fff;
-        }
-        :global(.overlay-drawer){
-          top: 0;
-          left: 0;
-          bottom: 0;
-          width: 100vw;
-          height: 100vh;
-          position: fixed;
-          backdrop-filter: blur(3px);
         }
       `}</style>
     </>

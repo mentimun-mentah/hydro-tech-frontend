@@ -12,6 +12,8 @@
     "apexcharts": "^3.26.0",
     "axios": "^0.21.1",
     "framer-motion": "^4.0.3",
+    "jspdf": "^2.3.1",
+    "jspdf-autotable": "^3.5.14",
     "next": "10.0.9",
     "nookies": "^2.5.2",
     "react": "17.0.2",
@@ -19,15 +21,10 @@
     "react-dom": "17.0.2",
     "react-joystick-component": "^1.4.0",
     "react-redux": "^7.2.3",
+    "redux": "^4.0.5",
     "redux-devtools-extension": "^2.13.9",
     "redux-thunk": "^2.3.0",
-    "socket.io-client": "^4.0.1",
     "validator": "^13.5.2",
     "websocket": "^1.0.33"
-  },
-  "bit": {
-    "env": {},
-    "componentsDefaultDirectory": "components/{name}",
-    "packageManager": "npm"
   }
 }

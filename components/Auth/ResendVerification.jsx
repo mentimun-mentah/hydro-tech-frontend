@@ -14,12 +14,12 @@ import ErrorMessage from 'components/ErrorMessage'
 
 const REGISTER = "REGISTER"
 
-const ForgotPassword = ({ changeView }) => {
+const ResendVerification = ({ changeView }) => {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [reset, setReset] = useState(formEmail)
+  const [resend, setResend] = useState(formEmail)
 
-  const { email } = reset
+  const { email } = resend
 
   /* INPUT CHANGE FUNCTION */
   const onChangeHandler = e => {
@@ -27,24 +27,24 @@ const ForgotPassword = ({ changeView }) => {
     const value = e.target.value
 
     const data = {
-      ...reset,
+      ...resend,
       [name]: {
-        ...reset[name],
+        ...resend[name],
         value: value,
         isValid: true,
         message: null,
       },
     };
-    setReset(data)
+    setResend(data)
   }
   /* INPUT CHANGE FUNCTION */
 
   /* SUBMIT FORM FUNCTION */
   const onSubmitHandler = e => {
     e.preventDefault()
-    if(formEmailIsValid(reset, setReset)){
+    if(formEmailIsValid(resend, setResend)){
       const data = { email: email.value }
-      axios.post("/users/password-reset/send", data)
+      axios.post("/users/resend-email", data)
         .then((res) => {
           setLoading(false);
           if(res.status >= 400 && res.status < 500){
@@ -57,7 +57,7 @@ const ForgotPassword = ({ changeView }) => {
         })
         .catch((err) => {
           setLoading(false);
-          const state = deepCopy(reset)
+          const state = deepCopy(resend)
           const errDetail = err.response.data.detail;
           if (typeof errDetail === "string") {
             state.email.value = state.email.value;
@@ -73,7 +73,7 @@ const ForgotPassword = ({ changeView }) => {
               }
             });
           }
-          setReset(state);
+          setResend(state);
         })
     }
   }
@@ -86,11 +86,10 @@ const ForgotPassword = ({ changeView }) => {
           <main className="main-content-sidebar">
             <div className="auth-content">
               <div>
-                <h2 className="auth-content-title forgot-title">Forgot Password?</h2>
-                <p>Enter the email address you used when you joined and we’ll send you a link to reset your password.</p>
-                <p>For security reasons, we do NOT store your password. So rest assured that we will never send your password via email.</p>
+                <h2 className="auth-content-title forgot-title">Resend email verification</h2>
+                <p>Enter the registered e-mail. We will send you the latest verification link.</p>
 
-                <Form name="reset" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
+                <Form name="resend" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                   <Form.Item 
                     validateStatus={!email.isValid && email.message && "error"}
                   >
@@ -122,4 +121,4 @@ const ForgotPassword = ({ changeView }) => {
   )
 }
 
-export default ForgotPassword
+export default ResendVerification

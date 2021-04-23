@@ -1,23 +1,13 @@
-import { useState } from 'react'
-import { Layout, Tabs, Upload, Button, Form, Space, Divider, Input, Row, Col, Select } from 'antd'
+import { withAuth } from 'lib/withAuth'
+import { Layout, Tabs, Row, Col } from 'antd'
 
 import moment from 'moment'
+import Token from 'components/Accounts/Token'
+import Profile from 'components/Accounts/Profile'
+import Password from 'components/Accounts/Password'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
-const formImage = {
-  file: { 
-    value: [
-      {
-        uid: '-1',
-        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-      }
-    ], 
-    isValid: true, message: null },
-};
-
 const Accounts = () => {
-  const [avatar, setAvatar] = useState(formImage)
-
   return (
     <>
       <div className="header-dashboard">
@@ -28,122 +18,24 @@ const Accounts = () => {
         <Layout.Content>
           <Row gutter={[20, 20]} justify="center">
             <Col xl={16} lg={18} md={24} sm={24}>
-              <Tabs type="card" centered>
+              <Tabs type="card" centered defaultActiveKey="1">
 
                 <Tabs.TabPane tab="Profile" key="1">
-                  <Form layout="vertical">
-                    <Form.Item label={<b className="fs-16">Avatar</b>}>
-                      <div className="avatar-section">
-                        <Space>
-                          <Upload
-                            accept="image/*"
-                            listType="picture-card"
-                            className="avatar-uploader"
-                            // onPreview={imagePreview}
-                            fileList={avatar.file.value}
-                            showUploadList={{showRemoveIcon: false, showPreviewIcon: true}}
-                          >
-                            {avatar.file.value.length >= 1 && null}
-                          </Upload>
-                          <Upload
-                            accept="image/*"
-                            showUploadList={false}
-                            // beforeUpload={(file) => imageValidation(file, "file", "/users/update-avatar", "put", setLoading, () => dispatch(actions.getUser()), "The image profile has updated.")}
-                          >
-                            <Button disabled={false}>
-                              Upload
-                            </Button>
-                          </Upload>
-                        </Space>
-                      </div>
-                    </Form.Item>
-
-                    <Divider />
-
-                    <Row gutter={[20, 20]}>
-                      <Col lg={12} md={24} sm={24} xs={24}>
-                        <Form.Item label="Username" className="mb0">
-                          <Input type="text" placeholder="Username" />
-                        </Form.Item>
-                      </Col>
-                      <Col lg={12} md={24} sm={24} xs={24}>
-                        <Form.Item label="Email" className="mb0">
-                          <Input type="Email" placeholder="Email" />
-                        </Form.Item>
-                      </Col>
-                      <Col lg={12} md={24} sm={24} xs={24}>
-                        <Form.Item label="Phone Number" className="mb0">
-                          <Input placeholder="Phone number" />
-                        </Form.Item>
-                      </Col>
-                      <Col lg={12} md={24} sm={24} xs={24}>
-                        <Form.Item label="Gender" className="mb0">
-                          <Select 
-                            name="gender" 
-                            className="w-100" 
-                            placeholder="Choose gender"
-                          >
-                            <Select.Option value="male">Male</Select.Option>
-                            <Select.Option value="female">Female</Select.Option>
-                          </Select>
-                        </Form.Item>
-                      </Col>
-                      <Col lg={24}>
-                        <Form.Item className="mb0">
-                          <Button type="primary">Save</Button>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Form>
-
+                  <Profile />
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Password" key="2">
-                  <Form layout="vertical">
-                    <Row gutter={[20, 20]}>
-                      <Col lg={24} md={24} sm={24} xs={24}>
-                        <Form.Item 
-                          label="Old Password"
-                          name="old_password"
-                          className="mb0"
-                        >
-                          <Input.Password placeholder="Old Password" size="large" />
-                        </Form.Item>
-                      </Col>
-                      <Col lg={24} md={24} sm={24} xs={24}>
-                        <Form.Item 
-                          label="Password"
-                          name="password"
-                          className="mb0"
-                        >
-                          <Input.Password placeholder="Password" size="large" />
-                        </Form.Item>
-                      </Col>
-                      <Col lg={24} md={24} sm={24} xs={24}>
-                        <Form.Item 
-                          label="Confirmation Password"
-                          name="password"
-                          className="mb0"
-                        >
-                          <Input.Password placeholder="Confirmation Password" size="large" />
-                        </Form.Item>
-                      </Col>
-                      <Col lg={24}>
-                        <Form.Item className="mb0">
-                          <Button type="primary">Save</Button>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-
-
-
-
-                  </Form>
+                  <Password />
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Plant" key="3">
                   Plant
                 </Tabs.TabPane>
+
+                <Tabs.TabPane tab="IoT Token" key="4">
+                  <Token />
+                </Tabs.TabPane>
+
               </Tabs>
             </Col>
           </Row>
@@ -226,4 +118,4 @@ const Accounts = () => {
   )
 }
 
-export default Accounts
+export default withAuth(Accounts)

@@ -1,29 +1,24 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/router'
-import { useDispatch } from 'react-redux'
+import { Form, Input, Button } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
-import { Form, Input, Button, Divider, Row, Col } from 'antd'
 
+import { formErrorMessage } from 'lib/axios'
 import { deepCopy, enterPressHandler } from 'lib/utility'
-import { formLogin, formLoginIsValid } from 'formdata/login'
+import { formReset, formResetIsValid } from 'formdata/resetPassword'
 
+import Link from 'next/link'
 import axios from 'lib/axios'
-import SocialLogin from './SocialButton'
-import * as actions from 'store/actions'
 import Style from 'components/Auth/style'
 import ErrorMessage from 'components/ErrorMessage'
 
-const REGISTER = "REGISTER", FORGOT_PASSWORD = "FORGOT_PASSWORD", RESEND_VERIFICATION = "RESEND_VERIFICATION"
-
-const LoginContainer = ({ changeView }) => {
+const ResetPassword = () => {
   const router = useRouter()
-  const dispatch = useDispatch()
-
   const [loading, setLoading] = useState(false)
-  const [login, setLogin] = useState(formLogin)
+  const [reset, setReset] = useState(formReset)
 
-  const { email, password } = login
+  const { email, password, confirm_password } = reset
 
   /* INPUT CHANGE FUNCTION */
   const onChangeHandler = e => {
@@ -31,41 +26,43 @@ const LoginContainer = ({ changeView }) => {
     const value = e.target.value
 
     const data = {
-      ...login,
+      ...reset,
       [name]: {
-        ...login[name],
+        ...reset[name],
         value: value,
         isValid: true,
         message: null,
       },
     };
-    setLogin(data)
+    setReset(data)
   }
   /* INPUT CHANGE FUNCTION */
 
   /* SUBMIT FORM FUNCTION */
   const onSubmitHandler = e => {
     e.preventDefault()
-    if(formLoginIsValid(login, setLogin)) {
-      setLoading(true)
+    if(formResetIsValid(reset, setReset)) {
+      setLoading(true);
       const data = {
         email: email.value,
         password: password.value,
+        confirm_password: confirm_password.value,
       }
-      axios.post("/users/login", data)
-        .then(() => {
-          setLoading(false)
-          dispatch(actions.getUser())
-          router.replace("/dashboard")
+      const { token } = router.query;
+      axios.put(`/users/password-reset/${token}`, data)
+        .then((res) => {
+          setLoading(false);
+          formErrorMessage("success", res.data.detail)
+          router.replace("/");
         })
         .catch((err) => {
-          setLoading(false)
-          const state = deepCopy(login)
+          setLoading(false);
+          const state = deepCopy(reset);
           const errDetail = err.response.data.detail;
           if (typeof errDetail === "string") {
-            state.password.value = state.password.value;
-            state.password.isValid = false;
-            state.password.message = errDetail;
+            state.email.value = state.email.value;
+            state.email.isValid = false;
+            state.email.message = errDetail;
           } else {
             errDetail.map((data) => {
               const key = data.loc[data.loc.length - 1];
@@ -76,7 +73,7 @@ const LoginContainer = ({ changeView }) => {
               }
             });
           }
-          setLogin(state)
+          setReset(state);
         })
     }
   }
@@ -88,20 +85,17 @@ const LoginContainer = ({ changeView }) => {
         <motion.div initial={{ opacity: 0, x: -100 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 100 }}>
           <main className="main-content-sidebar">
             <div className="auth-content">
-              <h2 className="auth-content-title">Sign in to Hydro</h2>
-              <SocialLogin text="Sign in" />
-              <Divider plain>Or</Divider>
-
-              <Form name="login" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
+              <h2 className="auth-content-title forgot-title">Reset Password</h2>
+              <Form name="resetPassword" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                 <Form.Item 
                   label="Email"
                   className="m-b-10"
                   validateStatus={!email.isValid && email.message && "error"}
                 >
                   <Input 
-                    size="large" 
+                    size="large"
                     name="email"
-                    placeholder="Email" 
+                    placeholder="Email"
                     value={email.value}
                     onChange={onChangeHandler}
                   />
@@ -109,7 +103,7 @@ const LoginContainer = ({ changeView }) => {
                 </Form.Item>
                 <Form.Item 
                   label="Password"
-                  className="m-b-10"
+                  className="m-b-10 input-with-right-child"
                   validateStatus={!password.isValid && password.message && "error"}
                 >
                   <Input.Password 
@@ -121,37 +115,37 @@ const LoginContainer = ({ changeView }) => {
                   />
                   <ErrorMessage item={password} />
                 </Form.Item>
-          
-                <Form.Item className="m-b-10">
-                  <Row justify="space-between">
-                    <Col md={12}>
-                      <a onClick={() => changeView(FORGOT_PASSWORD)}>Forgot password ?</a>
-                    </Col>
-                    <Col md={12}>
-                      <a className="float-right" onClick={() => changeView(RESEND_VERIFICATION)}>
-                        Resend verification
-                      </a>
-                    </Col>
-                  </Row>
+                <Form.Item 
+                  label="Confirmation Password"
+                  className="input-with-right-child"
+                  validateStatus={!confirm_password.isValid && confirm_password.message && "error"}
+                >
+                  <Input.Password 
+                    size="large"
+                    name="confirm_password"
+                    placeholder="Confirmation Password" 
+                    value={confirm_password.value}
+                    onChange={onChangeHandler}
+                  />
+                  <ErrorMessage item={confirm_password} />
                 </Form.Item>
 
                 <Form.Item>
                   <Button block type="primary" size="large" onClick={onSubmitHandler} disabled={loading}>
-                    {loading ? <LoadingOutlined /> : <b>Sign In</b>}
+                    {loading ? <LoadingOutlined /> : <b>Change Password</b>}
                   </Button>
                 </Form.Item>
 
-                <span>Not a member?</span>
-                <a onClick={() => changeView(REGISTER)}> Register now</a>
+                <span>Already a member?</span>
+                <Link href="/auth"><a> Sign In</a></Link>
               </Form>
             </div>
           </main>
         </motion.div>
       </section>
-
       <style jsx>{Style}</style>
     </>
   )
 }
 
-export default LoginContainer
+export default ResetPassword

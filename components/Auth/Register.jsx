@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
+import { LoadingOutlined } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Form, Input, Button, Divider, Image, Row, Col, Steps, Card } from 'antd'
-import { LoadingOutlined } from '@ant-design/icons'
 
-import { deepCopy } from 'lib/utility'
-import { resNotification } from 'lib/axios'
+import { formErrorMessage } from 'lib/axios'
+import { deepCopy, enterPressHandler } from 'lib/utility'
 import { formRegister, formRegisterIsValid } from 'formdata/register'
 
 import axios from 'lib/axios'
@@ -47,6 +47,7 @@ const RegisterContainer = ({ changeView }) => {
     }, 2500)
   }
 
+  /* INPUT CHANGE FUNCTION */
   const onChangeHandler = e => {
     const name = e.target.name
     const value = e.target.value
@@ -62,11 +63,9 @@ const RegisterContainer = ({ changeView }) => {
     };
     setRegister(data)
   }
+  /* INPUT CHANGE FUNCTION */
 
-  const enterPressHandler = e => {
-    if(e.keyCode === 13) onSubmitHandler(e)
-  }
-
+  /* SUBMIT FORM FUNCTION */
   const onSubmitHandler = e => {
     e.preventDefault()
     if(formRegisterIsValid(register, setRegister)) {
@@ -80,7 +79,7 @@ const RegisterContainer = ({ changeView }) => {
       axios.post("/users/register", data)
         .then((res) => {
           setLoading(false)
-          resNotification("success", res.data.detail)
+          formErrorMessage("success", res.data.detail)
           setTimeout(() => {
             next()
           }, 1000)
@@ -107,6 +106,7 @@ const RegisterContainer = ({ changeView }) => {
         });
     }
   }
+  /* SUBMIT FORM FUNCTION */
 
   return(
     <>
@@ -142,7 +142,7 @@ const RegisterContainer = ({ changeView }) => {
                         <SocialLogin text="Register" />
                         <Divider plain>Or</Divider>
 
-                        <Form name="login" layout="vertical" onKeyUp={enterPressHandler}>
+                        <Form name="login" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                           <Form.Item 
                             label="Username"
                             className="m-b-10"
@@ -200,7 +200,7 @@ const RegisterContainer = ({ changeView }) => {
                             <ErrorMessage item={confirm_password} />
                           </Form.Item>
 
-                          <Form.Item name="agreement">
+                          <Form.Item name="agreement" className="m-b-10">
                             <div className="text-secondary">
                               <span>By registering, I agree to the</span>
                               <a className="text-tridatu" href="#a"> Terms and Conditions</a>
@@ -210,10 +210,8 @@ const RegisterContainer = ({ changeView }) => {
                           </Form.Item>
 
                           <Form.Item>
-                            <Button block type="primary" size="large" onClick={onSubmitHandler}>
-                              <b>
-                                {loading && <LoadingOutlined className="m-r-5" /> }Create Account
-                              </b>
+                            <Button block type="primary" size="large" onClick={onSubmitHandler} disabled={loading}>
+                              {loading ? <LoadingOutlined /> : <b>Create Account</b>}
                             </Button>
                           </Form.Item>
 

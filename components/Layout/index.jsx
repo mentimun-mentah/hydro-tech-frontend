@@ -1,12 +1,26 @@
+import { useEffect } from 'react'
+import { parseCookies } from 'nookies'
 import { useRouter } from 'next/router'
+import { useDispatch } from 'react-redux'
 
 import AuthLayout from './Auth'
 import DasboardLayout from './dashboard'
+import * as actions from 'store/actions'
 
 const Layout = ({ children }) => {
   const router = useRouter()
-  const isAuth = router.pathname.startsWith('/auth')
+  const dispatch = useDispatch()
+
+  const isAuth = router.pathname.startsWith('/auth') || router.pathname.startsWith('/password-reset')
   const isDashboard = router.pathname.startsWith('/dashboard')
+
+  const { csrf_access_token, csrf_refresh_token } = parseCookies()
+
+  useEffect(() => {
+    if (csrf_access_token && csrf_refresh_token) {
+      dispatch(actions.getUser())
+    }
+  }, [parseCookies])
 
   let layout = <>{children}</>
   if(isDashboard) layout = <DasboardLayout>{children}</DasboardLayout>

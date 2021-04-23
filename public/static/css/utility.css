@@ -115,7 +115,7 @@
   display: table-cell;
 }
 .overflow-hidden {
-  overflow: hidden;
+  overflow: hidden!important;
 }
 .overflow-scroll {
   overflow: scroll;
@@ -131,10 +131,10 @@
 .clearfix:after {
   clear: both;
 }
-.left {
-  float: left;
+.float-left {
+  float: left!important;
 }
-.right {
+.float-right {
   float: right!important;
 }
 .fit {
@@ -916,16 +916,29 @@
     font-size: 1rem;
   }
   .h3 {
-    font-size: .75rem;
+    font-size: 1rem;
   }
   .h4 {
-    font-size: .5rem;
+    font-size: .9rem;
   }
   .h5 {
     font-size: 0.875rem;
   }
   .h6 {
     font-size: 0.75rem;
+  }
+}
+@media (max-width: 1020px) {
+  .h2 {
+    font-size: 1.35rem;
+  }
+}
+@media (max-width: 400px) {
+  .h1 {
+    font-size: 1.3rem;
+  }
+  .h2 {
+    font-size: 1rem;
   }
 }
 @media (min-width: 40em) and (max-width: 52em) {
@@ -957,6 +970,16 @@
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
 }
+.force-select {  
+  -webkit-touch-callout: all; /* iOS Safari */
+    -webkit-user-select: all; /* Safari */
+     -khtml-user-select: all; /* Konqueror HTML */
+       -moz-user-select: all; /* Old versions of Firefox */
+        -ms-user-select: all; /* Internet Explorer/Edge */
+            user-select: all; /* Non-prefixed version, currently supported by Chrome, Opera and Firefox */
+}
+
+
 html { scroll-behavior: smooth; }
 .img-fit { object-fit: cover; }
 

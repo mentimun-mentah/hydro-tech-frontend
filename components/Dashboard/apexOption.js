@@ -35,9 +35,12 @@ export const optionsPH = {
   stroke: { curve: 'smooth', },
   sparkline: { enabled: true },
   dataLabels: { enabled: false },
-  yaxis: { min: 0 },
+  yaxis: { 
+    min: 0,
+    tickAmount: 5,
+  },
   xaxis: {
-    range: 10,
+    range: 5,
     type: 'datetime',
     labels: { show: false },
     axisTicks: { show: false },
