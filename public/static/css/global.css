@@ -15,6 +15,7 @@
   --salmon-1: #ffbe76;
   --orange: #f0932b;
   --danger: #dc3545;
+  --light: #f8f9fa;
 }
 
 ::selection {
@@ -212,6 +213,10 @@ body {
   color: var(--danger)!important;
 }
 
+.text-reset {
+  color: inherit!important;
+}
+
 .form-text {
   display: block;
   margin-top: .25rem;
@@ -226,6 +231,7 @@ body {
   position: fixed;
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
+  z-index: 2;
 }
 
 .modal-modif > .ant-modal-content, 

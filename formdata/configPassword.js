@@ -1,5 +1,9 @@
 import isLength from 'validator/lib/isLength'
 
+export const formConfirmPassword = {
+  password: { value: "", isValid: true, message: "" }
+}
+
 export const formConfigPassword = {
   old_password: { value: "", isValid: true, message: "" },
   password: { value: "", isValid: true, message: "" },
@@ -57,6 +61,21 @@ export const formVerifyPasswordIsValid = (state, setState) => {
   }
 
   if(!isGood) setState({ ...state, verify_password })
+
+  return isGood
+}
+
+export const formConfirmPasswordIsValid = (state, setState) => {
+  const password = { ...state.password }
+  let isGood = true
+
+  if(!isLength(password.value, { min: 6, max: 100 })){
+    isGood = false;
+    password.isValid = false;
+    password.message = "Ensure this value has 6 - 100 characters";
+  }
+
+  if(!isGood) setState({ ...state, password })
 
   return isGood
 }

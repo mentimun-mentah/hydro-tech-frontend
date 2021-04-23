@@ -1,9 +1,9 @@
 import { withAuth } from 'lib/withAuth'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
+import { Joystick } from 'react-joystick-component'
 import { AnimatePresence, motion } from 'framer-motion'
 import { w3cwebsocket as W3CWebSocket } from 'websocket'
-import { Layout, Card, Row, Col, Image, Tag, Modal } from 'antd'
-import { Joystick } from 'react-joystick-component'
+import { Layout, Card, Row, Col, Image, Tag, Modal, Grid } from 'antd'
 
 import { optionsPH } from 'components/Dashboard/apexOption'
 import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData } from 'components/Dashboard/apexOption'
@@ -22,35 +22,43 @@ const WaterTank = '/static/images/water-tank.svg'
 const Lecttuce = '/static/images/plant/lecttuce.png'
 const Temperature = '/static/images/temperature.gif'
 
-const DAY = "DAY", WEEK = "WEEK"
-const initStatistic = { kind: "", sh: "0", tds: "0", ldr: "0", ta: "0", ph: "0" }
-const initDataSeries = [ { name: "pH", data: [] } ]
 const max_width_height = 90
+const DAY = "DAY", WEEK = "WEEK"
+const useBreakpoint = Grid.useBreakpoint
+const initDataSeries = [ { name: "pH", data: [] } ]
+const initStatistic = { kind: "", sh: "0", tds: "0", ldr: "0", ta: "0", ph: "0" }
 
 let ws = {}
 
 const Dashboard = () => {
-  const constraintsRef = useRef(null)
+  const screens = useBreakpoint()
 
-  const [pos, setPos] = useState({})
   const [image, setImage] = useState("")
-  const [position, setPosition] = useState({})
+  const [heightPh, setHeightPh] = useState(465)
   const [showModalCam, setShowModalCam] = useState(false)
   const [seriesPh, setSeriesPh] = useState(initDataSeries)
   const [statistic, setStatistic] = useState([initStatistic])
+  const [size, setSize] = useState({ imgWidth1: 100, imgWidth2: 120, imgWidth3: 140 })
 
   const statisticLength = statistic.length
-  const { vertical, horizontal } = position
+  const { imgWidth1, imgWidth2, imgWidth3 } = size
 
   useEffect(() => {
-    return false
+    let mounted = true
+    if(mounted && !screens.lg) setHeightPh(265)
+    else setHeightPh(465)
+
+    if(mounted && screens.xs) setSize({...size, imgWidth1: 80, imgWidth2: 100, imgWidth3: 120})
+    else setSize({...size, imgWidth1: 100, imgWidth2: 120, imgWidth3: 140})
+  }, [screens])
+
+  useEffect(() => {
     const interval = setInterval(() => {
-      //ldr = cahaya, ta = tinggi air, ph = power of hydrogen, tds = nutrisi, sh = suhu
-      const ph = ((Math.random() * (15 - 7) + 1) + 7).toFixed(2)
-      const ta = Math.floor((Math.random() * (98- 70) + 1) + 70).toString()
-      const sh = Math.floor((Math.random() * (30 - 26) + 1) + 26).toString()
-      const ldr = Math.floor((Math.random() * (600 - 500) + 1) + 500).toString()
-      const tds = Math.floor((Math.random() * (1000 - 800) + 1) + 800).toString()
+      const ph = ((Math.random() * (15 - 7) + 1) + 7).toFixed(2) //power of hydrogen
+      const ta = Math.floor((Math.random() * (98- 70) + 1) + 70).toString() //tinggi air
+      const sh = Math.floor((Math.random() * (30 - 26) + 1) + 26).toString() //suhu
+      const ldr = Math.floor((Math.random() * (600 - 500) + 1) + 500).toString() //cahaya
+      const tds = Math.floor((Math.random() * (1000 - 800) + 1) + 800).toString() //nutrisi
 
       const dataFromArduino = { kind: "IoT", sh: sh, tds: tds, ldr: ldr, ta: ta, ph: ph }
 
@@ -64,35 +72,22 @@ const Dashboard = () => {
         data.push({x,y})
         setSeriesPh([{...seriesPh[0], data}])
 
-        // if(ApexCharts && ApexCharts.exec){
-        //   ApexCharts && ApexCharts.exec("realtime", "updateSeries", seriesPh)
-        // }
+        if(ApexCharts && ApexCharts.exec){
+          ApexCharts && ApexCharts.exec && ApexCharts.exec("realtime", "updateSeries", seriesPh)
+        }
       }
     }, 1000)
 
     return () => clearInterval(interval)
   }, [])
 
-  const onShowModalCamHandler = () => {
-    setShowModalCam(true)
-    if(ws && ws.send && ws.readyState !== 0) {
-      ws.send(`kind:live_cam_true`)
-    }
-  }
-
-  const onCloseModalCamHandler = () => {
-    if(ws && ws.send && ws.readyState !== 0) {
-      ws.send(`kind:live_cam_false`)
-      setShowModalCam(false)
-      setImage("")
-    }
-  }
 
   const wsConnect = () => {
-    ws = new W3CWebSocket(`wss://192.168.18.83:8000/dashboard/ws`)
+    return false
+    ws = new W3CWebSocket(`ws://192.168.18.86:8000/dashboard/ws`)
 
     ws.onopen = () => { 
-      ws.send("Connected"); console.log("WS Connected") 
+      ws.send("Connected"); console.log("Connected") 
       if(showModalCam) ws.send(`kind:live_cam_true`)
       else ws.send(`kind:live_cam_false`)
     }
@@ -108,69 +103,67 @@ const Dashboard = () => {
 
     ws.onclose = e => {
       console.log('Disconected.\nReconnect will be attempted in 1 second.', e.reason);
-      setTimeout(() => {
-        wsConnect();
-      }, 1000);
+      // setTimeout(() => {
+      //   wsConnect();
+      // }, 1000);
     };
   }
 
-  const onJoyStickMoved = ({ x, y }) => {
-    setPosition({ vertical: y*4, horizontal: x*4 })
+  /*CONNECT TO WEBSOCKET WHEN MOUNTED AND SET LIVE CAM FALSE WHEN UNMOUNT*/
+  useEffect(() => {
+    if(ws.readyState !== 1) wsConnect()
+    return () => {
+      if(ws && ws.send && ws.readyState == 1) ws.send(`kind:live_cam_false`)
+    }
+  }, [])
+  /*CONNECT TO WEBSOCKET WHEN MOUNTED AND SET LIVE CAM FALSE WHEN UNMOUNT*/
+
+  /*MODAL CAMERA*/
+  const onShowModalCamHandler = () => {
+    setShowModalCam(true)
+    if(ws && ws.send && ws.readyState !== 0) {
+      ws.send(`kind:live_cam_true`)
+    }
   }
 
-  useEffect(() => {
-    if(ws.readyState == 3 || ws.readyState == 2 || ws.readyState == 0) {
-      wsConnect()
+  const onCloseModalCamHandler = () => {
+    setShowModalCam(false)
+    if(ws && ws.send && ws.readyState !== 0) {
+      ws.send(`kind:live_cam_false`)
+      setImage("")
     }
-  }, [ws])
+  }
 
   useEffect(() => {
     if(ws && ws.send && ws.readyState == 1) {
       if(showModalCam) ws.send(`kind:live_cam_true`)
       else ws.send(`kind:live_cam_false`)
     }
-  }, [showModalCam])
-  // }, [])
 
-  useEffect(() => {
-    let v = vertical
-    let h = horizontal
-    if(vertical < 0) v = Math.abs(v)
-    if(vertical > 0) v = 0
-    if(horizontal < 0) h = 0
-    const data = `kind:set_value_servo,sh:${h ? h : 0},sv:${v ? v : 0}`
-    if(ws && ws.send && ws.readyState !== 0 && ws.readyState !== 3 && ws.readyState !== 2 && showModalCam) {
-      ws.send(data)
-    }
-  }, [position])
-
-  useEffect(() => {
-    wsConnect()
-    return () => {
-      if(ws && ws.send && showModalCam) {
-        console.log()
-        ws.send(`kind:live_cam_false`)
-      }
-    }
-  }, [])
-
-  const onPositionChangeHandler = (e) => {
-    console.log(e)
-    // console.log("x:", e.layerX, "y:", e.layerY)
-    let x = e.layerX * 2
-    let y = e.layerY * 2
-    // if(x >= (max_width_height * 2)) x = max_width_height * 2
-    if(x <= 0) x = 0
-    // if(y >= (max_width_height * 2)) y = max_width_height * 2
-    if(y <= 0) y = 0
-
-    setPos({x: x, y: y})
-  }
-
-  useEffect(() => {
     if(showModalCam) document.body.classList.add("overflow-hidden")
     else document.body.classList.remove("overflow-hidden")
   }, [showModalCam])
+  // }, [])
+
+  const onJoyStickMoved = ({ x, y }) => {
+    const center   = 90
+    let horizontal = x*2
+    let vertical   = y*2
+    if(horizontal == 0) horizontal = center
+    if(horizontal > 0)  horizontal = center + x*2
+    if(horizontal < 0)  horizontal = center - Math.abs(x*2)
+
+    if(vertical == 0) vertical = center
+    if(vertical > 0)  vertical = center + y*2
+    if(vertical < 0)  vertical = center - Math.abs(y*2)
+
+    console.log(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`)
+    if(ws && ws.send && ws.readyState == 1 && showModalCam) {
+      ws.send(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`)
+    }
+  }
+  /*MODAL CAMERA*/
+
   
   return(
     <>
@@ -188,7 +181,7 @@ const Dashboard = () => {
                 <h2 className="h2 bold mb1 line-height-1">{statistic[statisticLength-1].ph} pH</h2>
                 <span className="header-date">Power of Hydrogen</span>
                 <div className="chart">
-                  <Chart type="area" series={seriesPh} options={optionsPH} height={465} />
+                  <Chart type="area" series={seriesPh} options={optionsPH} height={heightPh} />
                 </div>
               </Card>
             </Col>
@@ -202,7 +195,7 @@ const Dashboard = () => {
                       <Tag className="right tag-condition good">Good</Tag>
                     </h2>
                     <div className="text-center items-center mt2">
-                      <Image width={120} src={Temperature} preview={false} alt="temperature" className="ml5" />
+                      <Image width={imgWidth2} src={Temperature} preview={false} alt="temperature" className="ml5" />
                       <h3 className="h2 bold mb0 mt2">{statistic[statisticLength-1].sh}&#176;<span className="regular header-date">C</span></h3>
                     </div>
                   </Card>
@@ -215,7 +208,7 @@ const Dashboard = () => {
                       <Tag className="right tag-condition medium">Medium</Tag>
                     </h2>
                     <div className="text-center items-center mt1">
-                      <Image width={140} src={WaterTank} preview={false} alt="water-tank" className="mln1" />
+                      <Image width={imgWidth3} src={WaterTank} preview={false} alt="water-tank" className="mln1" />
                       <h3 className="h2 bold mb0">{statistic[statisticLength-1].ta}%</h3>
                       <h4 className="h3 header-date mb0">Remaining</h4>
                     </div>
@@ -235,7 +228,7 @@ const Dashboard = () => {
                   </span>
                 </h2>
                 <div className="text-center items-center mt2">
-                  <Image width={100} src={Lecttuce} preview={false} alt="plant" />
+                  <Image width={imgWidth1} src={Lecttuce} preview={false} alt="plant" />
                   <h4 className="h3 header-date mb0 mt1">Lecttuce</h4>
                 </div>
               </Card>
@@ -248,7 +241,7 @@ const Dashboard = () => {
                   <Tag className="right tag-condition bad">Bad</Tag>
                 </h2>
                 <div className="text-center items-center mt2">
-                  <Image width={100} src={Plant} preview={false} alt="plant" />
+                  <Image width={imgWidth1} src={Plant} preview={false} alt="plant" />
                   <h3 className="h2 bold mb0">{statistic[statisticLength-1].tds}<span className="regular header-date"> ppm</span></h3>
                 </div>
               </Card>
@@ -260,7 +253,7 @@ const Dashboard = () => {
                   Light Intensity
                 </h2>
                 <div className="text-center items-center mt2">
-                  <Image width={100} src={Sun} preview={false} alt="temperature" />
+                  <Image width={imgWidth1} src={Sun} preview={false} alt="temperature" />
                   <h3 className="h2 bold mb0">{statistic[statisticLength-1].ldr}<span className="regular header-date"> lux</span></h3>
                 </div>
               </Card>
@@ -272,7 +265,7 @@ const Dashboard = () => {
 
       <Modal
         centered
-        title={<b>Plant</b>}
+        title={<b>Plant Camera</b>}
         zIndex="1030"
         width={700}
         footer={null}

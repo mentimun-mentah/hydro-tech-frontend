@@ -136,7 +136,7 @@ const Reports = () => {
                       </Radio.Group>
                     </div>
                     <div className="chart">
-                      <Chart type="area" series={selectedGrowthSeries} options={selectedGrowthOption} height={400} />
+                      <Chart type="area" series={selectedGrowthSeries} options={selectedGrowthOption} height={300} />
                     </div>
                   </Tabs.TabPane>
 
@@ -166,7 +166,12 @@ const Reports = () => {
                   Table Reports
                 </h3>
                 <div className="m-t-20">
-                  <Table scroll={{ y: 500, x: 700 }} dataSource={dataSource} columns={columns} pagination={false} />
+                  <Table 
+                    columns={columns} 
+                    pagination={false} 
+                    dataSource={dataSource} 
+                    scroll={{ y: 500, x: 700 }} 
+                  />
                 </div>
               </Card>
             </Col>
