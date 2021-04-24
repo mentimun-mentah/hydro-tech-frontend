@@ -49,7 +49,7 @@ export const getUser = () => {
         }
       })
       .catch(err => {
-        if(err.response.data.detail === signature_exp){
+        if(err && err.response && err.response.data.detail === signature_exp){
           axios.get("/users/my-user")
             .then(res => {
               if(res.data){

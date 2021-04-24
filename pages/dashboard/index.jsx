@@ -2,13 +2,14 @@ import { withAuth } from 'lib/withAuth'
 import { useState, useEffect } from 'react'
 import { Joystick } from 'react-joystick-component'
 import { AnimatePresence, motion } from 'framer-motion'
-import { w3cwebsocket as W3CWebSocket } from 'websocket'
 import { Layout, Card, Row, Col, Image, Tag, Modal, Grid } from 'antd'
 
+// import { ws, wsConnect } from 'lib/wsConfig'
 import { optionsPH } from 'components/Dashboard/apexOption'
 import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData } from 'components/Dashboard/apexOption'
 
 import moment from 'moment'
+import nookies from 'nookies'
 import dynamic from 'next/dynamic'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
@@ -80,10 +81,12 @@ const Dashboard = () => {
 
     return () => clearInterval(interval)
   }, [])
-  
+
   const wsConnect = () => {
-    //token = csrf_token
-    ws = new W3CWebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MTkyNDk2LCJuYmYiOjE2MTkxOTI0OTYsImp0aSI6IjIyZmFlOWVlLTAzZTktNDdhYi05NDk1LWVkYTNlMzE4MmIxOSIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI4MzU1ZTIwYy05NzZmLTRlOTEtOGQ2Ny0xMmNlYjZlZjJmYzAifQ.bh9ldyCibLzNZPnJnG9pZOr_Wz9d66hBGNssmPdmu8k`)
+    // const cookies = nookies.get()
+    // ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`)
+    let tkn = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8"
+    ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`)
 
     ws.onopen = () => { 
       ws.send("Connected"); console.log("Connected") 
@@ -362,5 +365,5 @@ const Dashboard = () => {
   )
 }
 
-// export default withAuth(Dashboard)
-export default Dashboard
+export default withAuth(Dashboard)
+// export default Dashboard

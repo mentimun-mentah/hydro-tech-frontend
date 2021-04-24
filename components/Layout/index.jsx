@@ -18,7 +18,7 @@ const Layout = ({ children }) => {
 
   useEffect(() => {
     if (csrf_access_token && csrf_refresh_token) {
-      dispatch(actions.getUser())
+      // dispatch(actions.getUser())
     }
   }, [parseCookies])
 
