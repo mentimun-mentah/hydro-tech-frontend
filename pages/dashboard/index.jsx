@@ -85,6 +85,7 @@ const Dashboard = () => {
   const wsConnect = () => {
     // const cookies = nookies.get()
     // ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`)
+    return false
     let tkn = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8"
     ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`)
 
