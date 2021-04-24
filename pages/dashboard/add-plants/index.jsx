@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
-import { Layout, Card, Row, Col, Image, Form, Button, Input, Select, Upload, Pagination } from 'antd'
+import { Layout, Card, Row, Col, Image, Form, Button, Input, Select, Upload } from 'antd'
 
 import { formImage } from 'formdata/image'
 
-import pageStyle from 'components/Dashboard/pageStyle.js'
+import Pagination from 'components/Pagination'
+import pageStyle from 'components/Dashboard/pageStyle'
 
 const Bayam = '/static/images/plant/bayam.png'
 const Kailan = '/static/images/plant/kailan-2.png'
@@ -21,6 +22,14 @@ const plantList = [
   { name: "Sawi", image: Sawi },
   { name: "Selada", image: Selada },
 ]
+
+const selectAfter = (
+  <Select defaultValue="days" className="select-after">
+    <Select.Option value="days">days</Select.Option>
+    <Select.Option value=".jp">weeks</Select.Option>
+    <Select.Option value=".cn">months</Select.Option>
+  </Select>
+);
 
 const AddPlants = () => {
   const [imageList, setImageList] = useState(formImage)
@@ -173,7 +182,9 @@ const AddPlants = () => {
                 ))}
 
                 <Col xl={24} lg={24} md={24} sm={24}>
-                  <Pagination className="modif-pagination text-center m-t-20 m-b-20" current={3} total={50} />
+                  <div className="text-center m-t-20 m-b-20">
+                    <Pagination current={3} total={50} />
+                  </div>
                 </Col>
               </Row>
 
@@ -188,9 +199,6 @@ const AddPlants = () => {
         :global(.rounded-card-actions .ant-card-actions) {
           border-bottom-left-radius: 1rem;
           border-bottom-right-radius: 1rem;
-        }
-        :global(.modif-pagination) {
-
         }
       `}</style>
     </>

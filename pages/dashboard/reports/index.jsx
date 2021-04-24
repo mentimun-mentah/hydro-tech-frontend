@@ -18,7 +18,7 @@ const useBreakpoint = Grid.useBreakpoint
 const Reports = () => {
   const screens = useBreakpoint()
   
-  const [selectedGrowth, setSelectedGrowth] = useState(WEEK)
+  const [selectedGrowth, setSelectedGrowth] = useState(DAY)
   const [selectedGrowthOption, setSelectedGrowthOption] = useState(optionsGrowth)
   const [selectedGrowthSeries, setSelectedGrowthSeries] = useState(seriesWeekGrowth)
 

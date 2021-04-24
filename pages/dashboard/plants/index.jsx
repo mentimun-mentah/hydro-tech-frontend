@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Layout, Card, Row, Col, Image, Drawer, Grid } from 'antd'
 
 import moment from 'moment'
+import Pagination from 'components/Pagination'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
 const useBreakpoint = Grid.useBreakpoint
@@ -73,6 +74,12 @@ const Plants = () => {
                   </Card>
                 </Col>
               ))}
+
+              <Col xl={24} lg={24} md={24} sm={24}>
+                <div className="text-center m-t-20 m-b-20">
+                  <Pagination current={3} total={50} />
+                </div>
+              </Col>
             </Row>
           </AnimatePresence>
         </Layout.Content>
