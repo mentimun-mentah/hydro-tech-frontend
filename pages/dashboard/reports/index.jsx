@@ -139,7 +139,7 @@ const Reports = () => {
                     columns={columns} 
                     pagination={false} 
                     dataSource={dataSource} 
-                    scroll={{ y: 500, x: 700 }} 
+                    scroll={{ y: 500, x: 1180 }} 
                   />
                 </div>
               </Card>

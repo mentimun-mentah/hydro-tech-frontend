@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Layout, Card, Row, Col, Image, Drawer, Grid } from 'antd'
+import { Layout, Card, Row, Col, Image, Drawer, Grid, Form, Input } from 'antd'
 
 import moment from 'moment'
 import Pagination from 'components/Pagination'
@@ -45,6 +45,20 @@ const Plants = () => {
         <h1 className="h1 bold mb0">Plants List</h1>
         <span className="header-date">{moment().format("dddd, DD MMMM YYYY")}</span>
       </div>
+
+      <Form layout="vertical">
+        <Row gutter={[20, 20]}>
+          <Col lg={10} md={10} sm={12} xs={24}>
+            <Form.Item className="">
+              <Input
+                size="large"
+                placeholder="Search plant"
+                prefix={<i className="far fa-search text-grey" />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
 
       <Layout>
         <Layout.Content>

@@ -23,14 +23,6 @@ const plantList = [
   { name: "Selada", image: Selada },
 ]
 
-const selectAfter = (
-  <Select defaultValue="days" className="select-after">
-    <Select.Option value="days">days</Select.Option>
-    <Select.Option value=".jp">weeks</Select.Option>
-    <Select.Option value=".cn">months</Select.Option>
-  </Select>
-);
-
 const AddPlants = () => {
   const [imageList, setImageList] = useState(formImage)
 
@@ -52,6 +44,7 @@ const AddPlants = () => {
                           className="m-b-0"
                         >
                           <Input
+                            size="large"
                             placeholder="Plant Name"
                           />
                         </Form.Item>
@@ -63,50 +56,68 @@ const AddPlants = () => {
                           className="m-b-0"
                         >
                           <Input.TextArea 
+                            size="large"
                             placeholder="Description"
                             autoSize={{ minRows: 2, maxRows: 3 }} 
                           />
                         </Form.Item>
                       </Col>
 
-                      <Col xl={12} lg={12} md={12} sm={24}>
+                      <Col xl={8} lg={8} md={8} sm={24} xs={24}>
                         <Form.Item 
-                          label="Default PH"
+                          label="PH Minimum"
                           className="m-b-0"
                         >
                           <Input
-                            placeholder="Default PH"
+                            size="large"
+                            placeholder="PH Minimum"
                           />
                         </Form.Item>
                       </Col>
-                      <Col xl={12} lg={12} md={12} sm={24}>
+                      <Col xl={8} lg={8} md={8} sm={24} xs={24}>
                         <Form.Item 
-                          label="Default PPM"
+                          label="PH Maximum"
                           className="m-b-0"
                         >
                           <Input
-                            placeholder="Default PPM"
+                            size="large"
+                            placeholder="PH Maximum"
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col xl={8} lg={8} md={8} sm={24} xs={24}>
+                        <Form.Item 
+                          label="TDS Minimum"
+                          className="m-b-0"
+                        >
+                          <Input
+                            size="large"
+                            placeholder="TDS Minimum"
                           />
                         </Form.Item>
                       </Col>
 
-                      <Col xl={12} lg={12} md={12} sm={24}>
+                      <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                         <Form.Item 
                           label="Time to growth"
                           className="m-b-0"
                         >
                           <Input
-                            placeholder="Time to growth"
+                            size="large"
+                            placeholder="e.g. 21 days, 4 weeks"
                           />
                         </Form.Item>
                       </Col>
 
-                      <Col xl={12} lg={12} md={12} sm={24}>
+                      <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                         <Form.Item 
                           label="Difficulty Level"
                           className="m-b-0"
                         >
-                          <Select defaultValue="simple">
+                          <Select 
+                            size="large"
+                            defaultValue="simple"
+                          >
                             <Select.Option value="simple">Simple</Select.Option>
                             <Select.Option value="medium">Medium</Select.Option>
                             <Select.Option value="hard">Hard</Select.Option>
@@ -114,7 +125,7 @@ const AddPlants = () => {
                         </Form.Item>
                       </Col>
 
-                      <Col xl={24} lg={24} md={24} sm={24}>
+                      <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                         <Form.Item 
                           label="Plant Photo"
                           className="m-b-0"
@@ -133,7 +144,7 @@ const AddPlants = () => {
                         </Form.Item>
                       </Col>
 
-                      <Col xl={24} lg={24} md={24} sm={24}>
+                      <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                         <Form.Item className="m-b-0">
                           <Button type="primary" size="large" className="p-l-30 p-r-30">
                             <b>Save</b>
@@ -150,9 +161,23 @@ const AddPlants = () => {
 
           <Row gutter={[20, 20]}>
             <Col span={24}>
-              <div className="header-dashboard m-t-40">
+              <div className="header-dashboard m-t-40 mb0">
                 <h2 className="h2 bold mb0">Plant List</h2>
               </div>
+
+              <Form layout="vertical">
+                <Row gutter={[20, 20]}>
+                  <Col lg={10} md={10} sm={12} xs={24}>
+                    <Form.Item className="">
+                      <Input
+                        size="large"
+                        placeholder="Search plant"
+                        prefix={<i className="far fa-search text-grey" />}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Form>
 
               <Row gutter={[20, 20]}>
                 {plantList.map((plant, i) => (

@@ -1,69 +1,162 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
+import { useDispatch, useSelector } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Modal, Button, Form, Card, Divider, Input, Typography } from 'antd'
 
 import { deepCopy, enterPressHandler } from 'lib/utility'
-import { formConfirmPassword, formConfirmPasswordIsValid } from 'formdata/configPassword'
+import { jsonHeaderHandler, signature_exp, formErrorMessage } from 'lib/axios'
+import { formVerifyPassword, formVerifyPasswordIsValid } from 'formdata/configPassword'
 
+import axios from 'lib/axios'
+import nookies from 'nookies'
+import * as actions from 'store/actions'
 import ErrorMessage from 'components/ErrorMessage'
 
-const TokenContainer = () => {
-  const [loading, setLoading] = useState(false)
-  const [formPassword, setFormPassword] = useState(formConfirmPassword)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const { password } = formPassword
+const TokenContainer = () => {
+  const dispatch = useDispatch()
+
+  const iot_token = useSelector(state => state.auth.iot_token)
+
+  const [loading, setLoading] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [verifyPassword, setVerifyPassword] = useState(formVerifyPassword)
+
+  const { verify_password } = verifyPassword
   
   /* INPUT CHANGE FUNCTION */
-  const onChangeHandler = e => {
-    const name = e.target.name
+  const onVerifyChangeHandler = e => {
     const value = e.target.value
     const data = {
-      ...formPassword,
-      [name]: {
-        ...formPassword[name],
+      ...verifyPassword,
+      verify_password: {
+        ...verifyPassword["verify_password"],
         value: value, isValid: true, message: null,
       },
     };
-    setFormPassword(data)
+    setVerifyPassword(data)
   }
   /* INPUT CHANGE FUNCTION */
 
   /* SUBMIT FORM FUNCTION */
   const onSubmitHandler = e => {
     e.persist()
-    if(formConfirmPasswordIsValid(formPassword, setFormPassword)){
-      const data = { password: password.value }
-      console.log(data)
-      onCloseConfirmPassword()
+    setLoading(true)
+    axios.post("/users/create-iot-token", null, jsonHeaderHandler())
+      .then(res => {
+        setLoading(false)
+        formErrorMessage("success", "Success generate new token.")
+        nookies.set(null, 'iot_token_cookies', res.data.token, {
+          maxAge: 30 * 24 * 60 * 60,
+          path: '/',
+        })
+        dispatch(actions.getIotToken())
+      })
+      .catch(err => {
+        setLoading(false)
+        const errDetail = err.response.data.detail;
+        const freshRequired = "Fresh token required";
+        if(typeof errDetail === "string" && errDetail === freshRequired) {
+          setShowConfirmPassword(true)
+        }
+      })
+  }
+
+  const submitVerifyPassword = e => {
+    e.persist()
+    if(formVerifyPasswordIsValid(verifyPassword, setVerifyPassword)){
+      setLoading(true)
+      const data = { password: verify_password.value }
+      axios.post("/users/fresh-token", data, jsonHeaderHandler())
+        .then(() => {
+          setLoading(true)
+          onSubmitHandler(e)
+          setShowConfirmPassword(false)
+          setVerifyPassword(formVerifyPassword)
+        })
+        .catch(err => {
+          const state = deepCopy(verifyPassword)
+          const errDetail = err.response.data.detail;
+          if(typeof errDetail === "string" && errDetail === signature_exp) {
+            axios.post("/users/fresh-token", data, jsonHeaderHandler())
+              .then(() => {
+                setLoading(true)
+                onSubmitHandler(e)
+                setShowConfirmPassword(false)
+                setVerifyPassword(formVerifyPassword)
+              })
+          }
+          if(typeof errDetail === "string" && errDetail !== signature_exp) {
+            setLoading(false);
+            state.verify_password.value = state.verify_password.value;
+            state.verify_password.isValid = false;
+            state.verify_password.message = errDetail;
+          } 
+          if(typeof errDetail !== "string") {
+            setLoading(false);
+            errDetail.map((data) => {
+              let key = data.loc[data.loc.length - 1] === "password" ? "verify_password" : "verify_password";
+              if(state[key]) {
+                state[key].value = state[key].value;
+                state[key].isValid = false;
+                state[key].message = data.msg;
+              }
+            });
+          }
+          setVerifyPassword(state);
+        })
     }
   }
   /* SUBMIT FORM FUNCTION */
 
   const onCloseConfirmPassword = () => {
-    setFormPassword(formConfirmPassword)
+    setVerifyPassword(formVerifyPassword)
     setShowConfirmPassword(false)
   }
+
+  useEffect(() => {
+    dispatch(actions.getIotToken())
+  }, [])
+
+  useEffect(() => {
+    const cookies = nookies.get()
+    if(!cookies.iot_token_cookies && iot_token) {
+        nookies.set(null, 'iot_token_cookies', iot_token, {
+          maxAge: 30 * 24 * 60 * 60,
+          path: '/',
+        })
+    }
+  }, [iot_token])
 
   return (
     <>
       <h1 className="fs-16 bold">IoT Token</h1>
-      <p className="mb-0">This is your IoT Token, your personal password for the Hydro X Tech API. Keep it safe!</p>
+      <pre></pre>
+      {iot_token ? (
+        <>
+          <p className="mb-0">This is your IoT Token, your personal password for the Hydro X Tech API. Keep it safe!</p>
 
-      <Divider />
+          <Divider />
 
-      <Card className="card-token">
-        <Typography.Paragraph className="m-b-0 text-danger force-select">
-          d0c1c39f8604a6fb7ebf2b76b17b8285
-        </Typography.Paragraph>
-      </Card>
+          <Card className="card-token">
+            <Typography.Paragraph className="m-b-0 text-danger force-select overflow-wrap-anywhere">
+              {iot_token}
+            </Typography.Paragraph>
+          </Card>
 
-      <Divider />
+          <Divider />
 
-      <h2 className="fs-14 bold m-b-0">Tips:</h2>
-      <p>If you feel that your Token is already known to other people, please change your Token using the button below.</p>
-      <Button type="primary" onClick={() => setShowConfirmPassword(true)}>Generate Token</Button>
+          <h2 className="fs-14 bold m-b-0">Tips:</h2>
+          <p>If you feel that your Token is already known to other people, please change your Token using the button below.</p>
+          <h2 className="fs-14 bold m-b-0">Note:</h2>
+          <p>The old IoT Token doesn't work if you change the Token.</p>
+        </>
+      ) : (
+        <p className="mb-0">It looks like you don't have an IoT Token, please press this button to generate a new token</p>
+      )}
+
+      <Button type="primary" onClick={onSubmitHandler}>Generate Token</Button>
 
       <Modal
         centered
@@ -78,35 +171,43 @@ const TokenContainer = () => {
         closeIcon={<i className="fas fa-times" />}
         onOk={onCloseConfirmPassword}
         onCancel={onCloseConfirmPassword}
-        afterClose={() => setFormPassword(formPassword)}
+        afterClose={() => setVerifyPassword(formVerifyPassword)}
         maskStyle={{backgroundColor: "rgba(0, 0, 0, 0.45)"}}
       >
-        <p className="m-b-0">
-          Enter your password to confirm changing your IoT Token.
-        </p>
-        <p>
-          <b>Note: </b>
-          The old IoT Token doesn't work if you change the Token.
-        </p>
-        <p className="fs-14 m-b-0"><b>Old Token:</b></p>
-        <p className="text-danger">d0c1c39f8604a6fb7ebf2b76b17b8285</p>
-        <Form layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
+        {iot_token ? (
+          <>
+            <p className="m-b-0">
+              Enter your password to confirm changing your IoT Token.
+            </p>
+            <p>
+              <b>Note: </b>
+              The old IoT Token doesn't work if you change the Token.
+            </p>
+            <p className="fs-14 m-b-0"><b>Old Token:</b></p>
+            <p className="text-danger">{iot_token}</p>
+          </>
+        ) : (
+          <p className="m-b-0">
+            Enter your password to generate your IoT Token.
+          </p>
+        )}
+        <Form layout="vertical" onKeyUp={e => enterPressHandler(e, submitVerifyPassword)}>
           <Form.Item 
             label="Password"
             className="m-b-15"
-            validateStatus={!password.isValid && password.message && "error"}
+            validateStatus={!verify_password.isValid && verify_password.message && "error"}
           >
             <Input.Password
               size="large"
               name="password"
               placeholder="Password"
-              value={password.value}
-              onChange={onChangeHandler}
+              value={verify_password.value}
+              onChange={onVerifyChangeHandler}
             />
-            <ErrorMessage item={password} />
+            <ErrorMessage item={verify_password} />
           </Form.Item>
           <Form.Item className="mb0">
-            <Button size="large" block type="primary" onClick={onSubmitHandler}>
+            <Button size="large" block type="primary" onClick={submitVerifyPassword}>
               {showConfirmPassword && loading ? <LoadingOutlined /> : "Change Token"}
             </Button>
           </Form.Item>
@@ -134,6 +235,9 @@ const TokenContainer = () => {
         }
         :global(.card-token .ant-card-body) {
           padding: 5px 10px;
+        }
+        :global(.overflow-wrap-anywhere) {
+          overflow-wrap: anywhere;
         }
       `}</style>
     </>

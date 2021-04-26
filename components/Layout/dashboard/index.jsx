@@ -9,7 +9,7 @@ import SplitText from './SplitText'
 import * as actions from 'store/actions'
 
 const useBreakpoint = Grid.useBreakpoint
-const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD_PLANTS"
+const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS"
 
 const SidebarContainer = ({ children }) => {
   const router = useRouter()
@@ -134,8 +134,8 @@ const SidebarContainer = ({ children }) => {
                 Plants
               </Menu.Item>
               <Menu.Item 
-                key={ADD_PLANTS} 
-                icon={<i className="far fa-seedling" />} 
+                key={ADD_PLANTS}
+                icon={<i className="far fa-hand-holding-seedling" />} 
                 onClick={() => router.push('/dashboard/add-plants')}
               >
                 Add Plants

@@ -28,12 +28,12 @@ const Accounts = () => {
                   <Password />
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="Plant" key="3">
-                  Plant
+                <Tabs.TabPane tab="IoT Token" key="3">
+                  <Token />
                 </Tabs.TabPane>
 
-                <Tabs.TabPane tab="IoT Token" key="4">
-                  <Token />
+                <Tabs.TabPane tab="Plant" key="4">
+                  Plant
                 </Tabs.TabPane>
 
               </Tabs>
@@ -118,4 +118,5 @@ const Accounts = () => {
   )
 }
 
-export default withAuth(Accounts)
+// export default withAuth(Accounts)
+export default Accounts
