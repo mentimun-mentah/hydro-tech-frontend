@@ -33,6 +33,40 @@ const getUserFail = (error) => {
 }
 
 
+/* GET IOT TOKEN ACTIONS */
+const getIotTokenStart = () => {
+  return {
+    type: actionType.GET_IOT_TOKEN_START,
+  }
+}
+const getIotTokenSuccess = (token) => {
+  return {
+    type: actionType.GET_IOT_TOKEN_SUCCESS,
+    payload: token,
+  }
+}
+const getIotTokenFail = (error) => {
+  return {
+    type: actionType.GET_IOT_TOKEN_FAIL,
+    error: error,
+  }
+}
+
+
+export const getIotToken = () => {
+  return (dispatch) => {
+    dispatch(getIotTokenStart())
+    const cookies = nookies.get()
+    if(cookies.iot_token_cookies && cookies.iot_token_cookies !== "null" && cookies.iot_token_cookies !== "undefined") {
+      dispatch(getIotTokenSuccess(cookies.iot_token_cookies))
+    }
+    else {
+      dispatch(getIotTokenFail("No token found"))
+    }
+  }
+}
+
+
 /* GET USER FUNCTION */
 export const getUser = () => {
   return (dispatch) => {
@@ -40,6 +74,7 @@ export const getUser = () => {
     axios.get("/users/my-user")
       .then(res => {
         if(res.data){
+          dispatch(getIotToken())
           dispatch(getUserSuccess(res.data))
         }
         else {
@@ -49,10 +84,11 @@ export const getUser = () => {
         }
       })
       .catch(err => {
-        if(err.response.data.detail === signature_exp){
+        if(err && err.response && err.response.data.detail === signature_exp){
           axios.get("/users/my-user")
             .then(res => {
               if(res.data){
+                dispatch(getIotToken())
                 dispatch(getUserSuccess(res.data))
               }
               else {

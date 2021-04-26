@@ -1,1 +1,1 @@
-export { getUser, logout } from './auth'
+export { getUser, getIotToken, logout } from './auth'

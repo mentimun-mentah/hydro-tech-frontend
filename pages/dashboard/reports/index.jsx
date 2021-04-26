@@ -18,7 +18,7 @@ const useBreakpoint = Grid.useBreakpoint
 const Reports = () => {
   const screens = useBreakpoint()
   
-  const [selectedGrowth, setSelectedGrowth] = useState(WEEK)
+  const [selectedGrowth, setSelectedGrowth] = useState(DAY)
   const [selectedGrowthOption, setSelectedGrowthOption] = useState(optionsGrowth)
   const [selectedGrowthSeries, setSelectedGrowthSeries] = useState(seriesWeekGrowth)
 
@@ -139,7 +139,7 @@ const Reports = () => {
                     columns={columns} 
                     pagination={false} 
                     dataSource={dataSource} 
-                    scroll={{ y: 500, x: 700 }} 
+                    scroll={{ y: 500, x: 1180 }} 
                   />
                 </div>
               </Card>

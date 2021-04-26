@@ -29,7 +29,7 @@ const RegisterContainer = ({ changeView }) => {
   const [loading, setLoading] = useState(false)
   const [register, setRegister] = useState(formRegister)
   const [plantSelected, setPlantSelected] = useState("")
-  const [text, setText] = useState("Setting up your profile")
+  const [text, setText] = useState("Completing your registration")
 
   const { username, email, password, confirm_password } = register
 

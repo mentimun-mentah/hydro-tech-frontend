@@ -214,9 +214,6 @@ const PasswordContainer = () => {
               <Button size="large" type="primary" disabled={loading} onClick={onSubmitHandler} style={{ width: 80 }}>
                 {!showConfirmPassword && loading ? <LoadingOutlined /> : <b>Save</b>}
               </Button>
-              <Button size="large" type="primary" onClick={() => setShowConfirmPassword(true)}>
-                showw
-              </Button>
             </Form.Item>
           </Col>
         </Row>

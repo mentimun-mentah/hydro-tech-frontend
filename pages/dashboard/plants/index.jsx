@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Layout, Card, Row, Col, Image, Drawer, Grid } from 'antd'
+import { Layout, Card, Row, Col, Image, Drawer, Grid, Form, Input } from 'antd'
 
 import moment from 'moment'
+import Pagination from 'components/Pagination'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
 const useBreakpoint = Grid.useBreakpoint
@@ -45,6 +46,20 @@ const Plants = () => {
         <span className="header-date">{moment().format("dddd, DD MMMM YYYY")}</span>
       </div>
 
+      <Form layout="vertical">
+        <Row gutter={[20, 20]}>
+          <Col lg={10} md={10} sm={12} xs={24}>
+            <Form.Item className="">
+              <Input
+                size="large"
+                placeholder="Search plant"
+                prefix={<i className="far fa-search text-grey" />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+
       <Layout>
         <Layout.Content>
           <AnimatePresence exitBeforeEnter>
@@ -73,6 +88,12 @@ const Plants = () => {
                   </Card>
                 </Col>
               ))}
+
+              <Col xl={24} lg={24} md={24} sm={24}>
+                <div className="text-center m-t-20 m-b-20">
+                  <Pagination current={3} total={50} />
+                </div>
+              </Col>
             </Row>
           </AnimatePresence>
         </Layout.Content>

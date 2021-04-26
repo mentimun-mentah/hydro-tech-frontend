@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Layout, Card, Row, Col, Image, Switch, Form, Button, InputNumber } from 'antd'
+import { Layout, Card, Row, Col, Image, Switch, Form, Button, InputNumber, Tag } from 'antd'
 
 import { enterPressHandler } from 'lib/utility'
 import { formSetting } from 'formdata/controlSetting'
@@ -15,6 +15,7 @@ const WaterPumpOn = '/static/images/water-pump-on.svg'
 const WaterPumpOff = '/static/images/water-pump-off.svg'
 
 const inputNumberProps = {
+  step: "0.1",
   min: 0,
   max: 10000,
   size: "large",
@@ -30,6 +31,7 @@ const Controls = () => {
   const [lampState, setLampState] = useState(false)
   const [setting, setSetting] = useState(formSetting)
   const [waterPumpState, setWaterPumpState] = useState(false)
+  const [isSystemSetting, setIsSystemSetting] = useState(false)
   const [nutritionPump, setNutritionPump] = useState({ phUp: false, phDown: false, tds: false })
 
   const { pu, pd, kp, kt, st } = setting
@@ -165,20 +167,29 @@ const Controls = () => {
             <Col span={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
                 <div className="header-dashboard">
-                  <h2 className="h2 bold mb0">Control Settings</h2>
+                  <Row align="middle" justify="space-between">
+                    <Col>
+                      <h2 className="h2 bold mb0">
+                        Control Settings {isSystemSetting && <Tag className="vertical-align-middle" color="orange">by System</Tag>}
+                      </h2>
+                    </Col>
+                    <Col>
+                      <Switch checked={isSystemSetting} onChange={val => setIsSystemSetting(val)} />
+                    </Col>
+                  </Row>
                   <span className="header-date">Change value of component to get the best settings for your hydroponics</span>
                 </div>
                 <Form name="settings" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                   <Row gutter={[20, 20]}>
                     <Col xl={12} lg={12} md={12} sm={24}>
                       <Form.Item 
-                        label="PH Up" 
+                        label="PH Maximum" 
                         className="m-b-0"
                       >
                         <InputNumber
                           {...inputNumberProps}
-                          placeholder="PH up"
-                          step={0.1}
+                          disabled={isSystemSetting}
+                          placeholder="PH Maximum"
                           value={pu.value}
                           onChange={e => onChangeHandler(e, "pu")}
                         />
@@ -186,18 +197,34 @@ const Controls = () => {
                     </Col>
                     <Col xl={12} lg={12} md={12} sm={24}>
                       <Form.Item
-                        label="PH Down"
+                        label="PH Minimum"
                         className="m-b-0"
                       >
                         <InputNumber
                           {...inputNumberProps}
-                          placeholder="PH Down"
-                          step={0.1}
+                          disabled={isSystemSetting}
+                          placeholder="PH Minimum"
                           value={pd.value}
                           onChange={e => onChangeHandler(e, "pd")}
                         />
                       </Form.Item>
                     </Col>
+
+                    <Col xl={24} lg={24} md={24} sm={24}>
+                      <Form.Item
+                        label="TDS Minimum"
+                        className="m-b-0"
+                      >
+                        <InputNumber
+                          {...inputNumberProps}
+                          disabled={isSystemSetting}
+                          placeholder="TDS Minimum"
+                          value={st.value}
+                          onChange={e => onChangeHandler(e, "st")}
+                        />
+                      </Form.Item>
+                    </Col>
+
                     <Col xl={12} lg={12} md={12} sm={24}>
                       <Form.Item
                         label="PH Calibration"
@@ -224,17 +251,43 @@ const Controls = () => {
                         />
                       </Form.Item>
                     </Col>
-                    <Col xl={24} lg={24} md={24} sm={24}>
+
+
+                    <Col xl={12} lg={12} md={12} sm={24}>
                       <Form.Item
-                        label="TDS Value"
+                        label="Tank Maximum"
                         className="m-b-0"
                       >
-                        <InputNumber
-                          {...inputNumberProps}
-                          placeholder="TDS Value"
-                          value={st.value}
-                          onChange={e => onChangeHandler(e, "st")}
-                        />
+                        <div className="ant-input-group-wrapper">
+                          <div className="ant-input-wrapper ant-input-group input-group-variant" style={{ zIndex: 1 }}>
+                            <InputNumber
+                              {...inputNumberProps}
+                              step={1}
+                              placeholder="Tank Maximum"
+                              className="w-100 bor-right-rad-0"
+                            />
+                            <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>
+                          </div>
+                        </div>
+                      </Form.Item>
+                    </Col>
+
+                    <Col xl={12} lg={12} md={12} sm={24}>
+                      <Form.Item 
+                        label="Tank Minimum"
+                        className="m-b-0"
+                      >
+                        <div className="ant-input-group-wrapper">
+                          <div className="ant-input-wrapper ant-input-group input-group-variant" style={{ zIndex: 1 }}>
+                            <InputNumber
+                              {...inputNumberProps}
+                              step={1}
+                              placeholder="Tank Minimum"
+                              className="w-100 bor-right-rad-0"
+                            />
+                            <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>
+                          </div>
+                        </div>
                       </Form.Item>
                     </Col>
 
@@ -256,6 +309,16 @@ const Controls = () => {
 
 
       <style jsx>{pageStyle}</style>
+      <style jsx>{`
+        :global(.bor-right-rad-0) {
+          border-top-right-radius: 0!important;
+          border-bottom-right-radius: 0!important;
+        }
+        :global(.bor-right-rad-05rem) {
+          border-top-right-radius: .5rem!important;
+          border-bottom-right-radius: .5rem!important;
+        }
+      `}</style>
     </>
   )
 }
