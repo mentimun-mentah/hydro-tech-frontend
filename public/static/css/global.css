@@ -16,6 +16,7 @@
   --orange: #f0932b;
   --danger: #dc3545;
   --light: #f8f9fa;
+  --green: #039991;
 }
 
 ::selection {
@@ -59,6 +60,21 @@ body {
   color: var(--white)!important;
   background: var(--blue)!important;
   border-color: var(--blue)!important;
+}
+
+.ant-btn-green {
+  color: var(--white)!important;
+  background: var(--green)!important;
+  border-color: var(--green)!important;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 12%);
+  -webkit-box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 5%);
+}
+
+.ant-btn.ant-btn-green:hover, .ant-btn.ant-btn-green:focus {
+  color: var(--white)!important;
+  background: var(--green)!important;
+  border-color: var(--green)!important;
 }
 
 .ant-btn.btn-white:hover, .ant-btn.btn-white:focus {

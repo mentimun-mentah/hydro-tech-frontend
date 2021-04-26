@@ -22,7 +22,7 @@ const Home = () => {
     <>
       <nav className="menuBar">
         <div className="logo">
-          <a href="">
+          <a href="/">
             <img src="/static/images/logo-hydro.png" height="50" />
           </a>
         </div>
@@ -40,6 +40,9 @@ const Home = () => {
             <Menu.Item key="signin">
               <a href="/auth">Sign In</a>
             </Menu.Item>
+            <Menu.Item key="dashboard">
+              <a href="/dashboard">Dashboard</a>
+            </Menu.Item>
           </Menu>
         </div>
       </nav>
@@ -51,7 +54,7 @@ const Home = () => {
               <div>
                 <h1 className="bold">A beautiful garden is a work of heart.</h1>
                 <p>Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.</p>
-                <Button type="primary">Get Started</Button>
+                <Button className="ant-btn-green">Get Started</Button>
               </div>
             </Col>
             <Col xl={12} lg={12} md={12} sm={24} xs={20}>
@@ -214,51 +217,56 @@ const Home = () => {
 
       <main>
         <div className="container-fluid">
-          <Row gutter={[20, 20]} justify="center" align="middle" className="m-b-20">
-            <Col xl={19} lg={19} md={24} sm={24}xs={24}>
+          <Row gutter={[20, 20]} justify="center" align="middle" className="m-b-30">
+            <Col xl={19} lg={19} md={24} sm={24} xs={24}>
               <div className="text-center">
-                <img src="/static/images/logo-hydro.png" height="50" />
+                <img src="/static/images/logo-hydro.png" height="50" className="m-b-30" />
               </div>
+
+              <Row gutter={[20, 20]} justify="center" className="text-center">
+                <Col xl={8} lg={8} md={8} sm={24} xs={24}>
+                  <h3 className="bold h3">Short History</h3>
+                  <p>
+                    Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process. Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                  </p>
+                </Col>
+
+                <Col xl={8} lg={8} md={8} sm={24} xs={24} className="footer__contact">
+                  <h3 className="bold h3">Contact</h3>
+                  <p>
+                    <i className="fas fa-map-marker-alt"></i> Taman Giri, Jl. Jalan No.84
+                  </p>
+                  <p>
+                    <i className="fas fa-phone"></i> Phone: (0361) 144 527 93
+                  </p>
+                  <p>
+                    <i className="fas fa-envelope"></i> Email:{" "}
+                    <a href="mailto:support@automatch.com">suardhanatugas@gmail.com</a>
+                  </p>
+                </Col>
+
+                <Col xl={8} lg={8} md={8} sm={24} xs={24} className="footer__social">
+                  <h3 className="bold h3">Follow us</h3>
+                  <p>
+                    <a href="*">
+                      <i className="fab fa-facebook"></i>
+                    </a>
+                    <a href="*">
+                      <i className="fab fa-twitter"></i>
+                    </a>
+                    <a href="*">
+                      <i className="fab fa-google-plus-g"></i>
+                    </a>
+                    <a href="*">
+                      <i className="fab fa-instagram"></i>
+                    </a>
+                  </p>
+                </Col>
+              </Row>
+
             </Col>
           </Row>
 
-          <Row gutter={[20, 20]} justify="center" className="text-center">
-            <Col xl={8} lg={8} md={8} sm={24} xs={24}>
-              <h3 className="bold h3"></h3>
-            </Col>
-
-            <Col xl={8} lg={8} md={8} sm={24} xs={24} className="footer__contact">
-              <h3 className="bold h3">Contact</h3>
-              <p>
-                <i className="fas fa-map-marker-alt"></i> Taman Giri, Jl. Jalan No.84
-              </p>
-              <p>
-                <i className="fas fa-phone"></i> Phone: (0361) 144 527 93
-              </p>
-              <p>
-                <i className="fas fa-envelope"></i> Email:{" "}
-                <a href="mailto:support@automatch.com">suardhanatugas@gmail.com</a>
-              </p>
-            </Col>
-
-            <Col xl={8} lg={8} md={8} sm={24} xs={24} className="footer__social">
-              <h3 className="bold h3">Follow us</h3>
-              <p>
-                <a href="*">
-                  <i className="fab fa-facebook"></i>
-                </a>
-                <a href="*">
-                  <i className="fab fa-twitter"></i>
-                </a>
-                <a href="*">
-                  <i className="fab fa-google-plus-g"></i>
-                </a>
-                <a href="*">
-                  <i className="fab fa-instagram"></i>
-                </a>
-              </p>
-            </Col>
-          </Row>
         </div>
       </main>
 
@@ -322,10 +330,8 @@ const Home = () => {
 
 .site-body {
   padding-top: 88px;
-  // background: rgba(3,153,145,0.15309873949579833);
   background: rgb(3,154,145);
   background: linear-gradient(180deg, rgba(3,154,145,0.31556372549019607) 8%, rgba(250,250,250,1) 84%);
-
 }
 
 .site-body-2 {
@@ -358,7 +364,7 @@ const Home = () => {
 .footer__about p a { color: #aaa !important;}
 
 .footer__contact p { word-wrap: break-word;}
-.footer__contact i { padding-right: 10px; font-size: 18px; color: var(--purple); }
+.footer__contact i { padding-right: 10px; font-size: 18px; color: var(--grey); }
 .footer__contact p a { color: var(--grey-1)!important; }
 
 .footer__social a { display: inline-block; margin-right: 20px; margin-bottom: 8px; color: var(--grey)!important; border: 0; }
@@ -368,7 +374,6 @@ const Home = () => {
 .footer__copyright p { margin: 0; padding: 0.5rem 0; }
 .footer__copyright a { color: #fff; border: 0; }
 .footer__copyright a:hover, .footer__copyright a:focus { color: #aaa; border: 0; }
-
       `}</style>
 
     </>
