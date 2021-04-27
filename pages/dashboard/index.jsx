@@ -2,7 +2,7 @@ import { withAuth } from "lib/withAuth";
 import { useState, useEffect } from "react";
 import { Joystick } from "react-joystick-component";
 import { AnimatePresence, motion } from "framer-motion";
-import { Layout, Card, Row, Col, Image, Tag, Modal, Grid } from "antd";
+import { Layout, Card, Row, Col, Tag, Modal, Grid } from "antd";
 
 // import { ws, wsConnect } from 'lib/wsConfig'
 import { optionsPH } from "components/Dashboard/apexOption";
@@ -15,6 +15,7 @@ import {
 
 import moment from "moment";
 import nookies from "nookies";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import pageStyle from "components/Dashboard/pageStyle.js";
 
@@ -246,10 +247,10 @@ const Dashboard = () => {
                     <div className="text-center items-center mt2">
                       <Image
                         width={imgWidth2}
+                        height={imgWidth2}
                         src={Temperature}
-                        preview={false}
-                        alt="temperature"
                         className="ml5"
+                        alt="temperature"
                       />
                       <h3 className="h2 bold mb0 mt2">
                         {statistic[statisticLength - 1].sh}&#176;
@@ -272,8 +273,8 @@ const Dashboard = () => {
                     <div className="text-center items-center mt1">
                       <Image
                         width={imgWidth3}
+                        height={imgWidth3}
                         src={WaterTank}
-                        preview={false}
                         alt="water-tank"
                         className="mln1"
                       />
@@ -295,9 +296,9 @@ const Dashboard = () => {
                   Plant
                   <span className="float-right" onClick={onShowModalCamHandler}>
                     <Image
-                      width={25}
+                      width={32}
+                      height={32}
                       src={Camera}
-                      preview={false}
                       alt="camera"
                       className="hover-pointer"
                     />
@@ -306,8 +307,8 @@ const Dashboard = () => {
                 <div className="text-center items-center mt2">
                   <Image
                     width={imgWidth1}
+                    height={imgWidth1}
                     src={Lecttuce}
-                    preview={false}
                     alt="plant"
                   />
                   <h4 className="h3 header-date mb0 mt1">Lecttuce</h4>
@@ -325,8 +326,8 @@ const Dashboard = () => {
                 <div className="text-center items-center mt2">
                   <Image
                     width={imgWidth1}
+                    height={imgWidth1}
                     src={Plant}
-                    preview={false}
                     alt="plant"
                   />
                   <h3 className="h2 bold mb0">
@@ -351,8 +352,8 @@ const Dashboard = () => {
                       >
                         <Image
                           width={imgWidth1}
+                          height={imgWidth1}
                           src={Sun}
-                          preview={false}
                           alt="temperature"
                         />
                         <h3 className="h2 bold mb0">
@@ -373,8 +374,8 @@ const Dashboard = () => {
                       >
                         <Image
                           width={imgWidth1}
+                          height={imgWidth1}
                           src={Moon}
-                          preview={false}
                           alt="temperature"
                         />
                         <h3 className="h2 bold mb0">
@@ -412,7 +413,7 @@ const Dashboard = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Image width={100} src={Loader1} preview={false} alt="loader" />
+            <Image width={100} height={100} src={Loader1} alt="loader" />
             <div className="fs-14 m-b-10">Connecting to camera...</div>
           </motion.div>
         ) : (
@@ -423,7 +424,7 @@ const Dashboard = () => {
             exit={{ opacity: 0 }}
           >
             <div className="text-center live-img">
-              <Image width={640} heigth={480} src={image} preview={false} />
+              <Image width={640} heigth={480} src={image} />
             </div>
             <div className="joystick-container">
               <Joystick

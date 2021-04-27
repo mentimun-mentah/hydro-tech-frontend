@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Layout, Card, Row, Col, Image, Drawer, Grid, Form, Input } from 'antd'
+import { Layout, Card, Row, Col, Drawer, Grid, Form, Input } from 'antd'
 
 import moment from 'moment'
+import Image from 'next/image'
 import Pagination from 'components/Pagination'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
@@ -75,7 +76,7 @@ const Plants = () => {
                       onClick={onShowDrawer}
                     >
                       <div className="text-right">
-                        <Image src={plant.image} preview={false} alt="plant" />
+                        <Image src={plant.image} width={500} height={500} alt="plant" />
                       </div>
                       <div className="text-center items-center text-grey">
                         <h2 className="h2 bold mb1 line-height-1">

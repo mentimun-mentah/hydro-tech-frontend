@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
-import { Layout, Card, Row, Col, Image, Form, Button, Input, Select, Upload } from 'antd'
+import { Layout, Card, Row, Col, Form, Button, Input, Select, Upload } from 'antd'
 
 import { formImage } from 'formdata/image'
 
+import Image from 'next/image'
 import Pagination from 'components/Pagination'
 import pageStyle from 'components/Dashboard/pageStyle'
 
@@ -191,7 +192,7 @@ const AddPlants = () => {
                       ]}
                     >
                       <div className="text-right">
-                        <Image src={plant.image} preview={false} alt="plant" />
+                        <Image src={plant.image} width={500} height={500} alt="plant" />
                       </div>
                       <div className="text-center items-center text-grey">
                         <h3 className="h3 bold mb1 line-height-1">

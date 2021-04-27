@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Layout, Card, Row, Col, Image, Switch, Form, Button, InputNumber, Tag } from 'antd'
+import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag } from 'antd'
 
 import { enterPressHandler } from 'lib/utility'
 import { formSetting } from 'formdata/controlSetting'
 
 import moment from 'moment'
+import Image from 'next/image'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
 const PumpOn = '/static/images/pump-on.svg'
@@ -89,7 +90,7 @@ const Controls = () => {
                   Lamp
                 </h2>
                 <div className="text-center items-center mt2">
-                  <Image width={100} src={lampState ? LampOn : LampOff} preview={false} alt="lamp" style={{padding:'5px'}} />
+                  <Image className="p-t-5 p-b-5 p-l-5 p-r-5" width={100} height={100} src={lampState ? LampOn : LampOff} alt="lamp" />
                   <Row justify="space-around">
                     <Col span={24}>
                       <Switch checked={lampState} onChange={val => setLampState(val)} />
@@ -106,7 +107,7 @@ const Controls = () => {
               <Card className="radius1rem shadow1 h-100" bordered={false}>
                 <h2 className="h2 bold line-height-1">Nutrition Pump</h2>
                 <div className="text-center items-center">
-                  <Image width={100} src={(phUp || phDown || tds) ? PumpOn : PumpOff} preview={false} alt="plant" />
+                  <Image width={100} height={100} src={(phUp || phDown || tds) ? PumpOn : PumpOff} alt="plant" />
                   <Row justify="space-around">
                     <Col span={8}>
                       <Switch 
@@ -149,7 +150,13 @@ const Controls = () => {
                   Solenoid valve
                 </h2>
                 <div className="text-center items-center mt2">
-                  <Image width={100} src={waterPumpState ? WaterPumpOn : WaterPumpOff} preview={false} alt="lamp" style={{padding:'5px'}} />
+                  <Image 
+                    alt="lamp" 
+                    width={100}
+                    height={100}
+                    className="p-t-5 p-b-5 p-l-5 p-r-5"
+                    src={waterPumpState ? WaterPumpOn : WaterPumpOff}
+                  />
                   <Row justify="space-around">
                     <Col span={24}>
                       <Switch checked={waterPumpState} onChange={val => setWaterPumpState(val)} />

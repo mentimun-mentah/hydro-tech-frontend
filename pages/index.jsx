@@ -1,8 +1,12 @@
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { Menu, Row, Col, Button, Image, Divider } from 'antd'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Menu, Row, Col, Button, Divider, Grid, Drawer } from 'antd'
 
 import Link from 'next/link'
+import Image from 'next/image'
 
+const useBreakpoint = Grid.useBreakpoint
 const Garden = '/static/images/garden-3.svg'
 const BetterFood = '/static/images/better-food.svg'
 const GrowthOwn = '/static/images/growth-own.svg'
@@ -22,6 +26,9 @@ const services_list = [
 ]
 
 const Home = () => {
+  const { xs, sm, md, lg, xl } = useBreakpoint()
+  const [visible, setIsVisible] = useState(false)
+
   const user = useSelector(state => state.auth.user)
 
   return (
@@ -29,66 +36,87 @@ const Home = () => {
       <nav className="menuBar">
         <div className="logo">
           <a href="/">
-            <img src="/static/images/logo-hydro.png" height="50" />
+            <Image src="/static/images/logo-hydro.png" height={50} width={195} />
           </a>
         </div>
         <div className="menuCon">
-          <Menu mode="horizontal" defaultSelectedKeys={["home"]}>
-            <Menu.Item key="home">
-              <a href="/">Home</a>
-            </Menu.Item>
-            <Menu.Item key="service">
-              <Link href="#service" as="#service">
-                <a>Service</a>
-              </Link>
-            </Menu.Item>
-            <Menu.Item key="about">
-              <Link href="#about" as="#about">
-                <a>About Us</a>
-              </Link>
-            </Menu.Item>
-            <Menu.Item key="dashboard">
-              <Link href="/dashboard" as="/dashboard">
-                <a>Dashboard</a>
-              </Link>
-            </Menu.Item>
-            {(user && user.username && user.avatar) ? (
+          {md ? (
+            <Menu mode="horizontal" defaultSelectedKeys={["home"]}>
+              <Menu.Item key="home">
+                <a href="/">Home</a>
+              </Menu.Item>
+              <Menu.Item key="service">
+                <Link href="#service" as="#service">
+                  <a>Service</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="about">
+                <Link href="#about" as="#about">
+                  <a>About Us</a>
+                </Link>
+              </Menu.Item>
               <Menu.Item key="dashboard">
                 <Link href="/dashboard" as="/dashboard">
                   <a>Dashboard</a>
                 </Link>
               </Menu.Item>
-            ) : (
-              <Menu.Item key="signin">
-                <Link href="/auth" as="/auth">
-                  <a>Sign In</a>
-                </Link>
-              </Menu.Item>
-            )}
-          </Menu>
+              {(user && user.username && user.avatar) ? (
+                <Menu.Item key="dashboard">
+                  <Link href="/dashboard" as="/dashboard">
+                    <a>Dashboard</a>
+                  </Link>
+                </Menu.Item>
+              ) : (
+                <Menu.Item key="signin">
+                  <Link href="/auth" as="/auth">
+                    <a>Sign In</a>
+                  </Link>
+                </Menu.Item>
+              )}
+            </Menu>
+          ) : (
+            <Button
+              type="text"
+              className="m-r-10"
+              icon={<i className="far fa-bars" />}
+              onClick={() => setIsVisible(true)}
+            />
+          )}
         </div>
       </nav>
 
       <main className="site-body">
         <div className="container-fluid">
           <Row gutter={[20, 20]} justify="center" align="middle">
-            <Col xl={8} lg={8} md={12} sm={24} xs={24}>
-              <div>
-                <h1 className="bold">A beautiful garden is a work of heart.</h1>
-                <p>Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.</p>
-                <Button className="ant-btn-green">Get Started</Button>
-              </div>
-            </Col>
-            <Col xl={12} lg={12} md={12} sm={24} xs={20}>
-              <div className="text-center">
-                <Image
-                  width="80%"
-                  src={Garden}
-                  preview={false}
-                  alt="temperature"
-                  className="ml5"
-                />
-              </div>
+            <Col xl={24} lg={24} md={23} sm={23} xs={23}>
+              <Row gutter={[20, 20]} justify="center" align="middle">
+                <Col xl={{span: 8, order: 1}} lg={{span: 8, order: 1}} 
+                  md={{span: 12, order: 1}} sm={{span: 24, order: 2}} xs={{span: 24, order: 2}}
+                >
+                  <div>
+                    <h1 className="bold h1">A beautiful garden is a combination work of heart and technology.</h1>
+                    <p>Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.</p>
+                    <Button className="ant-btn-green">
+                      <Link href={(user && user.username && user.avatar) ? "/dashboard" : "/auth"}>
+                        <a>Get Started</a>
+                      </Link>
+                    </Button>
+                  </div>
+                </Col>
+                <Col xl={{span: 12, order: 2}} lg={{span: 12, order: 2}}
+                  md={{span: 12, order: 2}} sm={{span: 24, order: 1}} xs={{span: 24, order: 1}}
+                >
+                  <div className="text-center">
+                    <Image
+                      width="600"
+                      height="600"
+                      src={Garden}
+                      alt="temperature"
+                      className="ml5"
+                    />
+                  </div>
+                </Col>
+              </Row>
             </Col>
           </Row>
         </div>
@@ -97,33 +125,40 @@ const Home = () => {
       <section id="service" className="p-t-80 p-b-40 bg-gradient-2">
         <div className="container-fluid">
           <Row gutter={[20, 20]} justify="center" align="middle">
-            <Col span={24}>
-              <div className="text-center">
-                <h2 className="h2 bold">Our Service</h2>
-                <p className="text-justify m-b-30">
-                  Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
-                </p>
-              </div>
-            </Col>
-            <Col span={18}>
+            <Col xl={24} lg={24} md={23} sm={23} xs={23}>
               <Row gutter={[20, 20]} justify="center" align="middle">
-                {services_list.map((data, i) => (
-                  <Col xl={8} lg={8} md={12} sm={12} xs={12} key={i}>
-                    <div className="text-center">
-                      <Image
-                        width={100}
-                        src={data.image}
-                        preview={false}
-                        alt="temperature"
-                        className="ml5"
-                      />
-                      <h3 className="h3 bold">{data.title}</h3>
-                      <p className="text-justify">
-                        {data.label}
-                      </p>
-                    </div>
-                  </Col>
-                ))}
+                <Col span={24}>
+                  <div className="text-center">
+                    <h2 className="h2 bold">Our Service</h2>
+                    <p className="text-justify m-b-30">
+                      Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
+                    </p>
+                    <p className="text-justify m-b-30">
+                      xs: {JSON.stringify(xs)}, sm: {JSON.stringify(sm)}, md: {JSON.stringify(md)}, lg: {JSON.stringify(lg)}, xl: {JSON.stringify(xl)}
+                    </p>
+                  </div>
+                </Col>
+                <Col xl={18} lg={18} md={20} sm={24} xs={24}>
+                  <Row gutter={[20, 20]} justify="center" align="middle">
+                    {services_list.map((data, i) => (
+                      <Col xl={8} lg={8} md={12} sm={12} xs={12} key={i}>
+                        <div className="text-center">
+                          <Image
+                            width={90}
+                            height={90}
+                            src={data.image}
+                            alt="temperature"
+                            className="ml5"
+                          />
+                          <h3 className="h3 bold">{data.title}</h3>
+                          <p className="text-justify">
+                            {data.label}
+                          </p>
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
+                </Col>
               </Row>
             </Col>
           </Row>
@@ -131,26 +166,33 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="m-b-0 p-t-40 bg-gradient-2">
+      <section className="m-b-0 bg-gradient-2">
         <div className="container-fluid">
           <Row gutter={[20, 20]} justify="center" align="middle">
             <Col xl={19} lg={19} md={24} sm={24}xs={24}>
               <Row gutter={[20, 20]} justify="center" align="middle">
-                <Col xl={{span: 12, order: 1}} lg={{span: 12, order: 1}} md={{span: 12, order: 1}} sm={{span: 12, order: 2}} xs={{span: 24, order: 2}}>
+                <Col xl={{span: 12, order: 1}} lg={{span: 12, order: 1}}
+                  md={{span: 12, order: 1}} sm={{span: 12, order: 1}} xs={{span: 24, order: 1}}
+                >
                   <div className="text-center">
                     <Image
-                      width="90%"
+                      width="500"
+                      height="500"
                       src={AboutUs}
-                      preview={false}
                       alt="temperature"
                       className="ml5"
                     />
                   </div>
                 </Col>
-                <Col xl={{span: 12, order: 2}} lg={{span: 12, order: 2}} md={{span: 12, order: 2}} sm={{span: 12, order: 2}} xs={{span: 24, order: 1}}>
+                <Col xl={{span: 12, order: 2}} lg={{span: 12, order: 2}} 
+                  md={{span: 12, order: 2}} sm={{span: 12, order: 2}} xs={{span: 24, order: 2}}
+                >
                   <div className="text-left">
                     <h2 className="h2 bold">About Us</h2>
-                    <p>Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process. Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.</p>
+                    <p>
+                      Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process. 
+                      Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                    </p>
                   </div>
                 </Col>
               </Row>
@@ -174,21 +216,28 @@ const Home = () => {
           <Row gutter={[20, 20]} justify="center" align="middle">
             <Col xl={19} lg={19} md={24} sm={24}xs={24}>
               <Row gutter={[20, 20]} justify="center" align="middle">
-                <Col xl={{span: 12, order: 2}} lg={{span: 12, order: 2}} md={{span: 12, order: 2}} sm={{span: 12, order: 2}} xs={{span: 24, order: 1}}>
+                <Col xl={{span: 12, order: 2}} lg={{span: 12, order: 2}}
+                  md={{span: 12, order: 2}} sm={{span: 12, order: 2}} xs={{span: 24, order: 1}}
+                >
                   <div className="text-center">
                     <Image
-                      width="90%"
+                      width="450"
+                      height="450"
                       src={BetterFood}
-                      preview={false}
                       alt="temperature"
                       className="ml5"
                     />
                   </div>
                 </Col>
-                <Col xl={{span: 12, order: 1}} lg={{span: 12, order: 1}} md={{span: 12, order: 1}} sm={{span: 12, order: 1}} xs={{span: 24, order: 2}}>
+                <Col xl={{span: 12, order: 1}} lg={{span: 12, order: 1}}
+                  md={{span: 12, order: 1}} sm={{span: 12, order: 1}} xs={{span: 24, order: 2}}
+                >
                   <div className="text-left">
                     <h2 className="h2 bold">Creating a Better Hydroponics System</h2>
-                    <p>Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process. Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.</p>
+                    <p>
+                      Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
+                      Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                    </p>
                   </div>
                 </Col>
               </Row>
@@ -202,21 +251,28 @@ const Home = () => {
           <Row gutter={[20, 20]} justify="center" align="middle">
             <Col xl={19} lg={19} md={24} sm={24}xs={24}>
               <Row gutter={[20, 20]} justify="center" align="middle">
-                <Col xl={{span: 12, order: 1}} lg={{span: 12, order: 1}} md={{span: 12, order: 1}} sm={{span: 12, order: 1}} xs={{span: 24, order: 1}}>
+                <Col xl={{span: 12, order: 1}} lg={{span: 12, order: 1}}
+                  md={{span: 12, order: 1}} sm={{span: 12, order: 1}} xs={{span: 24, order: 1}}
+                >
                   <div className="text-center">
                     <Image
-                      width="90%"
+                      width="450"
+                      height="450"
                       src={GrowthOwn}
-                      preview={false}
                       alt="temperature"
                       className="ml5"
                     />
                   </div>
                 </Col>
-                <Col xl={{span: 12, order: 2}} lg={{span: 12, order: 2}} md={{span: 12, order: 2}} sm={{span: 12, order: 2}} xs={{span: 24, order: 2}}>
+                <Col xl={{span: 12, order: 2}} lg={{span: 12, order: 2}}
+                  md={{span: 12, order: 2}} sm={{span: 12, order: 2}} xs={{span: 24, order: 2}}
+                >
                   <div className="text-left">
                     <h2 className="h2 bold">Grow your own plant</h2>
-                    <p>Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process. Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.</p>
+                    <p>
+                      Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
+                      Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                    </p>
                   </div>
                 </Col>
               </Row>
@@ -242,15 +298,16 @@ const Home = () => {
         <div className="container-fluid">
           <Row gutter={[20, 20]} justify="center" align="middle" className="m-b-30">
             <Col xl={19} lg={19} md={24} sm={24} xs={24}>
-              <div className="text-center">
-                <img src="/static/images/logo-hydro.png" height="50" className="m-b-30" />
+              <div className="text-center m-b-30">
+                <Image src="/static/images/logo-hydro.png" height={50} width={195} />
               </div>
 
               <Row gutter={[20, 20]} justify="center" className="text-center">
                 <Col xl={8} lg={8} md={8} sm={24} xs={24}>
                   <h3 className="bold h3">Short History</h3>
                   <p>
-                    Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process. Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                    Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
+                    Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
                   </p>
                 </Col>
 
@@ -297,6 +354,61 @@ const Home = () => {
         </div>
       </main>
 
+      <Drawer
+        placement="right"
+        zIndex="1030"
+        visible={visible}
+        onClose={() => setIsVisible(false)}
+        closeIcon={<i className="fas fa-times" />}
+        headerStyle={{overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"}}
+      >
+        <Menu mode="inline" defaultSelectedKeys={["home"]} className="m-t-15 menu-mobile">
+          <Menu.Item key="home">
+            <a href="/">Home</a>
+          </Menu.Item>
+          <Menu.Item key="service">
+            <Link href="#service" as="#service">
+              <a>Service</a>
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="about">
+            <Link href="#about" as="#about">
+              <a>About Us</a>
+            </Link>
+          </Menu.Item>
+          <Menu.Item key="dashboard">
+            <Link href="/dashboard" as="/dashboard">
+              <a>Dashboard</a>
+            </Link>
+          </Menu.Item>
+          {(user && user.username && user.avatar) ? (
+            <Menu.Item key="dashboard">
+              <Link href="/dashboard" as="/dashboard">
+                <a>Dashboard</a>
+              </Link>
+            </Menu.Item>
+          ) : (
+            <Menu.Item key="signin">
+              <Link href="/auth" as="/auth">
+                <a>Sign In</a>
+              </Link>
+            </Menu.Item>
+          )}
+        </Menu>
+      </Drawer>
+
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: ".2" }}
+            className="overlay-blur"
+          />
+        )}
+      </AnimatePresence>
+
       <style global jsx>{`
 .menuBar {
   z-index: 1;
@@ -315,7 +427,7 @@ const Home = () => {
 .logo a {
   display: inline-block;
   font-size: 20px;
-  padding: 15px 10px 10px 10px;
+  padding: 15px 10px 0px 10px;
   text-transform: capitalize;
 }
 
@@ -355,8 +467,36 @@ const Home = () => {
 .menuCon .ant-menu-horizontal > .ant-menu-item-selected a,
 .menuCon .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover,
 .menuCon .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected {
-  color: var(--purple);
-  border-color: var(--purple);
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.ant-menu-inline .ant-menu-item::after, .ant-menu-inline {
+  border-width: 0px;
+}
+
+.menu-mobile.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
+  font-weight: 600 !important;
+  background-color: #e4f1f1!important;
+}
+
+.menu-mobile .ant-menu-item {
+  border-radius: 0.8rem;
+}
+
+.menu-mobile.ant-menu, .menu-mobile .ant-menu-item a {
+  color: var(--grey-1) !important;
+}
+
+.menu-mobile .ant-menu-item:hover, 
+.menu-mobile .ant-menu-item-selected, 
+.menu-mobile .ant-menu-item-selected a:hover, 
+.menu-mobile .ant-menu-item-selected a {
+  color: #2f9991!important;
+}
+
+.menu-mobile .ant-menu-item:active, .menu-mobile .ant-menu-submenu-title:active {
+  background: #e4f1f1!important;
 }
 
 .site-body {
