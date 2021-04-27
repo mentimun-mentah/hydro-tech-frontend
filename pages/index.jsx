@@ -1,4 +1,7 @@
-import { Menu, Row, Col, Button, Image } from 'antd'
+import { useSelector } from 'react-redux'
+import { Menu, Row, Col, Button, Image, Divider } from 'antd'
+
+import Link from 'next/link'
 
 const Garden = '/static/images/garden-3.svg'
 const BetterFood = '/static/images/better-food.svg'
@@ -8,16 +11,19 @@ const Analytics = '/static/images/analytics.svg'
 const Presentation = '/static/images/presentation.svg'
 const Process = '/static/images/process.svg'
 const PlantsHand = '/static/images/plants-hand.svg'
+const GrowingPlant = '/static/images/growing-plant.svg'
 
 const services_list = [
   { title: "Realtime Monitoring", image: Analytics, label: "Imagine you are a recruiter with hundreds or even thousands" },
   { title: "Automated Control", image: Process, label: "Imagine you are a recruiter with hundreds or even thousands" },
   { title: "Multiple Plants", image: PlantsHand, label: "Imagine you are a recruiter with hundreds or even thousands" },
   { title: "Automated Report", image: Presentation, label: "Imagine you are a recruiter with hundreds or even thousands" },
-  { title: "Growth Plant", image: Presentation, label: "Using image processing" },
+  { title: "Growth Plant", image: GrowingPlant, label: "Using image processing" },
 ]
 
 const Home = () => {
+  const user = useSelector(state => state.auth.user)
+
   return (
     <>
       <nav className="menuBar">
@@ -27,27 +33,43 @@ const Home = () => {
           </a>
         </div>
         <div className="menuCon">
-          <Menu mode="horizontal">
+          <Menu mode="horizontal" defaultSelectedKeys={["home"]}>
             <Menu.Item key="home">
-              <a href="">Home</a>
+              <a href="/">Home</a>
             </Menu.Item>
             <Menu.Item key="service">
-              <a href="">Service</a>
+              <Link href="#service" as="#service">
+                <a>Service</a>
+              </Link>
             </Menu.Item>
             <Menu.Item key="about">
-              <a href="">About Us</a>
-            </Menu.Item>
-            <Menu.Item key="signin">
-              <a href="/auth">Sign In</a>
+              <Link href="#about" as="#about">
+                <a>About Us</a>
+              </Link>
             </Menu.Item>
             <Menu.Item key="dashboard">
-              <a href="/dashboard">Dashboard</a>
+              <Link href="/dashboard" as="/dashboard">
+                <a>Dashboard</a>
+              </Link>
             </Menu.Item>
+            {(user && user.username && user.avatar) ? (
+              <Menu.Item key="dashboard">
+                <Link href="/dashboard" as="/dashboard">
+                  <a>Dashboard</a>
+                </Link>
+              </Menu.Item>
+            ) : (
+              <Menu.Item key="signin">
+                <Link href="/auth" as="/auth">
+                  <a>Sign In</a>
+                </Link>
+              </Menu.Item>
+            )}
           </Menu>
         </div>
       </nav>
 
-      <main className="site-body p-b-40">
+      <main className="site-body">
         <div className="container-fluid">
           <Row gutter={[20, 20]} justify="center" align="middle">
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
@@ -72,7 +94,7 @@ const Home = () => {
         </div>
       </main>
 
-      <section className="p-b-40 bg-gradient-2">
+      <section id="service" className="p-t-80 p-b-40 bg-gradient-2">
         <div className="container-fluid">
           <Row gutter={[20, 20]} justify="center" align="middle">
             <Col span={24}>
@@ -105,6 +127,7 @@ const Home = () => {
               </Row>
             </Col>
           </Row>
+          <div id="about" />
         </div>
       </section>
 
@@ -264,15 +287,15 @@ const Home = () => {
                 </Col>
               </Row>
 
+              <Divider />
+
+              <p className="text-center m-b-25">All right reserved @hydroxtech</p>
+
             </Col>
           </Row>
 
         </div>
       </main>
-
-
-      <a href="/dashboard"><h3>Dashboard</h3></a>
-      <a href="/auth"><h3>Login</h3></a>
 
       <style global jsx>{`
 .menuBar {
@@ -326,6 +349,14 @@ const Home = () => {
 
 .menuCon .ant-menu-horizontal {
   border-bottom: none;
+}
+
+.menuCon .ant-menu-horizontal > .ant-menu-item a:hover, 
+.menuCon .ant-menu-horizontal > .ant-menu-item-selected a,
+.menuCon .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover,
+.menuCon .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected {
+  color: var(--purple);
+  border-color: var(--purple);
 }
 
 .site-body {
