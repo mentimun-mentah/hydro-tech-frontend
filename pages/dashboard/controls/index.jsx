@@ -260,9 +260,9 @@ const Controls = () => {
                     </Col>
 
 
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={24} lg={24} md={24} sm={24}>
                       <Form.Item
-                        label="Tank Maximum"
+                        label="Water Tank Height"
                         className="m-b-0"
                       >
                         <div className="ant-input-group-wrapper">
@@ -270,26 +270,7 @@ const Controls = () => {
                             <InputNumber
                               {...inputNumberProps}
                               step={1}
-                              placeholder="Tank Maximum"
-                              className="w-100 bor-right-rad-0"
-                            />
-                            <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>
-                          </div>
-                        </div>
-                      </Form.Item>
-                    </Col>
-
-                    <Col xl={12} lg={12} md={12} sm={24}>
-                      <Form.Item 
-                        label="Tank Minimum"
-                        className="m-b-0"
-                      >
-                        <div className="ant-input-group-wrapper">
-                          <div className="ant-input-wrapper ant-input-group input-group-variant" style={{ zIndex: 1 }}>
-                            <InputNumber
-                              {...inputNumberProps}
-                              step={1}
-                              placeholder="Tank Minimum"
+                              placeholder="Water Tank Height"
                               className="w-100 bor-right-rad-0"
                             />
                             <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>

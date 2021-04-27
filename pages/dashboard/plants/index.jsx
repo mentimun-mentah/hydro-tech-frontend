@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Layout, Card, Row, Col, Drawer, Grid, Form, Input } from 'antd'
+import { Layout, Row, Col, Drawer, Grid, Form, Input } from 'antd'
 
 import moment from 'moment'
-import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import Pagination from 'components/Pagination'
 import pageStyle from 'components/Dashboard/pageStyle.js'
+import PlantCardLoading from 'components/Card/PlantLoading'
+
+const PlantCardLoadingMemo = React.memo(PlantCardLoading)
+
+const PlantCard = dynamic(() => import('components/Card/Plant'), { ssr: false, loading: () => <PlantCardLoadingMemo />  })
 
 const useBreakpoint = Grid.useBreakpoint
 const Sprout = '/static/images/sprout.svg'
@@ -67,26 +72,7 @@ const Plants = () => {
             <Row gutter={[20, 20]}>
               {plantList.map((plant, i) => (
                 <Col lg={8} md={8} sm={12} xs={24} key={i}>
-                  <Card bordered={false} className="radius1rem shadow1 h-100">
-                    <motion.div
-                      key={i}
-                      whileHover={{ y: -4 }}
-                      whileTap={{ scale: 0.98, y: 0 }}
-                      className="hover-pointer"
-                      onClick={onShowDrawer}
-                    >
-                      <div className="text-right">
-                        <Image src={plant.image} width={500} height={500} alt="plant" />
-                      </div>
-                      <div className="text-center items-center text-grey">
-                        <h2 className="h2 bold mb1 line-height-1">
-                          {plant.name}
-                        </h2>
-                        <p className="mb0 mt1">16 Weeks</p>
-                        <p className="mb0">Difficutly level <b className="text-orange">Simple</b></p>
-                      </div>
-                    </motion.div>
-                  </Card>
+                  <PlantCard plant={plant} onShow={onShowDrawer} />
                 </Col>
               ))}
 

@@ -18,15 +18,15 @@ const PlantsHand = '/static/images/plants-hand.svg'
 const GrowingPlant = '/static/images/growing-plant.svg'
 
 const services_list = [
-  { title: "Realtime Monitoring", image: Analytics, label: "Imagine you are a recruiter with hundreds or even thousands" },
-  { title: "Automated Control", image: Process, label: "Imagine you are a recruiter with hundreds or even thousands" },
-  { title: "Multiple Plants", image: PlantsHand, label: "Imagine you are a recruiter with hundreds or even thousands" },
-  { title: "Automated Report", image: Presentation, label: "Imagine you are a recruiter with hundreds or even thousands" },
-  { title: "Growth Plant", image: GrowingPlant, label: "Using image processing" },
+{ title: "Realtime Monitoring", image: Analytics, label: "Monitoring your garden from our platform with your own device in realtime." },
+{ title: "Automated Control", image: Process, label: "We do automated control for maintaining your garden to save your precious time." },
+{ title: "Multiple Plants", image: PlantsHand, label: "Using our platform, you can easily select the type of plants you want to grow." },
+{ title: "Growth Plant", image: GrowingPlant, label: "We use PlantCV as image processing to determine the height of the plant in your garden." },
+{ title: "Automated Report", image: Presentation, label: "Download the report data as you need and you can use it for analytics and much more." },
 ]
 
 const Home = () => {
-  const { xs, sm, md, lg, xl } = useBreakpoint()
+  const { md } = useBreakpoint()
   const [visible, setIsVisible] = useState(false)
 
   const user = useSelector(state => state.auth.user)
@@ -85,7 +85,7 @@ const Home = () => {
         </div>
       </nav>
 
-      <main className="site-body">
+      <main className={`${md ? 'p-t-88' : 'p-t-40'} site-body`}>
         <div className="container-fluid">
           <Row gutter={[20, 20]} justify="center" align="middle">
             <Col xl={24} lg={24} md={23} sm={23} xs={23}>
@@ -94,8 +94,10 @@ const Home = () => {
                   md={{span: 12, order: 1}} sm={{span: 24, order: 2}} xs={{span: 24, order: 2}}
                 >
                   <div>
-                    <h1 className="bold h1">A beautiful garden is a combination work of heart and technology.</h1>
-                    <p>Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.</p>
+                    <h1 className="bold h1">Welcome to the future of gardening</h1>
+                    <p>
+                      Hydro X Tech is an IoT-based platform for monitoring and automated maintaining of your garden, this is useful for helping gardeners to improve the quality of their crops.
+                    </p>
                     <Button className="ant-btn-green">
                       <Link href={(user && user.username && user.avatar) ? "/dashboard" : "/auth"}>
                         <a>Get Started</a>
@@ -131,10 +133,7 @@ const Home = () => {
                   <div className="text-center">
                     <h2 className="h2 bold">Our Service</h2>
                     <p className="text-justify m-b-30">
-                      Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
-                    </p>
-                    <p className="text-justify m-b-30">
-                      xs: {JSON.stringify(xs)}, sm: {JSON.stringify(sm)}, md: {JSON.stringify(md)}, lg: {JSON.stringify(lg)}, xl: {JSON.stringify(xl)}
+                      Explore all the Hydro X Tech services and feel the big impact
                     </p>
                   </div>
                 </Col>
@@ -190,9 +189,17 @@ const Home = () => {
                   <div className="text-left">
                     <h2 className="h2 bold">About Us</h2>
                     <p>
-                      Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process. 
-                      Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                      Hydro X Tech is here to help you in maintaining a plantation, especially hydroponics through technology. The existence of technology can save time and space in cultivating hydroponic plants.
                     </p>
+                    {/* <p> */}
+                    {/*   Hydro X Tech hadir untuk membantu anda dalam pemeliharaan suatu perkebunan khususnya hydroponics melalui teknologi. Adanya teknologi dapat menghemat waktu dan tempat dalam melakukan pembudidayaan tanaman hidroponik. */}
+                    {/* </p> */}
+
+                    {/* <h2 className="h2 bold">Hydroponics ?</h2> */}
+                    {/* <p> */}
+                    {/*   Hydroponics is a type of horticulture and a subset of hydroculture which involves growing plants without soil, by using mineral nutrient solutions in an aqueous solvent. */}
+                    {/*   We are a small team, yang bergerak di bidang pertanian khususnya pada hydroponic dengan memanfaatkan sentuhan teknologi untuk mempermudah pemeliharaan tanaman pada suatu perkebunan. */}
+                    {/* </p> */}
                   </div>
                 </Col>
               </Row>
@@ -235,8 +242,8 @@ const Home = () => {
                   <div className="text-left">
                     <h2 className="h2 bold">Creating a Better Hydroponics System</h2>
                     <p>
-                      Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
-                      Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                      Hydro X Tech comes with all the services that can help you to take care of your garden, from monitoring plant development, nutrition, water content to automatic control to balance the water content in the tank.
+                      {/* Hydro X Tech hadir dengan segala layanan yang dapat membantu anda untuk mengurus perkebunan, mulai dari monitoring perkembangan tanaman, nutrisi, kadar air hingga dapat melakukan kontrol otomatis untuk menyeimbangkan kadar air dalam tangki. */}
                     </p>
                   </div>
                 </Col>
@@ -270,8 +277,9 @@ const Home = () => {
                   <div className="text-left">
                     <h2 className="h2 bold">Grow your own plant</h2>
                     <p>
-                      Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
-                      Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                      Gardening is now made easier with Hydro X Tech, with no special knowledge is needed to start a hydroponics plantation, just let Hydro X Tech do the rest to maintain your garden automatically.
+                      {/* Berkebun menjadi lebih mudah dengan Hydro X Tech, tidak perlu adanya pengetahuan khusus untuk memulai perkebunan hydroponics, cukup biarkan Hydro X Tech yang melakukan sisanya untuk memelihara kebunmu secara otomatis. */}
+                      {/* Tidak perlu pengetahuan khusus untuk memulai perkebunan hydroponics dan dapat memanfaatkan lahan yang sempit untuk melakukan perkebunan hydroponic, dan menggunakan Hydro X Tech untuk melakukan pemeliharaan kebun secara otomatis. */}
                     </p>
                   </div>
                 </Col>
@@ -306,8 +314,8 @@ const Home = () => {
                 <Col xl={8} lg={8} md={8} sm={24} xs={24}>
                   <h3 className="bold h3">Short History</h3>
                   <p>
-                    Imagine you are a recruiter with hundreds or even thousands of applicants data to screen and process.
-                    Grow it yourselft, plant a farm Garden now. Gardening grows the spirit. Flowers feed the soul.
+                    We are a small team, which is engaged in agriculture, especially hydroponics, we use technology to facilitate automatic maintenance of a plantation and will increase the yield of better quality crops.
+                    {/* We are a small team, yang bergerak di bidang pertanian khususnya hydroponic, kita memanfaatkan teknologi untuk memudahkan pemeliharaan suatu perkebunan secara otomatis dan akan meningkatkan hasil kualitas panen menjadi lebih baik. */}
                   </p>
                 </Col>
 
@@ -321,7 +329,7 @@ const Home = () => {
                   </p>
                   <p>
                     <i className="fas fa-envelope"></i> Email:{" "}
-                    <a href="mailto:support@automatch.com">suardhanatugas@gmail.com</a>
+                    <a href="mailto:hydroxtech@gmail.com">hydroxtech@gmail.com</a>
                   </p>
                 </Col>
 

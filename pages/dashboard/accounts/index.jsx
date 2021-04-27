@@ -3,6 +3,7 @@ import { Layout, Tabs, Row, Col } from 'antd'
 
 import moment from 'moment'
 import Token from 'components/Accounts/Token'
+import Plant from 'components/Accounts/Plant'
 import Profile from 'components/Accounts/Profile'
 import Password from 'components/Accounts/Password'
 import pageStyle from 'components/Dashboard/pageStyle.js'
@@ -33,7 +34,7 @@ const Accounts = () => {
                 </Tabs.TabPane>
 
                 <Tabs.TabPane tab="Plant" key="4">
-                  Plant
+                  <Plant />
                 </Tabs.TabPane>
 
               </Tabs>
