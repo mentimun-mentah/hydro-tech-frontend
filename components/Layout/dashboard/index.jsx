@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { useDispatch } from 'react-redux'
 import { Layout, Menu, Grid } from 'antd'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createContext } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import Style from './style'
@@ -10,6 +10,10 @@ import * as actions from 'store/actions'
 
 const useBreakpoint = Grid.useBreakpoint
 const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS"
+
+export const WebSocketContext = createContext()
+
+let ws = {};
 
 const SidebarContainer = ({ children }) => {
   const router = useRouter()
@@ -28,6 +32,46 @@ const SidebarContainer = ({ children }) => {
     if(mounted && screens.xs) setCollapsed(true)
     else setCollapsed(false)
   }, [screens])
+
+  /*WEBSOCKET*/
+  const wsConnect = () => {
+    return false
+    let tkn =
+      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8";
+
+    let tkn2 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5NTQ3MjA4LCJuYmYiOjE2MTk1NDcyMDgsImp0aSI6IjBiZmFhODViLTcxZmQtNGE2OS05YzVkLWJjY2U3MTA2MTgxZSIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0N2M3ODcwYi1mZDk2LTQwZjYtYTBmYy1jZTkyYmMxYWQ2YTkifQ.XBQncUZojqtBLlqiup2xT7heyQSggaiMWu15RfomEJo";
+
+    // ws = new WebSocket(`ws://192.168.18.37:8000/dashboard/ws?token=${tkn2}`);
+    ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`);
+
+    ws.onopen = () => {
+      ws.send("Connected");
+      console.log("Connected");
+      ws.send(`kind:live_cam_false`);
+    };
+
+    ws.onclose = (e) => {
+      ws.close()
+      console.log("Layout Disconected.\nReconnect will be attempted in 1 second.", e.reason);
+      setTimeout(() => {
+        wsConnect()
+      }, 3000);
+    };
+
+    ws.onerror = (err) => {
+      console.error('Socket encountered error: ', err.message, 'Closing socket');
+      ws.close()
+    };
+  };
+  /*WEBSOCKET*/
+
+  /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
+  useEffect(() => {
+    if (ws.readyState !== 1) {
+      wsConnect();
+    }
+  }, []);
+  /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
 
   return(
     <>
@@ -158,7 +202,9 @@ const SidebarContainer = ({ children }) => {
           </div>
         </Layout.Sider>
         <Layout className="main-layout">
-          {children}
+          <WebSocketContext.Provider value={ws}>
+            {children}
+          </WebSocketContext.Provider>
         </Layout>
       </Layout>
 

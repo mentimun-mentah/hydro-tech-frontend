@@ -40,7 +40,7 @@ export const optionsPH = {
     tickAmount: 5,
   },
   xaxis: {
-    range: 5,
+    range: 21,
     type: 'datetime',
     labels: { show: false },
     axisTicks: { show: false },

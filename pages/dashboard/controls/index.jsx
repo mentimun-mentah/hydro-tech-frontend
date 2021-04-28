@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag } from 'antd'
 
-import { enterPressHandler } from 'lib/utility'
 import { formSetting } from 'formdata/controlSetting'
+import { deepCopy, enterPressHandler } from 'lib/utility'
 
 import moment from 'moment'
 import Image from 'next/image'
 import pageStyle from 'components/Dashboard/pageStyle.js'
+
+import { WebSocketContext } from 'components/Layout/dashboard'
 
 const PumpOn = '/static/images/pump-on.svg'
 const LampOn = '/static/images/lamp-on.svg'
@@ -16,7 +18,7 @@ const WaterPumpOn = '/static/images/water-pump-on.svg'
 const WaterPumpOff = '/static/images/water-pump-off.svg'
 
 const inputNumberProps = {
-  step: "0.1",
+  step: "0.01",
   min: 0,
   max: 10000,
   size: "large",
@@ -29,14 +31,18 @@ const switchInitialProps = {
 }
 
 const Controls = () => {
-  const [lampState, setLampState] = useState(false)
-  const [setting, setSetting] = useState(formSetting)
-  const [waterPumpState, setWaterPumpState] = useState(false)
-  const [isSystemSetting, setIsSystemSetting] = useState(false)
-  const [nutritionPump, setNutritionPump] = useState({ phUp: false, phDown: false, tds: false })
+  const ws = useContext(WebSocketContext)
+  console.log("## WebSocket", ws.readyState == 1 ? "Connected" : "Disconnect", "##", "\nfrom controls")
 
-  const { pu, pd, kp, kt, st } = setting
-  const { phUp, phDown, tds } = nutritionPump
+  const [isSending, setIsSending] = useState(false)
+  const [lamp, setLamp] = useState(false)
+  const [setting, setSetting] = useState(formSetting)
+  const [solenoid, setSolenoid] = useState(false)
+  const [isSystemSetting, setIsSystemSetting] = useState(false)
+  const [nutritionPump, setNutritionPump] = useState({ phup: false, phdown: false, nutrition: false })
+
+  const { phmax, phmin, tdsmin, phcal, tdscal, tankheight, tankmin } = setting
+  const { phup, phdown, nutrition } = nutritionPump
 
   /* INPUT CHANGE FUNCTION */
   const onChangeHandler = (e, item) => {
@@ -52,24 +58,91 @@ const Controls = () => {
   const onSubmitHandler = e => {
     e.preventDefault()
     let data = ""
-    if(pu.value !== "" && pu.value !== null) data += "pu:" + pu.value + ","
-    if(pd.value !== "" && pd.value !== null) data += "pd:" + pd.value + ","
-    if(kp.value !== "" && kp.value !== null) data += "kp:" + kp.value + ","
-    if(kt.value !== "" && kt.value !== null) data += "kt:" + kt.value + ","
-    if(st.value !== "" && st.value !== null) data += "st:" + st.value + ","
+    if(phmax.value !== "" && phmax.value !== null) data += "phmax:" + parseFloat(phmax.value).toFixed(2) + ","
+    if(phmin.value !== "" && phmin.value !== null) data += "phmin:" + parseFloat(phmin.value).toFixed(2) + ","
+    if(tdsmin.value !== "" && tdsmin.value !== null) data += "tdsmin:" + parseFloat(tdsmin.value).toFixed(2) + ","
+    if(phcal.value !== "" && phcal.value !== null) data += "phcal:" + parseFloat(phcal.value).toFixed(2) + ","
+    if(tdscal.value !== "" && tdscal.value !== null) data += "tdscal:" + parseFloat(tdscal.value).toFixed(2) + ","
+    if(tankheight.value !== "" && tankheight.value !== null) data += "tankheight:" + tankheight.value + ","
+    if(tankmin.value !== "" && tankmin.value !== null) data += "tankmin:" + tankmin.value + ","
 
     let checkData = data.slice(-1)
     // check if there is "," in the last of the string and will deleted
     if(checkData === ",") checkData = data.slice(0, -1)
     else checkData = data
 
-    console.log(`kind:set_value,${checkData}`)
+    if (ws && ws.send && ws.readyState == 1) {
+      setIsSending(true)
+      console.log(`SEND 1 = kind:set_hydro,${checkData}`)
+      ws.send(`kind:set_hydro,${checkData}`)
+      // setTimeout(() => {
+      //   console.log(`SEND 2 = kind:set_hydro,${checkData}`)
+      //   ws.send(`kind:set_hydro,${checkData}`)
+      // }, 4000)
+      setTimeout(() => {
+        setIsSending(false)
+      }, 10000)
+    }
+
   }
   /* SUBMIT FORM FUNCTION */
 
+  /*WEBSOCKET MESSAGE*/
+  if(ws && ws.readyState == 1) {
+    // kind:Hydro,ph:7.62,temp:24.56,tank:100,tds:421.93,ldr:bright,lamp:off,phup:off,phdown:on,nutrition:on,solenoid:off
+    ws.onmessage = (msg) => {
+      let obj = {}
+      let msgSplit = msg.data.split(",")
+
+      for(let val of msgSplit){
+        let newVal = val.split(":")
+        obj[newVal[0]] = newVal[1]
+      }
+
+      if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
+        console.log("ws message from controls", JSON.stringify(obj, null, 2))
+        const stateNutritionPump = deepCopy(nutritionPump)
+        const stateSolenoid = deepCopy(solenoid)
+        const stateLamp = deepCopy(lamp)
+        for(let val of Object.entries(obj)) {
+          if(stateNutritionPump[val[0]]) {
+            stateNutritionPump[val[0]] = val[1] == "on" ? true : false
+          }
+          if(stateLamp[val[0]]) {
+            stateLamp[val[0]] = val[1] == "on" ? true : false
+          }
+          if(stateSolenoid[val[0]]) {
+            stateSolenoid[val[0]] = val[1] == "on" ? true : false
+          }
+        }
+        setLamp(stateLamp)
+        setNutritionPump(stateNutritionPump)
+
+      }
+    }
+  }
+  /*WEBSOCKET MESSAGE*/
+
+  const onLampChange = val => {
+    if(ws && ws.send && ws.readyState == 1) {
+      setLamp(val)
+      ws.send(`kind:set_hydro,lamp:${val ? "on" : "off"}`)
+    }
+  }
+
+  const onSolenoidChange = val => {
+    if(ws && ws.send && ws.readyState == 1) {
+      setSolenoid(val)
+      ws.send(`kind:set_hydro,solenoid:${val ? "on" : "off"}`)
+    }
+  }
+
   /*NUTRITION PUMP HANDLER*/
-  const onNutritionPumpHandler = (e, item) => {
-    setNutritionPump({ ...nutritionPump, [item]: e })
+  const onNutritionPumpHandler = (val, item) => {
+    if(ws && ws.send && ws.readyState == 1) {
+      setNutritionPump({ ...nutritionPump, [item]: val })
+      ws.send(`kind:set_hydro,${item}:${val ? "on" : "off"}`)
+    }
   }
   /*NUTRITION PUMP HANDLER*/
 
@@ -90,12 +163,12 @@ const Controls = () => {
                   Lamp
                 </h2>
                 <div className="text-center items-center mt2">
-                  <Image className="p-t-5 p-b-5 p-l-5 p-r-5" width={100} height={100} src={lampState ? LampOn : LampOff} alt="lamp" />
+                  <Image className="p-t-5 p-b-5 p-l-5 p-r-5" width={100} height={100} src={lamp ? LampOn : LampOff} alt="lamp" />
                   <Row justify="space-around">
                     <Col span={24}>
-                      <Switch checked={lampState} onChange={val => setLampState(val)} />
+                      <Switch checked={lamp} onChange={onLampChange} />
                       <p className="mb0 mt1">
-                        {lampState ? "On" : "Off"}
+                        {lamp ? "On" : "Off"}
                       </p>
                     </Col>
                   </Row>
@@ -107,12 +180,12 @@ const Controls = () => {
               <Card className="radius1rem shadow1 h-100" bordered={false}>
                 <h2 className="h2 bold line-height-1">Nutrition Pump</h2>
                 <div className="text-center items-center">
-                  <Image width={100} height={100} src={(phUp || phDown || tds) ? PumpOn : PumpOff} alt="plant" />
+                  <Image width={100} height={100} src={(phup || phdown || nutrition) ? PumpOn : PumpOff} alt="plant" />
                   <Row justify="space-around">
                     <Col span={8}>
                       <Switch 
-                        checked={phUp} 
-                        onChange={e => onNutritionPumpHandler(e, "phUp")}
+                        checked={phup} 
+                        onChange={e => onNutritionPumpHandler(e, "phup")}
                         {...switchInitialProps}
                       />
                       <p className="mb0 mt1">
@@ -121,8 +194,8 @@ const Controls = () => {
                     </Col>
                     <Col span={8}>
                       <Switch
-                        checked={phDown}
-                        onChange={e => onNutritionPumpHandler(e, "phDown")}
+                        checked={phdown}
+                        onChange={e => onNutritionPumpHandler(e, "phdown")}
                         {...switchInitialProps}
                       />
                       <p className="mb0 mt1">
@@ -131,8 +204,8 @@ const Controls = () => {
                     </Col>
                     <Col span={8}>
                       <Switch
-                        checked={tds}
-                        onChange={e => onNutritionPumpHandler(e, "tds")}
+                        checked={nutrition}
+                        onChange={e => onNutritionPumpHandler(e, "nutrition")}
                         {...switchInitialProps}
                       />
                       <p className="mb0 mt1">
@@ -151,17 +224,17 @@ const Controls = () => {
                 </h2>
                 <div className="text-center items-center mt2">
                   <Image 
-                    alt="lamp" 
+                    alt="WaterPump" 
                     width={100}
                     height={100}
                     className="p-t-5 p-b-5 p-l-5 p-r-5"
-                    src={waterPumpState ? WaterPumpOn : WaterPumpOff}
+                    src={solenoid ? WaterPumpOn : WaterPumpOff}
                   />
                   <Row justify="space-around">
                     <Col span={24}>
-                      <Switch checked={waterPumpState} onChange={val => setWaterPumpState(val)} />
+                      <Switch checked={solenoid} onChange={onSolenoidChange} />
                       <p className="mb0 mt1">
-                        {waterPumpState ? "On" : "Off"}
+                        {solenoid ? "On" : "Off"}
                       </p>
                     </Col>
                   </Row>
@@ -197,8 +270,8 @@ const Controls = () => {
                           {...inputNumberProps}
                           disabled={isSystemSetting}
                           placeholder="PH Maximum"
-                          value={pu.value}
-                          onChange={e => onChangeHandler(e, "pu")}
+                          value={phmax.value}
+                          onChange={e => onChangeHandler(e, "phmax")}
                         />
                       </Form.Item>
                     </Col>
@@ -211,8 +284,8 @@ const Controls = () => {
                           {...inputNumberProps}
                           disabled={isSystemSetting}
                           placeholder="PH Minimum"
-                          value={pd.value}
-                          onChange={e => onChangeHandler(e, "pd")}
+                          value={phmin.value}
+                          onChange={e => onChangeHandler(e, "phmin")}
                         />
                       </Form.Item>
                     </Col>
@@ -226,8 +299,8 @@ const Controls = () => {
                           {...inputNumberProps}
                           disabled={isSystemSetting}
                           placeholder="TDS Minimum"
-                          value={st.value}
-                          onChange={e => onChangeHandler(e, "st")}
+                          value={tdsmin.value}
+                          onChange={e => onChangeHandler(e, "tdsmin")}
                         />
                       </Form.Item>
                     </Col>
@@ -240,8 +313,8 @@ const Controls = () => {
                         <InputNumber
                           {...inputNumberProps}
                           placeholder="PH Calibration"
-                          value={kp.value}
-                          onChange={e => onChangeHandler(e, "kp")}
+                          value={phcal.value}
+                          onChange={e => onChangeHandler(e, "phcal")}
                         />
                       </Form.Item>
                     </Col>
@@ -253,14 +326,34 @@ const Controls = () => {
                         <InputNumber
                           {...inputNumberProps}
                           placeholder="TDS Calibration"
-                          value={kt.value}
-                          onChange={e => onChangeHandler(e, "kt")}
+                          value={tdscal.value}
+                          onChange={e => onChangeHandler(e, "tdscal")}
                         />
                       </Form.Item>
                     </Col>
 
+                    <Col xl={12} lg={12} md={12} sm={24}>
+                      <Form.Item
+                        label="Water Tank Min"
+                        className="m-b-0"
+                      >
+                        <div className="ant-input-group-wrapper">
+                          <div className="ant-input-wrapper ant-input-group input-group-variant" style={{ zIndex: 1 }}>
+                            <InputNumber
+                              {...inputNumberProps}
+                              step={1}
+                              placeholder="Water Tank Min"
+                              className="w-100 bor-right-rad-0"
+                              value={tankmin.value}
+                              onChange={e => onChangeHandler(e, "tankmin")}
+                            />
+                            <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>
+                          </div>
+                        </div>
+                      </Form.Item>
+                    </Col>
 
-                    <Col xl={24} lg={24} md={24} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24}>
                       <Form.Item
                         label="Water Tank Height"
                         className="m-b-0"
@@ -272,6 +365,8 @@ const Controls = () => {
                               step={1}
                               placeholder="Water Tank Height"
                               className="w-100 bor-right-rad-0"
+                              value={tankheight.value}
+                              onChange={e => onChangeHandler(e, "tankheight")}
                             />
                             <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>
                           </div>
@@ -281,7 +376,13 @@ const Controls = () => {
 
                     <Col xl={24} lg={24} md={24} sm={24}>
                       <Form.Item className="m-b-0">
-                        <Button type="primary" size="large" className="p-l-30 p-r-30" onClick={onSubmitHandler}>
+                        <Button 
+                          type="primary"
+                          size="large"
+                          className="p-l-30 p-r-30"
+                          disabled={isSending || ws.readyState !== 1}
+                          onClick={onSubmitHandler}
+                        >
                           <b>Save</b>
                         </Button>
                       </Form.Item>

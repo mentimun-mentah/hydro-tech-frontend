@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Layout, Row, Col, Drawer, Grid, Form, Input } from 'antd'
+import { Layout, Row, Col, Drawer, Grid, Form, Input, Button } from 'antd'
 
 import moment from 'moment'
 import dynamic from 'next/dynamic'
@@ -43,6 +43,8 @@ const Plants = () => {
     let mounted = true
     if(mounted && screens.xs) setIsMobile(true)
     else setIsMobile(false)
+
+    return () => mounted = false
   }, [screens])
 
   return (
@@ -96,6 +98,19 @@ const Plants = () => {
           backgroundPosition: 'center bottom -100px',
           backgroundRepeat: 'no-repeat',
         }}
+        footer={
+          <div style={{ textAlign: 'center' }}>
+            <motion.div
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98, y: 0 }}
+            >
+              <Button block onClick={onCloseDrawer} type="primary" size="large">
+                Plant Now!
+              </Button>
+            </motion.div>
+          </div>
+        }
+        footerStyle={{ position: 'absolute', bottom: '0', width: '100%', borderTopWidth: 0 }}
       >
         <section className="mb3">
           <h1 className="bold h2">Bayam</h1>
