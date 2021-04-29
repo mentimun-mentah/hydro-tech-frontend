@@ -5,6 +5,7 @@ import Layout from 'components/Layout'
 import withReduxStore from 'lib/with-redux-store'
 
 import 'antd/dist/antd.css'
+import 'antd-button-color/dist/css/style.css'
 
 const App = ({ Component, pageProps, store }) => {
   return (

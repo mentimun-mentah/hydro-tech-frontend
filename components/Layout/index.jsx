@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useDispatch } from 'react-redux'
 
 import AuthLayout from './Auth'
+import HomeLayout from './home'
 import DasboardLayout from './dashboard'
 import * as actions from 'store/actions'
 
@@ -11,6 +12,7 @@ const Layout = ({ children }) => {
   const router = useRouter()
   const dispatch = useDispatch()
 
+  const isHome = router.pathname.startsWith('/') || router.pathname.startsWith('/blog')
   const isAuth = router.pathname.startsWith('/auth') || router.pathname.startsWith('/password-reset')
   const isDashboard = router.pathname.startsWith('/dashboard')
 
@@ -23,6 +25,7 @@ const Layout = ({ children }) => {
   }, [parseCookies])
 
   let layout = <>{children}</>
+  if(isHome) layout = <HomeLayout>{children}</HomeLayout>
   if(isDashboard) layout = <DasboardLayout>{children}</DasboardLayout>
   if(isAuth) layout = <AuthLayout>{children}</AuthLayout>
 

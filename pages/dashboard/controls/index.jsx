@@ -1,14 +1,13 @@
 import { useState, useContext } from 'react'
 import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag } from 'antd'
 
+import { enterPressHandler } from 'lib/utility'
 import { formSetting } from 'formdata/controlSetting'
-import { deepCopy, enterPressHandler } from 'lib/utility'
+import { WebSocketContext } from 'components/Layout/dashboard'
 
 import moment from 'moment'
 import Image from 'next/image'
 import pageStyle from 'components/Dashboard/pageStyle.js'
-
-import { WebSocketContext } from 'components/Layout/dashboard'
 
 const PumpOn = '/static/images/pump-on.svg'
 const LampOn = '/static/images/lamp-on.svg'
@@ -32,17 +31,28 @@ const switchInitialProps = {
 
 const Controls = () => {
   const ws = useContext(WebSocketContext)
-  console.log("## WebSocket", ws.readyState == 1 ? "Connected" : "Disconnect", "##", "\nfrom controls")
+  // console.log("## WebSocket", ws.readyState == 1 ? "Connected" : "Disconnect", "##", "\nfrom controls")
 
   const [isSending, setIsSending] = useState(false)
-  const [lamp, setLamp] = useState(false)
   const [setting, setSetting] = useState(formSetting)
+  const [isSystemSetting, setIsSystemSetting] = useState(true)
+
+  const [lamp, setLamp] = useState(false)
+  const [forceLamp, setForceLamp] = useState(false)
+
   const [solenoid, setSolenoid] = useState(false)
-  const [isSystemSetting, setIsSystemSetting] = useState(false)
-  const [nutritionPump, setNutritionPump] = useState({ phup: false, phdown: false, nutrition: false })
+  const [forceSolenoid, setForceSolenoid] = useState(false)
+
+  const [phup, setPhup] = useState(false)
+  const [forcePhup, setForcePhup] = useState(false)
+
+  const [phdown, setPhdown] = useState(false)
+  const [forcePhdown, setForcePhdown] = useState(false)
+
+  const [nutrition, setNutrition] = useState(false)
+  const [forceNutrition, setForceNutrition] = useState(false)
 
   const { phmax, phmin, tdsmin, phcal, tdscal, tankheight, tankmin } = setting
-  const { phup, phdown, nutrition } = nutritionPump
 
   /* INPUT CHANGE FUNCTION */
   const onChangeHandler = (e, item) => {
@@ -73,15 +83,8 @@ const Controls = () => {
 
     if (ws && ws.send && ws.readyState == 1) {
       setIsSending(true)
-      console.log(`SEND 1 = kind:set_hydro,${checkData}`)
-      ws.send(`kind:set_hydro,${checkData}`)
-      // setTimeout(() => {
-      //   console.log(`SEND 2 = kind:set_hydro,${checkData}`)
-      //   ws.send(`kind:set_hydro,${checkData}`)
-      // }, 4000)
-      setTimeout(() => {
-        setIsSending(false)
-      }, 10000)
+      ws.send(`${checkData},kind:set_hydro`)
+      console.log(`SEND 1\n${checkData},kind:set_hydro`)
     }
 
   }
@@ -91,6 +94,7 @@ const Controls = () => {
   if(ws && ws.readyState == 1) {
     // kind:Hydro,ph:7.62,temp:24.56,tank:100,tds:421.93,ldr:bright,lamp:off,phup:off,phdown:on,nutrition:on,solenoid:off
     ws.onmessage = (msg) => {
+      console.log(msg.data)
       let obj = {}
       let msgSplit = msg.data.split(",")
 
@@ -100,51 +104,92 @@ const Controls = () => {
       }
 
       if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
-        console.log("ws message from controls", JSON.stringify(obj, null, 2))
-        const stateNutritionPump = deepCopy(nutritionPump)
-        const stateSolenoid = deepCopy(solenoid)
-        const stateLamp = deepCopy(lamp)
-        for(let val of Object.entries(obj)) {
-          if(stateNutritionPump[val[0]]) {
-            stateNutritionPump[val[0]] = val[1] == "on" ? true : false
-          }
-          if(stateLamp[val[0]]) {
-            stateLamp[val[0]] = val[1] == "on" ? true : false
-          }
-          if(stateSolenoid[val[0]]) {
-            stateSolenoid[val[0]] = val[1] == "on" ? true : false
-          }
-        }
-        setLamp(stateLamp)
-        setNutritionPump(stateNutritionPump)
+        
+        if(obj.phup && !forcePhup) setPhup(obj.phup == "on" ? true : false)
+
+        if(obj.lamp && !forceLamp) setLamp(obj.lamp == "on" ? true : false)
+
+        if(obj.phdown && !forcePhdown) setPhdown(obj.phdown == "on" ? true : false)
+
+        if(obj.solenoid && !forceSolenoid) setSolenoid(obj.solenoid == "on" ? true : false)
+
+        if(obj.nutrition && !forceNutrition) setNutrition(obj.nutrition == "on" ? true : false)
+
+        setTimeout(() => {
+          setIsSending(false)
+        }, 2000)
 
       }
     }
   }
   /*WEBSOCKET MESSAGE*/
 
+  const sendWsHandler = (data) => { ws.send(data) }
+
   const onLampChange = val => {
     if(ws && ws.send && ws.readyState == 1) {
       setLamp(val)
-      ws.send(`kind:set_hydro,lamp:${val ? "on" : "off"}`)
+      setIsSending(true)
+
+      const data = `lamp:${val?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
+      sendWsHandler(data)
+
+      if(!lamp) setForceLamp(val)
+      else setForceLamp(val)
     }
   }
 
   const onSolenoidChange = val => {
     if(ws && ws.send && ws.readyState == 1) {
       setSolenoid(val)
-      ws.send(`kind:set_hydro,solenoid:${val ? "on" : "off"}`)
+      setIsSending(true)
+
+      const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${val?"on":"off"},kind:set_hydro`
+      sendWsHandler(data)
+
+      if(!solenoid) setForceSolenoid(val)
+      else setForceSolenoid(val)
     }
   }
 
-  /*NUTRITION PUMP HANDLER*/
-  const onNutritionPumpHandler = (val, item) => {
+  const onPhupChange = val => {
     if(ws && ws.send && ws.readyState == 1) {
-      setNutritionPump({ ...nutritionPump, [item]: val })
-      ws.send(`kind:set_hydro,${item}:${val ? "on" : "off"}`)
+      setPhup(val)
+      setIsSending(true)
+
+      const data = `lamp:${lamp?"on":"off"},phup:${val?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
+      sendWsHandler(data)
+
+      if(!phup) setForcePhup(val)
+      else setForcePhup(val)
     }
   }
-  /*NUTRITION PUMP HANDLER*/
+
+  const onPhdownChange = val => {
+    if(ws && ws.send && ws.readyState == 1) {
+      setPhdown(val)
+      setIsSending(true)
+
+      const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${val?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
+      sendWsHandler(data)
+
+      if(!phdown) setForcePhdown(val)
+      else setForcePhdown(val)
+    }
+  }
+
+  const onNutritionChange = val => {
+    if(ws && ws.send && ws.readyState == 1) {
+      setNutrition(val)
+      setIsSending(true)
+
+      const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${val?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
+      sendWsHandler(data)
+
+      if(!nutrition) setForceNutrition(val)
+      else setForceNutrition(val)
+    }
+  }
 
   return(
     <>
@@ -166,7 +211,11 @@ const Controls = () => {
                   <Image className="p-t-5 p-b-5 p-l-5 p-r-5" width={100} height={100} src={lamp ? LampOn : LampOff} alt="lamp" />
                   <Row justify="space-around">
                     <Col span={24}>
-                      <Switch checked={lamp} onChange={onLampChange} />
+                      <Switch 
+                        checked={lamp} 
+                        onChange={onLampChange} 
+                        disabled={isSending}
+                      />
                       <p className="mb0 mt1">
                         {lamp ? "On" : "Off"}
                       </p>
@@ -185,7 +234,8 @@ const Controls = () => {
                     <Col span={8}>
                       <Switch 
                         checked={phup} 
-                        onChange={e => onNutritionPumpHandler(e, "phup")}
+                        disabled={isSending}
+                        onChange={onPhupChange}
                         {...switchInitialProps}
                       />
                       <p className="mb0 mt1">
@@ -195,7 +245,8 @@ const Controls = () => {
                     <Col span={8}>
                       <Switch
                         checked={phdown}
-                        onChange={e => onNutritionPumpHandler(e, "phdown")}
+                        disabled={isSending}
+                        onChange={onPhdownChange}
                         {...switchInitialProps}
                       />
                       <p className="mb0 mt1">
@@ -205,7 +256,8 @@ const Controls = () => {
                     <Col span={8}>
                       <Switch
                         checked={nutrition}
-                        onChange={e => onNutritionPumpHandler(e, "nutrition")}
+                        disabled={isSending}
+                        onChange={onNutritionChange}
                         {...switchInitialProps}
                       />
                       <p className="mb0 mt1">
@@ -232,7 +284,11 @@ const Controls = () => {
                   />
                   <Row justify="space-around">
                     <Col span={24}>
-                      <Switch checked={solenoid} onChange={onSolenoidChange} />
+                      <Switch 
+                        checked={solenoid} 
+                        onChange={onSolenoidChange} 
+                        disabled={isSending} 
+                      />
                       <p className="mb0 mt1">
                         {solenoid ? "On" : "Off"}
                       </p>
@@ -334,27 +390,6 @@ const Controls = () => {
 
                     <Col xl={12} lg={12} md={12} sm={24}>
                       <Form.Item
-                        label="Water Tank Min"
-                        className="m-b-0"
-                      >
-                        <div className="ant-input-group-wrapper">
-                          <div className="ant-input-wrapper ant-input-group input-group-variant" style={{ zIndex: 1 }}>
-                            <InputNumber
-                              {...inputNumberProps}
-                              step={1}
-                              placeholder="Water Tank Min"
-                              className="w-100 bor-right-rad-0"
-                              value={tankmin.value}
-                              onChange={e => onChangeHandler(e, "tankmin")}
-                            />
-                            <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>
-                          </div>
-                        </div>
-                      </Form.Item>
-                    </Col>
-
-                    <Col xl={12} lg={12} md={12} sm={24}>
-                      <Form.Item
                         label="Water Tank Height"
                         className="m-b-0"
                       >
@@ -367,6 +402,27 @@ const Controls = () => {
                               className="w-100 bor-right-rad-0"
                               value={tankheight.value}
                               onChange={e => onChangeHandler(e, "tankheight")}
+                            />
+                            <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>
+                          </div>
+                        </div>
+                      </Form.Item>
+                    </Col>
+
+                    <Col xl={12} lg={12} md={12} sm={24}>
+                      <Form.Item
+                        label="Water Tank Minimum"
+                        className="m-b-0"
+                      >
+                        <div className="ant-input-group-wrapper">
+                          <div className="ant-input-wrapper ant-input-group input-group-variant" style={{ zIndex: 1 }}>
+                            <InputNumber
+                              {...inputNumberProps}
+                              step={1}
+                              placeholder="Water Tank Min"
+                              className="w-100 bor-right-rad-0"
+                              value={tankmin.value}
+                              onChange={e => onChangeHandler(e, "tankmin")}
                             />
                             <span className="ant-input-group-addon bor-right-rad-05rem">cm</span>
                           </div>

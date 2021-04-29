@@ -1,18 +1,19 @@
 import { withAuth } from "lib/withAuth";
+import { useRouter } from "next/router";
 import { Joystick } from "react-joystick-component";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
-import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage } from "antd";
+import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage, Steps } from "antd";
 
 import { optionsPH } from "components/Dashboard/apexOption";
 import { WebSocketContext } from 'components/Layout/dashboard';
 import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData, } from "components/Dashboard/apexOption";
 
 import moment from "moment";
-import nookies from "nookies";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import pageStyle from "components/Dashboard/pageStyle.js";
+import SetupProfileModal from 'components/Dashboard/SetupProfileModal'
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -29,23 +30,38 @@ const max_width_height = 90;
 const DAY = "DAY", WEEK = "WEEK";
 const useBreakpoint = Grid.useBreakpoint;
 const initDataSeries = [{ name: "pH", data: [] }];
-const initStatistic = { kind: "", sh: "0", tds: "0", ldr: "0", ta: "0", ph: "0", };
 const initialStatistic = { temp: "0", tank: "0", tds: "0", ldr: "bright", ph: "0", };
 
+const steps = [ { title: 'Plant', }, { title: 'Camera', }, { title: 'Token', }, { title: 'Control', }, { title: 'Finish', } ];
+
 const Dashboard = () => {
+  const router = useRouter();
   const screens = useBreakpoint();
   const ws = useContext(WebSocketContext)
+
+  const [current, setCurrent] = useState(0)
+  const [plantSelected, setPlantSelected] = useState("")
+  const [showModalSetup, setShowModalSetup] = useState(false)
 
   const [image, setImage] = useState("");
   const [heightPh, setHeightPh] = useState(465);
   const [showModalCam, setShowModalCam] = useState(false);
   const [seriesPh, setSeriesPh] = useState(initDataSeries);
-  // const [statistic, setStatistic] = useState([initStatistic]);
   const [statistic, setStatistic] = useState([initialStatistic]);
   const [size, setSize] = useState({ imgWidth1: 100, imgWidth2: 120, imgWidth3: 140, });
 
   const statisticLength = statistic.length;
   const { imgWidth1, imgWidth2, imgWidth3 } = size;
+
+  const onStepChange = val => {
+    setCurrent(val)
+    if(val == 4) {
+      setTimeout(() => {
+        setShowModalSetup(false)
+        router.push('/dashboard/controls')
+      }, 1500)
+    }
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -57,37 +73,6 @@ const Dashboard = () => {
 
     return () => mounted = false
   }, [screens]);
-
-  // useEffect(() => {
-  //   return false
-  //   const interval = setInterval(() => {
-  //     const ph = (Math.random() * (15 - 7) + 1 + 7).toFixed(2); //power of hydrogen
-  //     const ta = Math.floor(Math.random() * (98 - 70) + 1 + 70).toString(); //tinggi air
-  //     const sh = Math.floor(Math.random() * (30 - 26) + 1 + 26).toString(); //suhu
-  //     const ldr = Math.floor(Math.random() * (600 - 500) + 1 + 500).toString(); //cahaya
-  //     const tds = Math.floor(Math.random() * (1000 - 800) + 1 + 800).toString(); //nutrisi
-
-  //     const dataFromArduino = { kind: "IoT", sh: sh, tds: tds, ldr: ldr, ta: ta, ph: ph, };
-
-  //     if (dataFromArduino.hasOwnProperty("kind") && dataFromArduino.kind.toLowerCase() === "iot") {
-  //       setStatistic((oldState) => [...oldState, dataFromArduino]);
-
-  //       const x = Math.floor(new Date().getTime() / 1000);
-  //       const y = +dataFromArduino["ph"];
-
-  //       let { data } = seriesPh[0];
-  //       data.push({ x, y });
-  //       setSeriesPh([{ ...seriesPh[0], data }]);
-
-  //       if (ApexCharts && ApexCharts.exec) {
-  //         ApexCharts && ApexCharts.exec && ApexCharts.exec("realtime", "updateSeries", seriesPh);
-  //       }
-  //     }
-  //   }, 7000);
-
-  //   return () => clearInterval(interval);
-  // }, []);
-
 
   if(ws && ws.readyState == 1) {
     let urlObject;
@@ -424,6 +409,34 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
+      <Modal
+        centered
+        title={" "}
+        zIndex="1030"
+        footer={null}
+        maskClosable={false}
+        closable={false}
+        visible={showModalSetup}
+        className="modal-setting-profile noselect"
+        maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+      >
+        <Row justify="center">
+          <Col xl={18} lg={18} md={20} sm={24} xs={24}>
+            <Steps current={current} size="small" className="mb2">
+              {steps.map(item => (
+                <Steps.Step key={item.title} title={item.title} />
+              ))}
+            </Steps>
+          </Col>
+        </Row>
+        <SetupProfileModal
+          current={current}
+          onStepChange={onStepChange}
+          plantSelected={plantSelected}
+          setPlantSelected={setPlantSelected}
+        />
+      </Modal>
+
       <style jsx>{pageStyle}</style>
       <style jsx>{`
         :global(.joystick-container > div) {
@@ -478,6 +491,26 @@ const Dashboard = () => {
           display: flex;
           flex-direction: column;
           height: 100%;
+        }
+
+
+        :global(.modal-setting-profile.ant-modal) {
+          height: 100vh!important;
+          width: 100vw!important;
+          max-width: 100vw!important;
+          padding-bottom: 0px;
+          margin: 0px auto;
+        }
+        :global(.modal-setting-profile.ant-modal .ant-modal-content) {
+          height: 100vh!important;
+        }
+        :global(.modal-setting-profile.ant-modal .ant-modal-content .ant-modal-header) {
+          padding: 0px;
+          border-bottom: 0px solid transparent;
+        }
+        :global(.modal-setting-profile.ant-modal .ant-modal-content .ant-modal-body) {
+          height: 100vh;
+          max-height: 100vh;
         }
       `}</style>
     </>

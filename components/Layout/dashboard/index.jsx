@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router'
 import { useDispatch } from 'react-redux'
 import { Layout, Menu, Grid } from 'antd'
-import { useState, useEffect, createContext } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useState, useEffect, createContext } from 'react'
 
 import Style from './style'
 import SplitText from './SplitText'
@@ -21,6 +21,7 @@ const SidebarContainer = ({ children }) => {
   const screens = useBreakpoint()
 
   const [collapsed, setCollapsed] = useState(false)
+  const [selected, setSelected] = useState(DASHBOARD)
 
   const onLogoutHandler = () => {
     dispatch(actions.logout())
@@ -35,7 +36,6 @@ const SidebarContainer = ({ children }) => {
 
   /*WEBSOCKET*/
   const wsConnect = () => {
-    return false
     let tkn =
       "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8";
 
@@ -49,6 +49,12 @@ const SidebarContainer = ({ children }) => {
       console.log("Connected");
       ws.send(`kind:live_cam_false`);
     };
+
+    console.log(ws)
+
+    ws.onmessage = (msg) => {
+      console.log(msg.data)
+    }
 
     ws.onclose = (e) => {
       ws.close()
@@ -72,6 +78,11 @@ const SidebarContainer = ({ children }) => {
     }
   }, []);
   /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
+
+  useEffect(() => {
+    const data = router.pathname.split("/")[router.pathname.split("/").length - 1].toUpperCase()
+    setSelected(data)
+  }, [router])
 
   return(
     <>
@@ -140,7 +151,7 @@ const SidebarContainer = ({ children }) => {
               theme="light" 
               inlineIndent={15} 
               className="ant-menu-scroll"
-              defaultSelectedKeys={[router.pathname.split("/")[router.pathname.split("/").length - 1].toUpperCase()]}
+              selectedKeys={[selected]}
             >
               <Menu.Item 
                 key={HOME} 

@@ -82,6 +82,10 @@ body {
   border-color: var(--grey-0)!important;
 }
 
+.ant-btn-background-ghost.ant-btn-primary {
+  color: var(--purple)!important;
+}
+
 .ant-btn-primary {
   background: var(--purple)!important;
   border-color: var(--purple)!important;
@@ -239,6 +243,16 @@ body {
 
 .vertical-align-middle {
   vertical-align: middle!important;
+}
+
+.bor-right-rad-0 {
+  border-top-right-radius: 0!important;
+  border-bottom-right-radius: 0!important;
+}
+
+.bor-left-rad-0 {
+  border-top-left-radius: 0!important;
+  border-bottom-left-radius: 0!important;
 }
 
 .form-text {
