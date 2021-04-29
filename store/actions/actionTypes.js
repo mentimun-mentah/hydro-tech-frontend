@@ -9,3 +9,8 @@ export const GET_IOT_TOKEN_FAIL    = "GET_IOT_TOKEN_FAIL";
 
 // AUTH
 export const AUTH_LOGOUT = "AUTH_LOGOUT";
+
+// PLANT
+export const GET_PLANT_START   = "GET_PLANT_START";
+export const GET_PLANT_SUCCESS = "GET_PLANT_SUCCESS";
+export const GET_PLANT_FAIL    = "GET_PLANT_FAIL";

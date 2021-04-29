@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Layout, Card, Row, Col, Image, Drawer, Grid, Form, Input } from 'antd'
+import { Layout, Row, Col, Drawer, Grid, Form, Input, Button, Modal, Space, Select } from 'antd'
 
+import React from 'react'
 import moment from 'moment'
+import Image from 'next/image'
+import Reward from 'react-rewards'
+import dynamic from 'next/dynamic'
 import Pagination from 'components/Pagination'
 import pageStyle from 'components/Dashboard/pageStyle.js'
+import PlantCardLoading from 'components/Card/PlantLoading'
+
+const PlantCardLoadingMemo = React.memo(PlantCardLoading)
+
+const PlantCard = dynamic(() => import('components/Card/Plant'), { ssr: false, loading: () => <PlantCardLoadingMemo />  })
 
 const useBreakpoint = Grid.useBreakpoint
+const Badge = '/static/images/badge.svg'
 const Sprout = '/static/images/sprout.svg'
 const Bayam = '/static/images/plant/bayam.png'
 const Kailan = '/static/images/plant/kailan-2.png'
@@ -25,9 +35,11 @@ const plantList = [
 ]
 
 const Plants = () => {
+  const reward = useRef()
   const screens = useBreakpoint()
 
   const [isMobile, setIsMobile] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   const [visibleDrawer, setVisibleDrawer] = useState(false)
 
   const onShowDrawer = () => setVisibleDrawer(true)
@@ -37,7 +49,16 @@ const Plants = () => {
     let mounted = true
     if(mounted && screens.xs) setIsMobile(true)
     else setIsMobile(false)
+
+    return () => mounted = false
   }, [screens])
+
+  const onCongratsHandler = () => {
+    setShowModal(true)
+    setTimeout(() => {
+      reward.current.rewardMe();
+    }, 1000)
+  }
 
   return (
     <>
@@ -48,7 +69,7 @@ const Plants = () => {
 
       <Form layout="vertical">
         <Row gutter={[20, 20]}>
-          <Col lg={10} md={10} sm={12} xs={24}>
+          <Col lg={12} md={12} sm={12} xs={24}>
             <Form.Item className="">
               <Input
                 size="large"
@@ -57,8 +78,43 @@ const Plants = () => {
               />
             </Form.Item>
           </Col>
+          <Col lg={12} md={12} sm={12} xs={24}>
+            <Form.Item className="">
+              <Space className="space-w-100 w-100">
+                <span>Difficulty: </span>
+                <Select 
+                  size="large"
+                  defaultValue="simple"
+                  placeholder="Difficulty"
+                  className="w-100"
+                >
+                  <Select.Option value="simple">Easy</Select.Option>
+                  <Select.Option value="medium">Medium</Select.Option>
+                  <Select.Option value="hard">Hard</Select.Option>
+                </Select>
+              </Space>
+            </Form.Item>
+          </Col>
         </Row>
       </Form>
+
+      <Reward
+        type="confetti"
+        ref={ref => { reward.current = ref; }}
+        config={{
+          fakingRequest: false,
+          angle: 360,
+          decay: 0.80,
+          spread: 360,
+          startVelocity: 100,
+          elementCount: 256,
+          elementSize: 8,
+          lifetime: 260,
+          zIndex: 3100,
+          springAnimation: true
+        }}
+      >
+      </Reward>
 
       <Layout>
         <Layout.Content>
@@ -66,26 +122,12 @@ const Plants = () => {
             <Row gutter={[20, 20]}>
               {plantList.map((plant, i) => (
                 <Col lg={8} md={8} sm={12} xs={24} key={i}>
-                  <Card bordered={false} className="radius1rem shadow1 h-100">
-                    <motion.div
-                      key={i}
-                      whileHover={{ y: -4 }}
-                      whileTap={{ scale: 0.98, y: 0 }}
-                      className="hover-pointer"
-                      onClick={onShowDrawer}
-                    >
-                      <div className="text-right">
-                        <Image src={plant.image} preview={false} alt="plant" />
-                      </div>
-                      <div className="text-center items-center text-grey">
-                        <h2 className="h2 bold mb1 line-height-1">
-                          {plant.name}
-                        </h2>
-                        <p className="mb0 mt1">16 Weeks</p>
-                        <p className="mb0">Difficutly level <b className="text-orange">Simple</b></p>
-                      </div>
-                    </motion.div>
-                  </Card>
+                  <PlantCard 
+                    plant={plant}
+                    onShow={onShowDrawer}
+                    ongoing={i == 2}
+                    onCongrats={i == 2 ? onCongratsHandler : () => {}}
+                  />
                 </Col>
               ))}
 
@@ -109,6 +151,19 @@ const Plants = () => {
           backgroundPosition: 'center bottom -100px',
           backgroundRepeat: 'no-repeat',
         }}
+        footer={
+          <div style={{ textAlign: 'center' }}>
+            <motion.div
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98, y: 0 }}
+            >
+              <Button block onClick={onCloseDrawer} type="primary" size="large">
+                Plant Now!
+              </Button>
+            </motion.div>
+          </div>
+        }
+        footerStyle={{ position: 'absolute', bottom: '0', width: '100%', borderTopWidth: 0 }}
       >
         <section className="mb3">
           <h1 className="bold h2">Bayam</h1>
@@ -137,8 +192,27 @@ const Plants = () => {
         </section>
       </Drawer>
 
+      <Modal
+        centered
+        visible={showModal}
+        zIndex={3000}
+        width={416}
+        closable={false}
+        footer={null}
+        className="modal-modif noselect text-center"
+        closeIcon={<i className="fas fa-times" />}
+        maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+      >
+        <div className="text-dark text-center">
+          <Image src={Badge} width={150} height={150} alt="badge" />
+          <h3 className="mb-3 h3 bold">Congratulation</h3>
+          <p>You already finished growing lecctue</p>
+          <Button className="btn-white" onClick={() => setShowModal(false)}>Okay</Button>
+        </div>
+      </Modal>
+
       <AnimatePresence>
-        {visibleDrawer && (
+        {(visibleDrawer || showModal) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -153,6 +227,10 @@ const Plants = () => {
       <style jsx>{`
         .text-shadow-detail{
           text-shadow: 1px 1px 2px #fff;
+        }
+        
+        :global(.space-w-100 .ant-space-item:last-of-type){
+          width: 100%;
         }
       `}</style>
     </>

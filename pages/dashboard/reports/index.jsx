@@ -75,7 +75,7 @@ const Reports = () => {
                     </Timeline>
                   </Tabs.TabPane>
 
-                  <Tabs.TabPane tab="Stats" key="2">
+                  <Tabs.TabPane tab="Growth Plant" key="2">
                     <div className="flex justify-between">
                       <p></p>
                       <Radio.Group 

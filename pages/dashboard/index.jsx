@@ -1,22 +1,19 @@
 import { withAuth } from "lib/withAuth";
-import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import { Joystick } from "react-joystick-component";
 import { AnimatePresence, motion } from "framer-motion";
-import { Layout, Card, Row, Col, Image, Tag, Modal, Grid } from "antd";
+import { useState, useEffect, useContext } from "react";
+import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage, Steps } from "antd";
 
-// import { ws, wsConnect } from 'lib/wsConfig'
 import { optionsPH } from "components/Dashboard/apexOption";
-import {
-  seriesDayGrowth,
-  optionsDayGrowthData,
-  seriesWeekGrowth,
-  optionsWeekGrowthData,
-} from "components/Dashboard/apexOption";
+import { WebSocketContext } from 'components/Layout/dashboard';
+import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData, } from "components/Dashboard/apexOption";
 
 import moment from "moment";
-import nookies from "nookies";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import pageStyle from "components/Dashboard/pageStyle.js";
+import SetupProfileModal from 'components/Dashboard/SetupProfileModal'
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -30,132 +27,91 @@ const Lecttuce = "/static/images/plant/lecttuce.png";
 const Temperature = "/static/images/temperature.gif";
 
 const max_width_height = 90;
-const DAY = "DAY",
-  WEEK = "WEEK";
+const DAY = "DAY", WEEK = "WEEK";
 const useBreakpoint = Grid.useBreakpoint;
 const initDataSeries = [{ name: "pH", data: [] }];
-const initStatistic = {
-  kind: "",
-  sh: "0",
-  tds: "0",
-  ldr: "0",
-  ta: "0",
-  ph: "0",
-};
+const initialStatistic = { temp: "0", tank: "0", tds: "0", ldr: "bright", ph: "0", };
 
-let ws = {};
+const steps = [ { title: 'Plant', }, { title: 'Camera', }, { title: 'Token', }, { title: 'Control', }, { title: 'Finish', } ];
 
 const Dashboard = () => {
+  const router = useRouter();
   const screens = useBreakpoint();
+  const ws = useContext(WebSocketContext)
+
+  const [current, setCurrent] = useState(0)
+  const [plantSelected, setPlantSelected] = useState("")
+  const [showModalSetup, setShowModalSetup] = useState(false)
 
   const [image, setImage] = useState("");
   const [heightPh, setHeightPh] = useState(465);
   const [showModalCam, setShowModalCam] = useState(false);
   const [seriesPh, setSeriesPh] = useState(initDataSeries);
-  const [statistic, setStatistic] = useState([initStatistic]);
-  const [size, setSize] = useState({
-    imgWidth1: 100,
-    imgWidth2: 120,
-    imgWidth3: 140,
-  });
+  const [statistic, setStatistic] = useState([initialStatistic]);
+  const [size, setSize] = useState({ imgWidth1: 100, imgWidth2: 120, imgWidth3: 140, });
 
   const statisticLength = statistic.length;
   const { imgWidth1, imgWidth2, imgWidth3 } = size;
+
+  const onStepChange = val => {
+    setCurrent(val)
+    if(val == 4) {
+      setTimeout(() => {
+        setShowModalSetup(false)
+        router.push('/dashboard/controls')
+      }, 1500)
+    }
+  }
 
   useEffect(() => {
     let mounted = true;
     if (mounted && !screens.lg) setHeightPh(265);
     else setHeightPh(465);
 
-    if (mounted && screens.xs)
-      setSize({ ...size, imgWidth1: 80, imgWidth2: 100, imgWidth3: 120 });
+    if (mounted && screens.xs) setSize({ ...size, imgWidth1: 80, imgWidth2: 100, imgWidth3: 120 });
     else setSize({ ...size, imgWidth1: 100, imgWidth2: 120, imgWidth3: 140 });
+
+    return () => mounted = false
   }, [screens]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const ph = (Math.random() * (15 - 7) + 1 + 7).toFixed(2); //power of hydrogen
-      const ta = Math.floor(Math.random() * (98 - 70) + 1 + 70).toString(); //tinggi air
-      const sh = Math.floor(Math.random() * (30 - 26) + 1 + 26).toString(); //suhu
-      const ldr = Math.floor(Math.random() * (600 - 500) + 1 + 500).toString(); //cahaya
-      const tds = Math.floor(Math.random() * (1000 - 800) + 1 + 800).toString(); //nutrisi
-
-      const dataFromArduino = {
-        kind: "IoT",
-        sh: sh,
-        tds: tds,
-        ldr: ldr,
-        ta: ta,
-        ph: ph,
-      };
-
-      if (
-        dataFromArduino.hasOwnProperty("kind") &&
-        dataFromArduino.kind.toLowerCase() === "iot"
-      ) {
-        setStatistic((oldState) => [...oldState, dataFromArduino]);
-
-        const x = Math.floor(new Date().getTime() / 1000);
-        const y = +dataFromArduino["ph"];
-
-        let { data } = seriesPh[0];
-        data.push({ x, y });
-        setSeriesPh([{ ...seriesPh[0], data }]);
-
-        if (ApexCharts && ApexCharts.exec) {
-          ApexCharts &&
-            ApexCharts.exec &&
-            ApexCharts.exec("realtime", "updateSeries", seriesPh);
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const wsConnect = () => {
-    // const cookies = nookies.get()
-    // ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`)
-    // return false;
-    let tkn =
-      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8";
-    ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`);
-
-    ws.onopen = () => {
-      ws.send("Connected");
-      console.log("Connected");
-      if (showModalCam) ws.send(`kind:live_cam_true`);
-      else ws.send(`kind:live_cam_false`);
-    };
-
+  if(ws && ws.readyState == 1) {
     let urlObject;
     ws.onmessage = (msg) => {
-      console.log("message", msg.data);
+      if(typeof msg.data == "string") {
+        let obj = {}
+        let msgSplit = msg.data.split(",")
 
-      if (urlObject) URL.revokeObjectURL(urlObject);
-      urlObject = URL.createObjectURL(new Blob([msg.data]));
-      setImage(urlObject);
-    };
+        for(let val of msgSplit){
+          let newVal = val.split(":")
+          obj[newVal[0]] = newVal[1]
+        }
 
-    ws.onclose = (e) => {
-      console.log(
-        "Disconected.\nReconnect will be attempted in 1 second.",
-        e.reason
-      );
-      setTimeout(() => {
-        wsConnect();
-      }, 1000);
-    };
-  };
+        if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
+          const { ph, temp, tank, tds, ldr } = obj
+          const dataHydro = { ph: ph, temp: temp, tank: tank, tds: tds, ldr: ldr };
+          setStatistic((oldState) => [...oldState, dataHydro]);
+          console.log("message from Hydro", JSON.stringify(dataHydro, null, 2))
+          
+          const x = Math.floor(new Date().getTime() / 1000);
+          const y = +dataHydro["ph"];
 
-  /*CONNECT TO WEBSOCKET WHEN MOUNTED AND SET LIVE CAM FALSE WHEN UNMOUNT*/
-  useEffect(() => {
-    if (ws.readyState !== 1) wsConnect();
-    return () => {
-      if (ws && ws.send && ws.readyState == 1) ws.send(`kind:live_cam_false`);
-    };
-  }, []);
-  /*CONNECT TO WEBSOCKET WHEN MOUNTED AND SET LIVE CAM FALSE WHEN UNMOUNT*/
+          let { data } = seriesPh[0];
+          data.push({ x, y });
+          setSeriesPh([{ ...seriesPh[0], data }]);
+
+          if (ApexCharts && ApexCharts.exec) {
+            ApexCharts && ApexCharts.exec && ApexCharts.exec("realtime", "updateSeries", seriesPh);
+          }
+        }
+      } else {
+        console.log("image =>", msg.data)
+        if(urlObject) URL.revokeObjectURL(urlObject);
+        urlObject = URL.createObjectURL(new Blob([msg.data]));
+        setImage(urlObject);
+      }
+    }
+  }
+
 
   /*MODAL CAMERA*/
   const onShowModalCamHandler = () => {
@@ -223,12 +179,7 @@ const Dashboard = () => {
                 </h2>
                 <span className="header-date">Power of Hydrogen</span>
                 <div className="chart">
-                  <Chart
-                    type="area"
-                    series={seriesPh}
-                    options={optionsPH}
-                    height={heightPh}
-                  />
+                  <Chart type="area" series={seriesPh} options={optionsPH} height={heightPh} />
                 </div>
               </Card>
             </Col>
@@ -246,13 +197,13 @@ const Dashboard = () => {
                     <div className="text-center items-center mt2">
                       <Image
                         width={imgWidth2}
+                        height={imgWidth2}
                         src={Temperature}
-                        preview={false}
-                        alt="temperature"
                         className="ml5"
+                        alt="temperature"
                       />
                       <h3 className="h2 bold mb0 mt2">
-                        {statistic[statisticLength - 1].sh}&#176;
+                        {statistic[statisticLength - 1].temp}&#176;
                         <span className="regular header-date">C</span>
                       </h3>
                     </div>
@@ -266,19 +217,27 @@ const Dashboard = () => {
                   >
                     <h2 className="h2 bold mb1 line-height-1">
                       Water Tank
-                      <Tag className="right tag-condition medium">Medium</Tag>
+                      {statistic[statisticLength - 1].tank < 50 && (
+                        <Tag className="right tag-condition bad">Bad</Tag>
+                      )}
+                      {statistic[statisticLength - 1].tank > 50 && statistic[statisticLength - 1].tank < 70 && (
+                        <Tag className="right tag-condition medium">Medium</Tag>
+                      )}
+                      {statistic[statisticLength - 1].tank > 70 && (
+                        <Tag className="right tag-condition good">Good</Tag>
+                      )}
                       {/*Bad / Medium / Good*/}
                     </h2>
                     <div className="text-center items-center mt1">
                       <Image
                         width={imgWidth3}
+                        height={imgWidth3}
                         src={WaterTank}
-                        preview={false}
                         alt="water-tank"
                         className="mln1"
                       />
                       <h3 className="h2 bold mb0">
-                        {statistic[statisticLength - 1].ta}%
+                        {statistic[statisticLength - 1].tank}%
                       </h3>
                       <h4 className="h3 header-date mb0">Remaining</h4>
                     </div>
@@ -291,23 +250,23 @@ const Dashboard = () => {
           <Row gutter={[20, 20]} style={{ marginTop: "20px" }}>
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <h2 className="h2 bold mb1 line-height-1">
+                <h2 className="h2 bold mb0 line-height-1 flex justify-between">
                   Plant
-                  <span className="float-right" onClick={onShowModalCamHandler}>
+                  <span onClick={onShowModalCamHandler}>
                     <Image
-                      width={25}
+                      width={32}
+                      height={32}
                       src={Camera}
-                      preview={false}
                       alt="camera"
                       className="hover-pointer"
                     />
                   </span>
                 </h2>
-                <div className="text-center items-center mt2">
+                <div className="text-center items-center mt1">
                   <Image
                     width={imgWidth1}
+                    height={imgWidth1}
                     src={Lecttuce}
-                    preview={false}
                     alt="plant"
                   />
                   <h4 className="h3 header-date mb0 mt1">Lecttuce</h4>
@@ -316,7 +275,7 @@ const Dashboard = () => {
             </Col>
 
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
-              <Card className="radius1rem shadow1 h-100" bordered={false}>
+              <Card className="radius1rem shadow1 h-100 monitor-card" bordered={false}>
                 <h2 className="h2 bold mb1 line-height-1">
                   Nutrition
                   <Tag className="right tag-condition bad">Bad</Tag>
@@ -325,8 +284,8 @@ const Dashboard = () => {
                 <div className="text-center items-center mt2">
                   <Image
                     width={imgWidth1}
+                    height={imgWidth1}
                     src={Plant}
-                    preview={false}
                     alt="plant"
                   />
                   <h3 className="h2 bold mb0">
@@ -338,11 +297,11 @@ const Dashboard = () => {
             </Col>
 
             <Col xl={8} lg={8} md={24} sm={24} xs={24}>
-              <Card className="radius1rem shadow1 h-100" bordered={false}>
+              <Card className="radius1rem shadow1 h-100 monitor-card" bordered={false}>
                 <h2 className="h2 bold mb1 line-height-1">Light Status</h2>
                 <AnimatePresence>
                   <div>
-                    {statistic[statisticLength - 1].ldr > 550 && (
+                    {statistic[statisticLength - 1].ldr == "bright" && (
                       <motion.div 
                         className="text-center items-center mt2"
                         initial={{ opacity: 0 }} 
@@ -351,8 +310,8 @@ const Dashboard = () => {
                       >
                         <Image
                           width={imgWidth1}
+                          height={imgWidth1}
                           src={Sun}
-                          preview={false}
                           alt="temperature"
                         />
                         <h3 className="h2 bold mb0">
@@ -364,7 +323,7 @@ const Dashboard = () => {
                 </AnimatePresence>
                 <AnimatePresence>
                   <div>
-                    {statistic[statisticLength - 1].ldr <= 550 && (
+                    {statistic[statisticLength - 1].ldr == "dark" && (
                       <motion.div 
                         className="text-center items-center mt2"
                         initial={{ opacity: 0 }} 
@@ -373,8 +332,8 @@ const Dashboard = () => {
                       >
                         <Image
                           width={imgWidth1}
+                          height={imgWidth1}
                           src={Moon}
-                          preview={false}
                           alt="temperature"
                         />
                         <h3 className="h2 bold mb0">
@@ -412,7 +371,7 @@ const Dashboard = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Image width={100} src={Loader1} preview={false} alt="loader" />
+            <Image width={100} height={100} src={Loader1} alt="loader" />
             <div className="fs-14 m-b-10">Connecting to camera...</div>
           </motion.div>
         ) : (
@@ -423,7 +382,7 @@ const Dashboard = () => {
             exit={{ opacity: 0 }}
           >
             <div className="text-center live-img">
-              <Image width={640} heigth={480} src={image} preview={false} />
+              <AntImage src={image} width={640} height={480} preview={false} />
             </div>
             <div className="joystick-container">
               <Joystick
@@ -449,6 +408,34 @@ const Dashboard = () => {
           />
         )}
       </AnimatePresence>
+
+      <Modal
+        centered
+        title={" "}
+        zIndex="1030"
+        footer={null}
+        maskClosable={false}
+        closable={false}
+        visible={showModalSetup}
+        className="modal-setting-profile noselect"
+        maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+      >
+        <Row justify="center">
+          <Col xl={18} lg={18} md={20} sm={24} xs={24}>
+            <Steps current={current} size="small" className="mb2">
+              {steps.map(item => (
+                <Steps.Step key={item.title} title={item.title} />
+              ))}
+            </Steps>
+          </Col>
+        </Row>
+        <SetupProfileModal
+          current={current}
+          onStepChange={onStepChange}
+          plantSelected={plantSelected}
+          setPlantSelected={setPlantSelected}
+        />
+      </Modal>
 
       <style jsx>{pageStyle}</style>
       <style jsx>{`
@@ -499,10 +486,36 @@ const Dashboard = () => {
           height: ${max_width_height}px;
           border-radius: 10px;
         }
+
+        :global(.monitor-card .ant-card-body) {
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+
+
+        :global(.modal-setting-profile.ant-modal) {
+          height: 100vh!important;
+          width: 100vw!important;
+          max-width: 100vw!important;
+          padding-bottom: 0px;
+          margin: 0px auto;
+        }
+        :global(.modal-setting-profile.ant-modal .ant-modal-content) {
+          height: 100vh!important;
+        }
+        :global(.modal-setting-profile.ant-modal .ant-modal-content .ant-modal-header) {
+          padding: 0px;
+          border-bottom: 0px solid transparent;
+        }
+        :global(.modal-setting-profile.ant-modal .ant-modal-content .ant-modal-body) {
+          height: 100vh;
+          max-height: 100vh;
+        }
       `}</style>
     </>
   );
 };
 
-export default withAuth(Dashboard)
-// export default Dashboard;
+// export default withAuth(Dashboard)
+export default Dashboard;

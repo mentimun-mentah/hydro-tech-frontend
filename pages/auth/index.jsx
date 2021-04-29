@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Form, Input, Button, Divider, Image, Row, Col, Steps, Card } from 'antd'
 
+import Router from 'next/router'
+import nookies from 'nookies'
 import Login from 'components/Auth/Login'
 import Register from 'components/Auth/Register'
 import ForgotPassword from 'components/Auth/ForgotPassword'
@@ -34,5 +36,18 @@ const Auth = () => {
     </>
   )
 }
+
+
+Auth.getInitialProps = (ctx) => {
+  const cookies = nookies.get(ctx)
+  if(cookies.csrf_refresh_token && cookies.csrf_access_token && 
+     cookies.csrf_refresh_token !== "null" && cookies.csrf_access_token !== "null" &&
+     cookies.csrf_refresh_token !== "undefined" && cookies.csrf_access_token !== "undefined"
+  ) {
+    process.browser
+      ? Router.replace("/", "/") //Redirec from Client Side
+      : ctx.res.writeHead(302, { Location: "/" }).end(); //Redirec from Server Side
+  }
+};
 
 export default Auth
