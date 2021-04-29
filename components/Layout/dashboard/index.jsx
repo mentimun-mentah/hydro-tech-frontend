@@ -36,6 +36,7 @@ const SidebarContainer = ({ children }) => {
 
   /*WEBSOCKET*/
   const wsConnect = () => {
+    return false
     let tkn =
       "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8";
 
