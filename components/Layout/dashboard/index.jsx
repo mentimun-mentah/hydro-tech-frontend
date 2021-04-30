@@ -6,6 +6,7 @@ import { useState, useEffect, createContext } from 'react'
 
 import Style from './style'
 import SplitText from './SplitText'
+import nookies from 'nookies'
 import * as actions from 'store/actions'
 
 const useBreakpoint = Grid.useBreakpoint
@@ -38,27 +39,26 @@ const SidebarContainer = ({ children }) => {
 
   /*WEBSOCKET*/
   const wsConnect = () => {
-    let tkn =
-      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8";
+    const cookies = nookies.get()
+    if(cookies && cookies.csrf_access_token) {
+      ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
 
-    let tkn2 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5NTQ3MjA4LCJuYmYiOjE2MTk1NDcyMDgsImp0aSI6IjBiZmFhODViLTcxZmQtNGE2OS05YzVkLWJjY2U3MTA2MTgxZSIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0N2M3ODcwYi1mZDk2LTQwZjYtYTBmYy1jZTkyYmMxYWQ2YTkifQ.XBQncUZojqtBLlqiup2xT7heyQSggaiMWu15RfomEJo";
+      ws.onopen = () => {
+        ws.send("Connected");
+        console.log("Connected");
+        ws.send(`kind:live_cam_false`);
+      };
 
+      ws.onclose = (e) => {
+        ws.close()
+        console.log("Layout Disconected.\nReconnect will be attempted in 1 second.", e.reason);
+        setTimeout(() => {
+          wsConnect()
+        }, 3000);
+      };
+    }
     // ws = new WebSocket(`ws://192.168.18.37:8000/dashboard/ws?token=${tkn2}`);
-    ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`);
 
-    ws.onopen = () => {
-      ws.send("Connected");
-      console.log("Connected");
-      ws.send(`kind:live_cam_false`);
-    };
-
-    ws.onclose = (e) => {
-      ws.close()
-      console.log("Layout Disconected.\nReconnect will be attempted in 1 second.", e.reason);
-      setTimeout(() => {
-        wsConnect()
-      }, 3000);
-    };
 
     ws.onerror = (err) => {
       console.error('Socket encountered error: ', err.message, 'Closing socket');
