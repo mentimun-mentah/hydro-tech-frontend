@@ -29,6 +29,7 @@ const Loader1 = "/static/images/loader-1.gif";
 const Plant = "/static/images/leaf-outline.gif";
 const WaterTank = "/static/images/water-tank.svg";
 const Lecttuce = "/static/images/plant/lecttuce.png";
+const Sawi = "/static/images/plant/sawi.png";
 const Temperature = "/static/images/temperature.gif";
 
 const max_width_height = 90;
@@ -172,7 +173,7 @@ const Dashboard = () => {
     if(user && user.role !== "admin" && !Boolean(cookies.final_setup)){
       setShowModalSetup(true)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     if(user && user.role === "admin") {
@@ -286,17 +287,12 @@ const Dashboard = () => {
                   <Image
                     width={imgWidth1}
                     height={imgWidth1}
-                    src={Lecttuce}
+                    src={Sawi}
                     alt="plant"
                   />
-                  <h4 className="h3 text-black mb0 mt1">Lecttuce</h4>
-                  <motion.div
-                    className="text-grey"
-                    whileHover={{ scale: 0.98 }}
-                    whileTap={{ scale: 0.98, y: 0 }}
-                  >
-                    18 days until harvest
-                  </motion.div>
+                  <h3 className="h2 bold mb0">
+                    <span className="regular header-date">Sawi Manis</span>
+                  </h3>
                 </div>
               </Card>
             </Col>

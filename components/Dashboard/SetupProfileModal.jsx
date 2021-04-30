@@ -13,7 +13,7 @@ import * as actions from 'store/actions'
 
 const Loader1 = "/static/images/loader-1.gif";
 const Lecttuce = "/static/images/plant/lecttuce.png";
-const IoTCamera = "/static/images/iot-camera.png";
+const IoTCamera = "/static/images/iot-camera-1.png";
 const plantList = ["Bayam", "Brokoli", "Kangkung", "Kubis", "Pakcoy", "Seledri", "Selada"]
 
 
