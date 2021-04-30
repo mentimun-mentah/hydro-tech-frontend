@@ -313,7 +313,7 @@ const Plants = () => {
         <div className="text-dark text-center">
           <Image src={Badge} width={150} height={150} alt="badge" />
           <h3 className="mb-3 h3 bold">Congratulation</h3>
-          <p>You already finished growing lecctue</p>
+          <p>You already finished growing the plant</p>
           <Button className="btn-white" onClick={() => setShowModal(false)}>Okay</Button>
         </div>
       </Modal>
