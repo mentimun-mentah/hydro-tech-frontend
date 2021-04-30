@@ -20,6 +20,7 @@ const plantList = ["Bayam", "Brokoli", "Kangkung", "Kubis", "Pakcoy", "Seledri",
 const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelected }) => {
   const dispatch = useDispatch()
 
+  const user = useSelector(state => state.auth.user)
   const plants = useSelector(state => state.plant.plant)
   const iot_token = useSelector(state => state.auth.iot_token)
 
@@ -66,7 +67,7 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
           <div className="step-container ">
             {current == 0 && (
               <>
-                <h1 className="bold h2"> Hi, Ackerman, Choose what plants you will plant </h1>
+                <h1 className="bold h2"> Hi, {user && user.username}, Choose what plants you will plant </h1>
 
                 <Form>
                   <Form.Item>
@@ -87,6 +88,7 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                                 <AntImage 
                                   width={60}
                                   height={60} 
+                                  preview={false}
                                   src={`${process.env.NEXT_PUBLIC_API_URL}/static/plants/${plant.plants_image}`}
                                   alt="plant" className="align-sub noselect" 
                                 />
@@ -131,7 +133,9 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                         <div className="text-center">
                           <Image width={200} height={200} src={IoTCamera} alt="loader" />
                         </div>
-                        <h1 className="bold h2 text-center"> Ackerman, would you like to use camera for monitoring your plants?</h1>
+                        <h1 className="bold h2 text-center"> 
+                          {user && user.username}, would you like to use camera for monitoring your plants?
+                        </h1>
                       </Col>
                       <Col span={24}>
                         <Space align="center" className="w-100 justify-center">
