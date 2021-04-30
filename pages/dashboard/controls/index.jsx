@@ -29,6 +29,8 @@ const switchInitialProps = {
   unCheckedChildren: "OFF"
 }
 
+const delay = 5000
+
 const Controls = () => {
   const ws = useContext(WebSocketContext)
   // console.log("## WebSocket", ws.readyState == 1 ? "Connected" : "Disconnect", "##", "\nfrom controls")
@@ -91,10 +93,11 @@ const Controls = () => {
   /* SUBMIT FORM FUNCTION */
 
   /*WEBSOCKET MESSAGE*/
+  let count = 0
   if(ws && ws.readyState == 1) {
     // kind:Hydro,ph:7.62,temp:24.56,tank:100,tds:421.93,ldr:bright,lamp:off,phup:off,phdown:on,nutrition:on,solenoid:off
     ws.onmessage = (msg) => {
-      console.log(msg.data)
+      // console.log(msg.data)
       let obj = {}
       let msgSplit = msg.data.split(",")
 
@@ -104,6 +107,7 @@ const Controls = () => {
       }
 
       if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
+        if(isSending) count = count + 1
         
         if(obj.phup && !forcePhup) setPhup(obj.phup == "on" ? true : false)
 
@@ -115,9 +119,10 @@ const Controls = () => {
 
         if(obj.nutrition && !forceNutrition) setNutrition(obj.nutrition == "on" ? true : false)
 
-        setTimeout(() => {
+        if(count == 2) {
+          count = 0
           setIsSending(false)
-        }, 2000)
+        }
 
       }
     }
@@ -130,6 +135,10 @@ const Controls = () => {
     if(ws && ws.send && ws.readyState == 1) {
       setLamp(val)
       setIsSending(true)
+
+      setTimeout(() => {
+        setIsSending(true)
+      }, delay)
 
       const data = `lamp:${val?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
@@ -144,6 +153,10 @@ const Controls = () => {
       setSolenoid(val)
       setIsSending(true)
 
+      setTimeout(() => {
+        setIsSending(true)
+      }, delay)
+
       const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${val?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
 
@@ -156,6 +169,10 @@ const Controls = () => {
     if(ws && ws.send && ws.readyState == 1) {
       setPhup(val)
       setIsSending(true)
+
+      setTimeout(() => {
+        setIsSending(true)
+      }, delay)
 
       const data = `lamp:${lamp?"on":"off"},phup:${val?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
@@ -170,6 +187,10 @@ const Controls = () => {
       setPhdown(val)
       setIsSending(true)
 
+      setTimeout(() => {
+        setIsSending(true)
+      }, delay)
+
       const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${val?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
 
@@ -182,6 +203,10 @@ const Controls = () => {
     if(ws && ws.send && ws.readyState == 1) {
       setNutrition(val)
       setIsSending(true)
+
+      setTimeout(() => {
+        setIsSending(true)
+      }, delay)
 
       const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${val?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
       sendWsHandler(data)

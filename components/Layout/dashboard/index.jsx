@@ -42,20 +42,14 @@ const SidebarContainer = ({ children }) => {
 
     let tkn2 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5NTQ3MjA4LCJuYmYiOjE2MTk1NDcyMDgsImp0aSI6IjBiZmFhODViLTcxZmQtNGE2OS05YzVkLWJjY2U3MTA2MTgxZSIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0N2M3ODcwYi1mZDk2LTQwZjYtYTBmYy1jZTkyYmMxYWQ2YTkifQ.XBQncUZojqtBLlqiup2xT7heyQSggaiMWu15RfomEJo";
 
-    // ws = new WebSocket(`ws://192.168.18.37:8000/dashboard/ws?token=${tkn2}`);
-    ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`);
+    ws = new WebSocket(`ws://192.168.18.37:8000/dashboard/ws?token=${tkn2}`);
+    // ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`);
 
     ws.onopen = () => {
       ws.send("Connected");
       console.log("Connected");
       ws.send(`kind:live_cam_false`);
     };
-
-    console.log(ws)
-
-    ws.onmessage = (msg) => {
-      console.log(msg.data)
-    }
 
     ws.onclose = (e) => {
       ws.close()
