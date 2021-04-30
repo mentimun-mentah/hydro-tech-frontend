@@ -1,9 +1,12 @@
+import { withAuth } from "lib/withAuth";
 import { useState, useEffect } from 'react'
 import { optionsGrowth } from 'components/Dashboard/apexOption'
-import { Layout, Card, Row, Col, Radio, Tabs, Badge, Timeline, Table, Button, Grid } from 'antd'
-import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData } from 'components/Dashboard/apexOption'
+import { Layout, Card, Row, Col, Radio, Tabs, Badge, Timeline, Table, Button, Grid, Select, Space } from 'antd'
 
 import { columns, dataSource, progressData } from 'columns/sensorReport'
+import { seriesPHWeek, seriesPHDay, seriesPPMWeek, seriesPPMDay } from 'components/Dashboard/apexOption'
+import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData } from 'components/Dashboard/apexOption'
+import { optionsPHWeekData, optionsPHDayData, optionsPPMWeekData, optionsPPMDayData } from 'components/Dashboard/apexOption'
 
 import moment from 'moment'
 import dynamic from 'next/dynamic'
@@ -13,6 +16,7 @@ import pageStyle from 'components/Dashboard/pageStyle.js'
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 const DAY = "DAY", WEEK = "WEEK"
+const PH = "PH", PPM = "PPM"
 const useBreakpoint = Grid.useBreakpoint
 
 const Reports = () => {
@@ -22,9 +26,27 @@ const Reports = () => {
   const [selectedGrowthOption, setSelectedGrowthOption] = useState(optionsGrowth)
   const [selectedGrowthSeries, setSelectedGrowthSeries] = useState(seriesWeekGrowth)
 
+  const [selectedAnalysis, setSelectedAnalysis] = useState(PH)
+  const [selectedAnalysisTime, setSelectedAnalysisTime] = useState(DAY)
+  const [selectedAnalysisSeries, setSelectedAnalysisSeries] = useState(seriesPHDay)
+
+  const [selectedPHOption, setSelectedPHOption] = useState(optionsPHWeekData)
+  const [selectedPPMOption, setSelectedPPMOption] = useState(optionsPPMWeekData)
+  
+
+  /*FUNCTION FOR CHANGING ANALYSIS SELECTION*/
+  const onChangeSelectedAnalysisHanlder = e => {
+    setSelectedAnalysis(e.target.value)
+  }
+
+  const onChangeSelectedAnalysisTimeHanlder = val => {
+    setSelectedAnalysisTime(val)
+  }
+  /*FUNCTION FOR CHANGING ANALYSIS SELECTION*/
+
   /*FUNCTION FOR CHANGING GROWTH SELECTION*/
-  const onChangeSelectedGrowthHanlder = e => {
-    setSelectedGrowth(e.target.value)
+  const onChangeSelectedGrowthHanlder = val => {
+    setSelectedGrowth(val)
   }
   /*FUNCTION FOR CHANGING GROWTH SELECTION*/
 
@@ -41,6 +63,38 @@ const Reports = () => {
     }
   }, [selectedGrowth])
 
+  useEffect(() => {
+    if(selectedAnalysisTime === WEEK) {
+      if(selectedAnalysis === PH) {
+        const dataOption = { ...optionsGrowth, ...optionsPHWeekData }
+        setSelectedPHOption(dataOption)
+        setSelectedAnalysisSeries(seriesPHWeek)
+      }
+      if(selectedAnalysis === PPM) {
+        const dataOption = { ...optionsGrowth, ...optionsPPMWeekData }
+        setSelectedPPMOption(dataOption)
+        setSelectedAnalysisSeries(seriesPPMWeek)
+      }
+    }
+    if(selectedAnalysisTime === DAY) {
+      const dataOption = { ...optionsGrowth, ...optionsDayGrowthData }
+      setSelectedGrowthOption(dataOption)
+
+      if(selectedAnalysis === PH) {
+        const dataOption = { ...optionsGrowth, ...optionsPHDayData }
+        setSelectedPHOption(dataOption)
+        setSelectedAnalysisSeries(seriesPHDay)
+      }
+      if(selectedAnalysis === PPM) {
+        const dataOption = { ...optionsGrowth, ...optionsPPMDayData }
+        setSelectedPPMOption(dataOption)
+        setSelectedAnalysisSeries(seriesPPMDay)
+      }
+    }
+  }, [selectedAnalysisTime, selectedAnalysis])
+
+
+
   return(
     <>
       <div className="header-dashboard">
@@ -55,41 +109,50 @@ const Reports = () => {
             <Col xl={24} lg={24} md={24} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
                 <Tabs defaultActiveKey="1">
-                  <Tabs.TabPane tab="Progress" key="1">
-                    <div className="header-dashboard">
-                      <h4 className="h4 bold mb0">{moment().format("MMMM YYYY")}</h4>
+
+                  <Tabs.TabPane tab="Analysis" key="1">
+                    <div className="flex justify-between">
+                      <Radio.Group 
+                        value={selectedAnalysis} 
+                        onChange={onChangeSelectedAnalysisHanlder}
+                      >
+                        <Radio.Button value={PH}>
+                          <span className="h6">PH</span>
+                        </Radio.Button>
+                        <Radio.Button value={PPM}>
+                          <span className="h6">PPM</span>
+                        </Radio.Button>
+                      </Radio.Group>
+                      <Select 
+                        value={selectedAnalysisTime}
+                        onChange={onChangeSelectedAnalysisTimeHanlder} 
+                        className="select-no-rounded"
+                      >
+                        <Select.Option value={DAY}>Daily</Select.Option>
+                        <Select.Option value={WEEK}>Weekly</Select.Option>
+                      </Select>
                     </div>
-                    <Timeline className="m-l-14">
-                      {progressData.map((data, i) => (
-                        <Timeline.Item 
-                          key={i}
-                          dot={data.date}
-                          className={
-                            `${data.date >= 17 ? "ant-timeline-item-head-current" : "ant-timeline-item-head-past"} 
-                             ${data.date == 17 ? "scale-item" : "not-scale-item"}`
-                          }
-                        >
-                          {data.sub}
-                        </Timeline.Item>
-                      ))}
-                    </Timeline>
+                    <div className="chart">
+                      <Chart 
+                        type="area"
+                        series={selectedAnalysisSeries}
+                        options={selectedAnalysis === PH ? selectedPHOption : selectedPPMOption}
+                        height={300} 
+                      />
+                    </div>
                   </Tabs.TabPane>
 
                   <Tabs.TabPane tab="Growth Plant" key="2">
                     <div className="flex justify-between">
                       <p></p>
-                      <Radio.Group 
+                      <Select 
                         value={selectedGrowth} 
-                        className="btn-radio-pill" 
-                        onChange={onChangeSelectedGrowthHanlder}
+                        onChange={onChangeSelectedGrowthHanlder} 
+                        className="select-no-rounded"
                       >
-                        <Radio.Button value={DAY}>
-                          <span className="h6">Day</span>
-                        </Radio.Button>
-                        <Radio.Button value={WEEK}>
-                          <span className="h6">Week</span>
-                        </Radio.Button>
-                      </Radio.Group>
+                        <Select.Option value={DAY}>Daily</Select.Option>
+                        <Select.Option value={WEEK}>Weekly</Select.Option>
+                      </Select>
                     </div>
                     <div className="chart">
                       <Chart type="area" series={selectedGrowthSeries} options={selectedGrowthOption} height={300} />
@@ -125,12 +188,17 @@ const Reports = () => {
                     </h3>
                   </Col>
                   <Col lg={12} md={12} sm={12} xs={24}>
-                    <Button 
-                      onClick={() => generatePDF(dataSource)}
-                      className={`${!screens.xs && "float-right"}`}
-                    >
-                      Export
-                    </Button>
+                    <Space className={`${!screens.xs && "float-right"}`}>
+                      <Select defaultValue="day">
+                        <Select.Option value="day">Daily</Select.Option>
+                        <Select.Option value="week">Weekly</Select.Option>
+                        <Select.Option value="month">Monthly</Select.Option>
+                        <Select.Option value="year">Yearly</Select.Option>
+                      </Select>
+                      <Button onClick={() => generatePDF(dataSource)}>
+                        Export
+                      </Button>
+                    </Space>
                   </Col>
                 </Row>
                 <div className="m-t-20">
@@ -231,9 +299,13 @@ const Reports = () => {
         :global(.ant-tabs-ink-bar){
           background: var(--purple);
         }
+
+        :global(.select-no-rounded .ant-select-selector){
+          border-radius: 2px!important;
+        }
       `}</style>
     </>
   )
 }
 
-export default Reports
+export default withAuth(Reports)

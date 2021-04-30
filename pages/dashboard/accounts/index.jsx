@@ -119,5 +119,5 @@ const Accounts = () => {
   )
 }
 
-// export default withAuth(Accounts)
-export default Accounts
+export default withAuth(Accounts)
+// export default Accounts

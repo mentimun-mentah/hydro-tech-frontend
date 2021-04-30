@@ -1,3 +1,4 @@
+import { withAuth } from "lib/withAuth";
 import { useState, useContext } from 'react'
 import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag } from 'antd'
 
@@ -109,15 +110,25 @@ const Controls = () => {
       if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
         if(isSending) count = count + 1
         
-        if(obj.phup && !forcePhup) setPhup(obj.phup == "on" ? true : false)
+        if(obj.phup) setPhup(obj.phup == "on" ? true : false)
 
-        if(obj.lamp && !forceLamp) setLamp(obj.lamp == "on" ? true : false)
+        if(obj.lamp) setLamp(obj.lamp == "on" ? true : false)
 
-        if(obj.phdown && !forcePhdown) setPhdown(obj.phdown == "on" ? true : false)
+        if(obj.phdown) setPhdown(obj.phdown == "on" ? true : false)
 
-        if(obj.solenoid && !forceSolenoid) setSolenoid(obj.solenoid == "on" ? true : false)
+        if(obj.solenoid) setSolenoid(obj.solenoid == "on" ? true : false)
 
-        if(obj.nutrition && !forceNutrition) setNutrition(obj.nutrition == "on" ? true : false)
+        if(obj.nutrition) setNutrition(obj.nutrition == "on" ? true : false)
+
+        // if(obj.phup && !forcePhup) setPhup(obj.phup == "on" ? true : false)
+
+        // if(obj.lamp && !forceLamp) setLamp(obj.lamp == "on" ? true : false)
+
+        // if(obj.phdown && !forcePhdown) setPhdown(obj.phdown == "on" ? true : false)
+
+        // if(obj.solenoid && !forceSolenoid) setSolenoid(obj.solenoid == "on" ? true : false)
+
+        // if(obj.nutrition && !forceNutrition) setNutrition(obj.nutrition == "on" ? true : false)
 
         if(count == 2) {
           count = 0
@@ -493,4 +504,4 @@ const Controls = () => {
   )
 }
 
-export default Controls
+export default withAuth(Controls)

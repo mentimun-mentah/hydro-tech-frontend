@@ -122,6 +122,8 @@ export const logout = () => {
     const access_revoke = "/users/access-revoke";
     const refresh_revoke = "/users/refresh-revoke";
 
+    dispatch(getUserSuccess({}))
+
     if (csrf_access_token && csrf_refresh_token) {
 
       let headerAccessConfig = { headers: { "X-CSRF-TOKEN": csrf_access_token, } };

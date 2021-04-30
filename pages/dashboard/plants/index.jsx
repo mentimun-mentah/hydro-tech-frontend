@@ -1,6 +1,7 @@
-import { useSelector, useDispatch } from 'react-redux'
+import { withAuth } from "lib/withAuth";
 import { formErrorMessage } from 'lib/axios'
 import { useState, useEffect, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Layout, Row, Col, Drawer, Grid, Form, Input, Button, Modal, Space, Select, Empty } from 'antd'
 
@@ -40,12 +41,43 @@ const Plants = () => {
   const [plantData, setPlantData] = useState({})
   const [isMobile, setIsMobile] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [progressPlant, setProgressPlant] = useState({id: "", start: false})
   const [visibleDrawer, setVisibleDrawer] = useState(false)
+  const [showModalPlanted, setShowModalPlanted] = useState(false)
 
-  const onShowDrawer = () => setVisibleDrawer(true)
+  const onShowDrawer = () => {
+    setVisibleDrawer(true)
+  }
   const onCloseDrawer = () => {
-    setPlantData({})
+    // setPlantData({})
     setVisibleDrawer(false)
+    setShowModalPlanted(true)
+  }
+
+  const onOkModalPlantedHandler = () => {
+    setProgressPlant({id: plantData.plants_id, start: true})
+    setShowModalPlanted(false)
+  }
+  const onCancelModalPlantedHandler = () => {
+    setProgressPlant({id: plantData.plants_id, start: false})
+    setShowModalPlanted(false)
+    setPlantData({})
+  }
+  const onPlantedHandler = () => {
+    const data = {...progressPlant, start: true}
+    setProgressPlant(data)
+  }
+  const onCancelPlantedHandler = () => {
+    setPlantData({})
+    setProgressPlant({id: "", start: false})
+  }
+  const onCongratsHandler = () => {
+    setPlantData({})
+    setProgressPlant({id: "", start: false})
+    setShowModal(true)
+    setTimeout(() => {
+      reward.current.rewardMe();
+    }, 1000)
   }
 
   useEffect(() => {
@@ -55,13 +87,6 @@ const Plants = () => {
 
     return () => mounted = false
   }, [screens])
-
-  const onCongratsHandler = () => {
-    setShowModal(true)
-    setTimeout(() => {
-      reward.current.rewardMe();
-    }, 1000)
-  }
 
   const getPlantData = (id) => {
     setLoading(true)
@@ -111,6 +136,8 @@ const Plants = () => {
       setPage(plants.page - 1)
     }
   }, [plants])
+
+  console.log(progressPlant)
 
   return (
     <>
@@ -178,12 +205,14 @@ const Plants = () => {
           <AnimatePresence>
             {plants && plants.data && plants.data.length > 0 ? (
               <Row gutter={[20, 20]}>
-                {plants && plants.data && plants.data.length > 0 && plants.data.map((plant, i) => (
+                {plants && plants.data && plants.data.length > 0 && plants.data.map(plant => (
                   <Col xl={6} lg={8} md={8} sm={12} xs={12} key={plant.plants_id}>
                     <PlantCard 
                       plant={plant} 
-                      ongoing={i == 2}
-                      onCongrats={i == 2 ? onCongratsHandler : () => {}}
+                      onPlantedHandler={onPlantedHandler}
+                      onCancelPlantedHandler={onCancelPlantedHandler}
+                      ongoing={{ongoing: progressPlant.id == plant.plants_id, start: progressPlant.start}}
+                      onCongrats={(progressPlant.id == plant.plants_id && progressPlant.start) ? onCongratsHandler : () => {}}
                       getPlantData={() => getPlantData(plant.plants_id)}
                     />
                   </Col>
@@ -217,7 +246,7 @@ const Plants = () => {
 
       <Drawer
         width={isMobile? "80%" : "400" }
-        onClose={onCloseDrawer}
+        onClose={() => setVisibleDrawer(false)}
         visible={visibleDrawer}
         closeIcon={<i className="far fa-times"></i>}
         bodyStyle={{
@@ -291,8 +320,28 @@ const Plants = () => {
         </div>
       </Modal>
 
+      <Modal
+        centered
+        visible={showModalPlanted && !_.isEmpty(plantData)}
+        zIndex={3000}
+        width={416}
+        closable={false}
+        footer={null}
+        className="modal-modif noselect text-center"
+        closeIcon={<i className="fas fa-times" />}
+        maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+      >
+        <div className="text-dark text-center">
+          <h3 className="mb-3 h3 bold">Are you already planted {plantData.plants_name}?</h3>
+          <Space>
+            <Button type="primary" onClick={onOkModalPlantedHandler}>Yes I did</Button>
+            <Button className="btn-white" onClick={onCancelModalPlantedHandler}>No yet</Button>
+          </Space>
+        </div>
+      </Modal>
+
       <AnimatePresence>
-        {(visibleDrawer || showModal) && (
+        {(visibleDrawer || showModal || showModalPlanted) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -322,4 +371,4 @@ Plants.getInitialProps = async ctx => {
   ctx.store.dispatch(actions.getPlantSuccess(res.data))
 }
 
-export default Plants
+export default withAuth(Plants)

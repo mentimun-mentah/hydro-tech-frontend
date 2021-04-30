@@ -51,11 +51,6 @@ const HomeLayout = ({ children }) => {
                   <a>Documentation</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item key="dashboard">
-                <Link href="/dashboard" as="/dashboard">
-                  <a>Dashboard</a>
-                </Link>
-              </Menu.Item>
               {(user && user.username && user.avatar) ? (
                 <Menu.Item key="dashboard">
                   <Link href="/dashboard" as="/dashboard">

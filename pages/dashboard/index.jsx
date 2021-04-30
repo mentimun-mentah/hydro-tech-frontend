@@ -41,7 +41,7 @@ const Dashboard = () => {
 
   const [current, setCurrent] = useState(0)
   const [plantSelected, setPlantSelected] = useState("")
-  const [showModalSetup, setShowModalSetup] = useState(false)
+  const [showModalSetup, setShowModalSetup] = useState(true)
 
   const [image, setImage] = useState("");
   const [heightPh, setHeightPh] = useState(465);
@@ -249,7 +249,7 @@ const Dashboard = () => {
 
           <Row gutter={[20, 20]} style={{ marginTop: "20px" }}>
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
-              <Card className="radius1rem shadow1 h-100" bordered={false}>
+              <Card className="radius1rem shadow1 h-100 card-plant-dashboard" bordered={false}>
                 <h2 className="h2 bold mb0 line-height-1 flex justify-between">
                   Plant
                   <span onClick={onShowModalCamHandler}>
@@ -269,7 +269,14 @@ const Dashboard = () => {
                     src={Lecttuce}
                     alt="plant"
                   />
-                  <h4 className="h3 header-date mb0 mt1">Lecttuce</h4>
+                  <h4 className="h3 text-black mb0 mt1">Lecttuce</h4>
+                  <motion.div
+                    className="text-grey"
+                    whileHover={{ scale: 0.98 }}
+                    whileTap={{ scale: 0.98, y: 0 }}
+                  >
+                    18 days until harvest
+                  </motion.div>
                 </div>
               </Card>
             </Col>
@@ -512,10 +519,11 @@ const Dashboard = () => {
           height: 100vh;
           max-height: 100vh;
         }
+
       `}</style>
     </>
   );
 };
 
-// export default withAuth(Dashboard)
-export default Dashboard;
+export default withAuth(Dashboard)
+// export default Dashboard;

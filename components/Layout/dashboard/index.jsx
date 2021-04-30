@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
-import { useDispatch } from 'react-redux'
 import { Layout, Menu, Grid } from 'antd'
+import { useDispatch, useSelector } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState, useEffect, createContext } from 'react'
 
@@ -20,6 +20,8 @@ const SidebarContainer = ({ children }) => {
   const dispatch = useDispatch()
   const screens = useBreakpoint()
 
+  const user = useSelector(state => state.auth.user)
+
   const [collapsed, setCollapsed] = useState(false)
   const [selected, setSelected] = useState(DASHBOARD)
 
@@ -36,14 +38,13 @@ const SidebarContainer = ({ children }) => {
 
   /*WEBSOCKET*/
   const wsConnect = () => {
-    return false
     let tkn =
       "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8";
 
     let tkn2 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5NTQ3MjA4LCJuYmYiOjE2MTk1NDcyMDgsImp0aSI6IjBiZmFhODViLTcxZmQtNGE2OS05YzVkLWJjY2U3MTA2MTgxZSIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0N2M3ODcwYi1mZDk2LTQwZjYtYTBmYy1jZTkyYmMxYWQ2YTkifQ.XBQncUZojqtBLlqiup2xT7heyQSggaiMWu15RfomEJo";
 
-    ws = new WebSocket(`ws://192.168.18.37:8000/dashboard/ws?token=${tkn2}`);
-    // ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`);
+    // ws = new WebSocket(`ws://192.168.18.37:8000/dashboard/ws?token=${tkn2}`);
+    ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`);
 
     ws.onopen = () => {
       ws.send("Connected");
@@ -183,13 +184,15 @@ const SidebarContainer = ({ children }) => {
               >
                 Plants
               </Menu.Item>
-              <Menu.Item 
-                key={ADD_PLANTS}
-                icon={<i className="far fa-hand-holding-seedling" />} 
-                onClick={() => router.push('/dashboard/add-plants')}
-              >
-                Add Plants
-              </Menu.Item>
+              {user && user.role == "admin" && (
+                <Menu.Item 
+                  key={ADD_PLANTS}
+                  icon={<i className="far fa-hand-holding-seedling" />} 
+                  onClick={() => router.push('/dashboard/add-plants')}
+                >
+                  Add Plants
+                </Menu.Item>
+              )}
               <Menu.Item 
                 key={ACCOUNTS} 
                 icon={<i className="far fa-user" />} 

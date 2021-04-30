@@ -4,7 +4,7 @@ import { Card, Button, Row, Col, Progress } from 'antd'
 
 import Image from 'next/image'
 
-const PlantCard = ({ plant, ongoing, onCongrats, getPlantData }) => {
+const PlantCard = ({ plant, ongoing, onCongrats, getPlantData, onPlantedHandler, onCancelPlantedHandler }) => {
   return (
     <>
       <motion.div 
@@ -19,7 +19,7 @@ const PlantCard = ({ plant, ongoing, onCongrats, getPlantData }) => {
             whileHover={{ y: ongoing ? 0 : -4 }}
             whileTap={{ scale: ongoing ? 1 : 0.98, y: 0 }}
             className="hover-pointer h-100 plant-card-body"
-            onClick={ongoing ? () => {} : getPlantData}
+            onClick={ongoing.ongoing ? () => {} : getPlantData}
           >
             <div className="text-center">
               <Image 
@@ -34,10 +34,10 @@ const PlantCard = ({ plant, ongoing, onCongrats, getPlantData }) => {
               <h2 className="h2 bold mb1 line-height-1 truncate">
                 {plant.plants_name}
               </h2>
-              {ongoing ? (
+              {ongoing.ongoing && ongoing.start && (
                 <>
                   <Progress 
-                    percent={100} 
+                    percent={0} 
                     status="active" 
                     className="p-r-5 p-l-5 m-b-10" 
                     strokeColor="#ffc19e" 
@@ -46,21 +46,42 @@ const PlantCard = ({ plant, ongoing, onCongrats, getPlantData }) => {
                   <Row gutter={[10, 10]} className="w-100 m-t-auto">
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <motion.div whileTap={{ scale: 0.96 }}>
-                        <Button block type="primary" onClick={ongoing ? onCongrats : () => {}}>
+                        <Button block type="primary" onClick={(ongoing.ongoing && ongoing.start) ? onCongrats : () => {}}>
                           Finish
                         </Button>
                       </motion.div>
                     </Col>
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <motion.div whileTap={{ scale: 0.96 }}>
-                        <Button block className="btn-white">
+                        <Button block className="btn-white" onClick={onCancelPlantedHandler}>
                           Cancel
                         </Button>
                       </motion.div>
                     </Col>
                   </Row>
                 </>
-              ) : (
+              )} 
+              {ongoing.ongoing && !ongoing.start && (
+                <>
+                  <Row gutter={[10, 10]} className="w-100 m-t-auto">
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
+                      <motion.div whileTap={{ scale: 0.96 }}>
+                        <Button block type="primary" onClick={(ongoing.ongoing && !ongoing.start) ? onPlantedHandler : () => {}}>
+                          Planted
+                        </Button>
+                      </motion.div>
+                    </Col>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
+                      <motion.div whileTap={{ scale: 0.96 }}>
+                        <Button block className="btn-white" onClick={onCancelPlantedHandler}>
+                          Cancel
+                        </Button>
+                      </motion.div>
+                    </Col>
+                  </Row>
+                </>
+              )}
+              {!ongoing.ongoing && (
                 <>
                   <p className="mb0 mt1">{plant.plants_growth_value} <span className="text-capitalize">{plant.plants_growth_type}</span></p>
                   <p className="mb0">Difficutly level <b className="text-orange text-capitalize">{plant.plants_difficulty_level}</b></p>

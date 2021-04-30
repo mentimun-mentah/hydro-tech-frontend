@@ -1,3 +1,4 @@
+import { withAuth } from "lib/withAuth";
 import { useState, useEffect } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useSelector, useDispatch } from 'react-redux'
@@ -596,4 +597,4 @@ AddPlants.getInitialProps = async ctx => {
   ctx.store.dispatch(actions.getPlantSuccess(res.data))
 }
 
-export default AddPlants
+export default withAuth(AddPlants)
