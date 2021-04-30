@@ -31,7 +31,7 @@ const Home = () => {
 
   return (
     <>
-      <main className={`${md ? 'p-t-88' : 'p-t-40'} site-body`}>
+      <main className={`${md ? 'p-t-88' : 'p-t-40'} site-body`} id="home">
         <div className="container-fluid">
           <Row gutter={[20, 20]} justify="center" align="middle">
             <Col xl={24} lg={24} md={23} sm={23} xs={23}>

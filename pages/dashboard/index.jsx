@@ -1,6 +1,7 @@
 import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
 import { Joystick } from "react-joystick-component";
+import { useDispatch, useSelector } from 'react-redux'
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
 import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage, Steps } from "antd";
@@ -9,9 +10,13 @@ import { optionsPH } from "components/Dashboard/apexOption";
 import { WebSocketContext } from 'components/Layout/dashboard';
 import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData, } from "components/Dashboard/apexOption";
 
+import _ from 'lodash'
 import moment from "moment";
+import nookies from 'nookies'
+import axios from 'lib/axios'
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import * as actions from 'store/actions'
 import pageStyle from "components/Dashboard/pageStyle.js";
 import SetupProfileModal from 'components/Dashboard/SetupProfileModal'
 
@@ -24,6 +29,7 @@ const Loader1 = "/static/images/loader-1.gif";
 const Plant = "/static/images/leaf-outline.gif";
 const WaterTank = "/static/images/water-tank.svg";
 const Lecttuce = "/static/images/plant/lecttuce.png";
+const Sawi = "/static/images/plant/sawi.png";
 const Temperature = "/static/images/temperature.gif";
 
 const max_width_height = 90;
@@ -38,6 +44,8 @@ const Dashboard = () => {
   const router = useRouter();
   const screens = useBreakpoint();
   const ws = useContext(WebSocketContext)
+
+  const user = useSelector(state => state.auth.user)
 
   const [current, setCurrent] = useState(0)
   const [plantSelected, setPlantSelected] = useState("")
@@ -160,6 +168,19 @@ const Dashboard = () => {
   };
   /*MODAL CAMERA*/
 
+  useEffect(() => {
+    const cookies = nookies.get()
+    if(user && user.role !== "admin" && !Boolean(cookies.final_setup)){
+      setShowModalSetup(true)
+    }
+  }, [user])
+
+  useEffect(() => {
+    if(user && user.role === "admin") {
+      setShowModalSetup(false)
+    }
+  }, [user])
+
   return (
     <>
       <div className="header-dashboard">
@@ -249,7 +270,7 @@ const Dashboard = () => {
 
           <Row gutter={[20, 20]} style={{ marginTop: "20px" }}>
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
-              <Card className="radius1rem shadow1 h-100" bordered={false}>
+              <Card className="radius1rem shadow1 h-100 card-plant-dashboard" bordered={false}>
                 <h2 className="h2 bold mb0 line-height-1 flex justify-between">
                   Plant
                   <span onClick={onShowModalCamHandler}>
@@ -266,10 +287,12 @@ const Dashboard = () => {
                   <Image
                     width={imgWidth1}
                     height={imgWidth1}
-                    src={Lecttuce}
+                    src={Sawi}
                     alt="plant"
                   />
-                  <h4 className="h3 header-date mb0 mt1">Lecttuce</h4>
+                  <h3 className="h2 bold mb0">
+                    <span className="regular header-date">Sawi Manis</span>
+                  </h3>
                 </div>
               </Card>
             </Col>
@@ -512,10 +535,16 @@ const Dashboard = () => {
           height: 100vh;
           max-height: 100vh;
         }
+
       `}</style>
     </>
   );
 };
 
-// export default withAuth(Dashboard)
-export default Dashboard;
+Dashboard.getInitialProps = async ctx => {
+  let res = await axios.get(`/plants/all-plants?page=1&per_page=100`)
+  ctx.store.dispatch(actions.getPlantSuccess(res.data))
+}
+
+export default withAuth(Dashboard)
+// export default Dashboard;

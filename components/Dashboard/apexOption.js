@@ -116,6 +116,107 @@ export const optionsGrowth = {
   }
 }
 
+
+
+export const seriesPHWeek = [{
+  name: "PH",
+  data: [12.59, 10.93, 9.74, 15.79]
+}]
+
+export const seriesPHDay = [{
+  name: "PH",
+  data: [9.30, 8.72, 11.50, 8.38, 9.52, 13.13, 11.11]
+}]
+
+export const seriesPPMWeek = [{
+  name: "PPM",
+  data: [958, 881, 870, 949]
+}]
+
+export const seriesPPMDay = [{
+  name: "PPM",
+  data: [870, 913, 835, 834, 900, 878, 808]
+}]
+
+
+export const optionsPHWeekData = {
+  xaxis: {
+    max: 4,
+    categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
+  },
+  tooltip: {
+    enabled: true,
+    custom: ({series, seriesIndex, dataPointIndex}) => {
+      return(
+      '<div class="text-center">'+
+        '<p style="margin-bottom: 0;color:var(--grey-1); font-size: 12px!important; margin-top:5px;">'
+        + series[seriesIndex][dataPointIndex] + 
+        '<span style="color:var(--grey)"></span></p>'+
+      '</div>'
+      )
+    },
+  }
+}
+
+export const optionsPHDayData = {
+  xaxis: {
+    max: 7,
+    categories: [...Array(7)].map((_, x) => `Day ${x+1}`),
+  },
+  tooltip: {
+    enabled: true,
+    custom: ({series, seriesIndex, dataPointIndex}) => {
+      return(
+      '<div class="text-center">'+
+        '<p style="margin-bottom: 0;color:var(--grey-1); font-size: 12px!important; margin-top:5px;">'
+        + series[seriesIndex][dataPointIndex] + 
+        '<span style="color:var(--grey)"></span></p>'+
+      '</div>'
+      )
+    },
+  }
+}
+
+
+export const optionsPPMWeekData = {
+  xaxis: {
+    max: 4,
+    categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
+  },
+  tooltip: {
+    enabled: true,
+    custom: ({series, seriesIndex, dataPointIndex}) => {
+      return(
+      '<div class="text-center">'+
+        '<p style="margin-bottom: 0;color:var(--grey-1); font-size: 12px!important; margin-top:5px;">'
+        + series[seriesIndex][dataPointIndex] + 
+        '<span style="color:var(--grey)"> PPM</span></p>'+
+      '</div>'
+      )
+    },
+  }
+}
+
+export const optionsPPMDayData = {
+  xaxis: {
+    max: 7,
+    categories: [...Array(7)].map((_, x) => `Day ${x+1}`),
+  },
+  tooltip: {
+    enabled: true,
+    custom: ({series, seriesIndex, dataPointIndex}) => {
+      return(
+      '<div class="text-center">'+
+        '<p style="margin-bottom: 0;color:var(--grey-1); font-size: 12px!important; margin-top:5px;">'
+        + series[seriesIndex][dataPointIndex] + 
+        '<span style="color:var(--grey)"> PPM</span></p>'+
+      '</div>'
+      )
+    },
+  }
+}
+
+
 export const seriesWeekGrowth = [{
   name: "Week",
   data: [8.3, 9.3, 12.4, 14]
@@ -147,6 +248,8 @@ export const optionsWeekGrowthData = {
     },
   }
 }
+
+
 
 export const optionsDayGrowthData = {
   xaxis: {
