@@ -27,7 +27,7 @@ const HomeLayout = ({ children }) => {
           {md ? (
             <Menu mode="horizontal" defaultSelectedKeys={["home"]}>
               <Menu.Item key="home">
-                <Link href="/" as="/">
+                <Link href="/#home" as="/#home">
                   <a>Home</a>
                 </Link>
               </Menu.Item>

@@ -273,7 +273,7 @@ const Plants = () => {
               <p className="text-grey-1">{plantData.plants_desc}</p>
             </section>
             <section>
-              <h3 className="bold">Information to growth Bayam</h3>
+              <h3 className="bold">Information to growth {plantData.plants_name}</h3>
               <Row gutter={[20, 0]} className="text-grey-1">
                 <Col span={12}>
                   <p className="bold mb0 fs-22 line-height-1 text-shadow-detail">{plantData.plants_ph_max}</p>
