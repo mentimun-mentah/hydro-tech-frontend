@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { jsonHeaderHandler } from 'lib/axios'
+import { useDispatch, useSelector } from 'react-redux'
 import { Card, Row, Col, Image as AntImage, Form, Button, Space, Typography } from "antd"
 
 import Image from 'next/image'
@@ -20,6 +20,7 @@ const plantList = ["Bayam", "Brokoli", "Kangkung", "Kubis", "Pakcoy", "Seledri",
 const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelected }) => {
   const dispatch = useDispatch()
 
+  const plants = useSelector(state => state.plant.plant)
   const iot_token = useSelector(state => state.auth.iot_token)
 
   const [loading, setLoading] = useState(false)
@@ -50,9 +51,17 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
   }
   /* SUBMIT FORM FUNCTION */
 
+  const onFinishSetup = () => {
+    onStepChange(4)
+    nookies.set(null, 'final_setup', 'true', {
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/',
+    })
+  }
+
   return(
     <>
-      <Row justify="center" style={{ height: 'calc(100% - 40px)' }}>
+      <Row justify="center" style={{ height: 'calc(100% - 40px)' }} align="middle">
         <Col xl={8} lg={10} md={16} sm={24} xs={24}>
           <div className="step-container ">
             {current == 0 && (
@@ -62,29 +71,34 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                 <Form>
                   <Form.Item>
                     <div className="plantlist-container">
-                      {plantList.map(data => (
+                      {plants && plants.data && plants.data.length > 0 && plants.data.map(plant => (
                         <motion.div
-                          key={data} 
+                          key={plant.plants_id} 
                           whileHover={{ y: -4 }}
                           whileTap={{ scale: 0.98, y: 0 }}
                           className="card-plantlist"
                         >
                           <Card 
-                            className={`radius1rem card-body-p-1 ${plantSelected === data && "card-plantlist-selected"}`}
-                            onClick={() => setPlantSelected(data)}
+                            className={`radius1rem card-body-p-1 ${plantSelected === plant.plants_id && "card-plantlist-selected"}`}
+                            onClick={() => setPlantSelected(plant.plants_id)}
                           >
                             <Row gutter={[10,10]}>
                               <Col className="col-image-plantlist noselect">
-                                <AntImage width={60} src={Lecttuce} preview={false} alt="plant" className="align-sub noselect" />
+                                <AntImage 
+                                  width={60}
+                                  height={60} 
+                                  src={`${process.env.NEXT_PUBLIC_API_URL}/static/plants/${plant.plants_image}`}
+                                  alt="plant" className="align-sub noselect" 
+                                />
                               </Col>
                               <Col className="col-detail-plantlist">
-                                <h2 className="mb0 h4 bold title-plantlist">{data}</h2>
+                                <h2 className="mb0 h4 bold title-plantlist">{plant.plants_name}</h2>
                                 <p className="mb0 subtitle-plantlist h6 noselect">
-                                  <span className="bold text-orange">{Math.floor(Math.random() * 100)} </span>Days to grow
+                                  <span className="bold text-orange">{plant.plants_growth_value} </span>{plant.plants_growth_type} to grow
                                 </p>
                                 <p className="mb0 subtitle-plantlist h6 noselect">
                                   Difficulty level
-                                  <span className="bold text-orange"> Easy</span>
+                                  <span className="bold text-orange"> {plant.plants_difficulty_level}</span>
                                 </p>
                               </Col>
                             </Row>
@@ -230,7 +244,7 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                             size="large"
                             type="primary"
                             className="p-l-15 p-r-15"
-                            onClick={() => onStepChange(4)}
+                            onClick={onFinishSetup}
                           >
                             Go now
                           </Button>

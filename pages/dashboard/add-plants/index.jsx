@@ -21,6 +21,8 @@ import ErrorMessage from 'components/ErrorMessage'
 import pageStyle from 'components/Dashboard/pageStyle'
 import addPlantStyle from 'components/Dashboard/addPlantStyle'
 
+const formPlantCopy = deepCopy(formPlant)
+
 const per_page = 12
 
 const AddPlants = () => {
@@ -40,7 +42,7 @@ const AddPlants = () => {
 
   const resetInputField = () => {
     setTimeout(() => {
-      setPlant(formPlant)
+      setPlant(formPlantCopy)
       setImageList(formImage)
     }, 500)
   }
@@ -156,8 +158,8 @@ const AddPlants = () => {
         const errName = ["The name has already been taken.", "Nama sudah dipakai."]
 
         if(errDetail == signature_exp){
-          resNotification("success", "Success", successResponse)
           resetInputField()
+          resNotification("success", "Success", successResponse)
           fetchingPlantHandler()
           if(isUpdate) setIsUpdate(false)
         }
@@ -313,7 +315,6 @@ const AddPlants = () => {
                             max="20"
                             className="w-100"
                             placeholder="PH Maximum"
-                            name="ph_max"
                             value={ph_max.value}
                             onChange={e => onChangeHandler(e, "ph_max")}
                           />
@@ -334,7 +335,6 @@ const AddPlants = () => {
                             max="20"
                             className="w-100"
                             placeholder="PH Minimum"
-                            name="ph_min"
                             value={ph_min.value}
                             onChange={e => onChangeHandler(e, "ph_min")}
                           />
@@ -354,7 +354,6 @@ const AddPlants = () => {
                             max="3000"
                             className="w-100"
                             placeholder="TDS Minimum"
-                            name="tds_min"
                             value={tds_min.value}
                             onChange={e => onChangeHandler(e, "tds_min")}
                           />
@@ -379,7 +378,6 @@ const AddPlants = () => {
                                   min="0"
                                   max="1000000000"
                                   className="w-100 bor-right-rad-0"
-                                  name="growth_value"
                                   placeholder="e.g. 28"
                                   value={growth_value.value}
                                   onChange={e => onChangeHandler(e, "growth_value")}

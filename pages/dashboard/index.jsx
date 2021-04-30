@@ -1,6 +1,7 @@
 import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
 import { Joystick } from "react-joystick-component";
+import { useDispatch, useSelector } from 'react-redux'
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
 import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage, Steps } from "antd";
@@ -9,9 +10,13 @@ import { optionsPH } from "components/Dashboard/apexOption";
 import { WebSocketContext } from 'components/Layout/dashboard';
 import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData, } from "components/Dashboard/apexOption";
 
+import _ from 'lodash'
 import moment from "moment";
+import nookies from 'nookies'
+import axios from 'lib/axios'
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import * as actions from 'store/actions'
 import pageStyle from "components/Dashboard/pageStyle.js";
 import SetupProfileModal from 'components/Dashboard/SetupProfileModal'
 
@@ -39,9 +44,11 @@ const Dashboard = () => {
   const screens = useBreakpoint();
   const ws = useContext(WebSocketContext)
 
+  const user = useSelector(state => state.auth.user)
+
   const [current, setCurrent] = useState(0)
   const [plantSelected, setPlantSelected] = useState("")
-  const [showModalSetup, setShowModalSetup] = useState(true)
+  const [showModalSetup, setShowModalSetup] = useState(false)
 
   const [image, setImage] = useState("");
   const [heightPh, setHeightPh] = useState(465);
@@ -159,6 +166,19 @@ const Dashboard = () => {
     }
   };
   /*MODAL CAMERA*/
+
+  useEffect(() => {
+    const cookies = nookies.get()
+    if(user && user.role !== "admin" && !Boolean(cookies.final_setup)){
+      setShowModalSetup(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if(user && user.role === "admin") {
+      setShowModalSetup(false)
+    }
+  }, [user])
 
   return (
     <>
@@ -524,6 +544,11 @@ const Dashboard = () => {
     </>
   );
 };
+
+Dashboard.getInitialProps = async ctx => {
+  let res = await axios.get(`/plants/all-plants?page=1&per_page=100`)
+  ctx.store.dispatch(actions.getPlantSuccess(res.data))
+}
 
 export default withAuth(Dashboard)
 // export default Dashboard;

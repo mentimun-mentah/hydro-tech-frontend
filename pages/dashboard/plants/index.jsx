@@ -137,8 +137,6 @@ const Plants = () => {
     }
   }, [plants])
 
-  console.log(progressPlant)
-
   return (
     <>
       <div className="header-dashboard">
