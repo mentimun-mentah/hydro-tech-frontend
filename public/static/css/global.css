@@ -100,6 +100,10 @@ body {
   border-color: var(--grey-0)!important;
 }
 
+.ant-btn-circle {
+  border-radius: 50%!important;
+}
+
 .ant-input-number-handler-wrap {
   display: none!important;
 }
@@ -201,6 +205,10 @@ body {
   box-shadow: rgb(0 0 0 / 8%) 3px 8px 20px;
 }
 
+.text-purple {
+  color: var(--purple)!important;
+}
+
 .text-salmon {
   color: var(--salmon)!important;
 }
@@ -229,6 +237,10 @@ body {
   color: var(--grey-2)!important;
 }
 
+.text-green {
+  color: var(--green)!important;
+}
+
 .text-black {
   color: var(--black)!important;
 }
@@ -239,6 +251,14 @@ body {
 
 .text-reset {
   color: inherit!important;
+}
+
+.bg-white {
+  background-color: var(--white)!important;
+}
+
+.bg-whitesmoke {
+  background-color: var(--white-smoke)!important;
 }
 
 .vertical-align-middle {

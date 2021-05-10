@@ -103,6 +103,14 @@ const style = css`
   margin-bottom: 4px!important;
 }
 
+:global(.ant-menu-sub.ant-menu-inline) {
+  background: transparent;
+}
+
+:global(.ant-menu-submenu-arrow::before, .ant-menu-submenu-arrow::after) {
+  width: 7px;
+}
+
 :global(.logo) {
   padding-top: 1rem;
   padding-bottom: 15px;

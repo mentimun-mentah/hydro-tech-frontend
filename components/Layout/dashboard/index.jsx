@@ -10,7 +10,8 @@ import nookies from 'nookies'
 import * as actions from 'store/actions'
 
 const useBreakpoint = Grid.useBreakpoint
-const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS"
+const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", 
+  ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS", ADD_BLOG = "ADD-BLOG", MANAGE_BLOG = "MANAGE-BLOG"
 
 export const WebSocketContext = createContext()
 
@@ -28,6 +29,7 @@ const SidebarContainer = ({ children }) => {
 
   const onLogoutHandler = () => {
     dispatch(actions.logout())
+    ws.close()
     router.replace('/')
   }
 
@@ -41,7 +43,7 @@ const SidebarContainer = ({ children }) => {
   const wsConnect = () => {
     const cookies = nookies.get()
     if(cookies && cookies.csrf_access_token) {
-      ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
+      ws = new WebSocket(`ws://${process.env.NEXT_PUBLIC_API_URL}/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
 
       ws.onopen = () => {
         ws.send("Connected");
@@ -51,14 +53,12 @@ const SidebarContainer = ({ children }) => {
 
       ws.onclose = (e) => {
         ws.close()
-        console.log("Layout Disconected.\nReconnect will be attempted in 1 second.", e.reason);
+        console.log("Layout Disconected.\nReconnect will be attempted in 3 second.", e.reason);
         setTimeout(() => {
           wsConnect()
         }, 3000);
       };
     }
-    // ws = new WebSocket(`ws://192.168.18.37:8000/dashboard/ws?token=${tkn2}`);
-
 
     ws.onerror = (err) => {
       console.error('Socket encountered error: ', err.message, 'Closing socket');
@@ -185,13 +185,29 @@ const SidebarContainer = ({ children }) => {
                 Plants
               </Menu.Item>
               {user && user.role == "admin" && (
-                <Menu.Item 
-                  key={ADD_PLANTS}
-                  icon={<i className="far fa-hand-holding-seedling" />} 
-                  onClick={() => router.push('/dashboard/add-plants')}
-                >
-                  Add Plants
-                </Menu.Item>
+                <>
+                  <Menu.Item 
+                    key={ADD_PLANTS}
+                    icon={<i className="far fa-hand-holding-seedling" />} 
+                    onClick={() => router.push('/dashboard/add-plants')}
+                  >
+                    Add Plants
+                  </Menu.Item>
+                  <Menu.SubMenu key="blog-sub" icon={<i className="far fa-blog m-r-10" />} title="Blog">
+                    <Menu.Item 
+                      key={ADD_BLOG}
+                      onClick={() => router.push('/dashboard/add-blog')}
+                    >
+                      Add Blog
+                    </Menu.Item>
+                    <Menu.Item 
+                      key={MANAGE_BLOG}
+                      onClick={() => router.push('/dashboard/add-blog')}
+                    >
+                      Manage Blog
+                    </Menu.Item>
+                  </Menu.SubMenu>
+                </>
               )}
               <Menu.Item 
                 key={ACCOUNTS} 

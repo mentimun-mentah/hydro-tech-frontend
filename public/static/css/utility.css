@@ -16,6 +16,9 @@
 .h6 {
   font-size: 0.75rem!important;
 }
+.w-fit-content {
+  width: fit-content!important;
+}
 .w-80 {
   width: 100%!important;
 }
