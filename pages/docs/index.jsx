@@ -1,16 +1,17 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { SearchOutlined } from '@ant-design/icons'
-import { Row, Col, Button, Input, Divider } from 'antd'
+import { Row, Col, Button, Input, Card, Divider } from 'antd'
 
-import CardBlog from 'components/Card/Blog'
 import Pagination from 'components/Pagination'
 
+import Link from 'next/link'
+import Image from 'next/image'
 
-const Blog = () => {
-  const [q, setQ] = useState("")
-  const [page, setPage] = useState(2)
+const Hydro = '/static/images/blog/2.jpeg'
 
-  return (
+const Documentation = () => {
+  return(
     <>
       <div className="blog-image">
         <div className="container-fluid p-b-50 p-t-50 blog-image-inner">
@@ -20,8 +21,7 @@ const Blog = () => {
                 <Col span={24}>
                   <div className="text-center bg-whitesmoke--3 w-fit-content ml-auto mr-auto p-l-15 p-r-15 p-b-1 border-radius--5rem">
                     <h2 className="h1 bold mb1 text-purple">Hydro X Tech</h2>
-                    <h3 className="h2 bold mb1 text-grey-1">"Blog"</h3>
-                    <p className="text-grey-1 fs-16 m-b-5">Everything about hydroponics</p>
+                    <h3 className="h2 bold mb1 text-grey-1">"Documentation"</h3>
                   </div>
                 </Col>
                 <Col xl={10} lg={12} md={16} sm={24} xs={24}>
@@ -44,25 +44,37 @@ const Blog = () => {
             <Row gutter={[20, 20]}>
               {[...Array(12)].map((_, i) => (
                 <Col xl={8} lg={8} md={8} sm={12} xs={24} key={i}>
-                  <CardBlog />
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: ".2" }}
+                    className="h-100"
+                  >
+                    <Card 
+                      className="w-100 card-blog" 
+                      bordered={false}
+                      cover={<Image alt="blog" src="/static/images/arduino-boards.jpeg" width={350} height={250} />}
+                    >
+                      <small className="text-grey">Maret 01, 2021</small>
+                      <h1 className="h3 bold truncate line-height-3">
+                        Set-up your IoT devkit
+                      </h1>
+                      <p className="truncate-2">
+                        For sending your first Hello World on NB-IoT you can use an embedded developer kit (devkit). Devkits are available for all NB-IoT modules from different manufactures such as Quectel or ublox.
+                      </p>
+                      <Link href="/docs/asd">
+                        <a>
+                          <Button type="primary" ghost><b>Read more</b></Button>
+                        </a>
+                      </Link>
+                    </Card>
+                  </motion.div>
                 </Col>
               ))}
             </Row>
           </Col>
-
-          <Col span={24}>
-            <div className="text-center m-t-20 m-b-20">
-              <Pagination 
-                total={30} 
-                goTo={val => setPage(val)} 
-                current={page} 
-                hideOnSinglePage 
-                pageSize={10}
-              />
-            </div>
-          </Col>
         </Row>
-
       </div>
 
       <Divider className="p-b-10" />
@@ -88,7 +100,7 @@ const Blog = () => {
         }
 
         :global(.blog-image .blog-image-inner) {
-          background-image: url('/static/images/blog/blog-wrapper.jpg');
+          background-image: url('/static/images/bg-docs.jpg');
           background-repeat: no-repeat;
           background-size: cover;
           background-position: center;
@@ -103,4 +115,4 @@ const Blog = () => {
   )
 }
 
-export default Blog
+export default Documentation

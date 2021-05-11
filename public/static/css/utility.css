@@ -41,13 +41,16 @@
   text-decoration: none;
 }
 .bolder {
-  font-weight: 800;
+  font-weight: 800!important;
+}
+.fw-600 {
+  font-weight: 600!important;
 }
 .bold {
-  font-weight: 700;
+  font-weight: 700!important;
 }
 .regular {
-  font-weight: 400;
+  font-weight: 400!important;
 }
 .italic {
   font-style: italic;
@@ -909,6 +912,9 @@
 }
 .border-radius--5rem {
   border-radius: .5rem;
+}
+.border-radius-2px {
+  border-radius: 2px!important;
 }
 .rounded {
   border-radius: 3px;

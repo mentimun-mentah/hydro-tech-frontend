@@ -12,6 +12,7 @@ const Layout = ({ children }) => {
   const router = useRouter()
   const dispatch = useDispatch()
 
+  const isNoLayout = router.pathname.startsWith('/docs')
   const isHome = router.pathname.startsWith('/') || router.pathname.startsWith('/blog')
   const isAuth = router.pathname.startsWith('/auth') || router.pathname.startsWith('/password-reset')
   const isDashboard = router.pathname.startsWith('/dashboard')
@@ -28,6 +29,7 @@ const Layout = ({ children }) => {
   if(isHome) layout = <HomeLayout>{children}</HomeLayout>
   if(isDashboard) layout = <DasboardLayout>{children}</DasboardLayout>
   if(isAuth) layout = <AuthLayout>{children}</AuthLayout>
+  // if(isNoLayout) layout = <>{children}</>
 
   return layout
 }

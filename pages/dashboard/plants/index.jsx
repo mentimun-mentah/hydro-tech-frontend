@@ -61,7 +61,7 @@ const Plants = () => {
   const onCancelModalPlantedHandler = () => {
     setProgressPlant({id: plantData.plants_id, start: false})
     setShowModalPlanted(false)
-    setPlantData({})
+    // setPlantData({})
   }
   const onPlantedHandler = () => {
     const data = {...progressPlant, start: true}
@@ -72,12 +72,15 @@ const Plants = () => {
     setProgressPlant({id: "", start: false})
   }
   const onCongratsHandler = () => {
-    setPlantData({})
-    setProgressPlant({id: "", start: false})
+    // setProgressPlant({id: plantData.plants_id, start: false})
+    // setPlantData({})
+    // // setProgressPlant({id: "", start: false})
     setShowModal(true)
     setTimeout(() => {
       reward.current.rewardMe();
     }, 1000)
+    setProgressPlant({id: plantData.plants_id, start: false})
+    setShowModalPlanted(false)
   }
 
   useEffect(() => {

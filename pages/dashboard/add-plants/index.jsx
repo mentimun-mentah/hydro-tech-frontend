@@ -467,7 +467,7 @@ const AddPlants = () => {
 
           <Row gutter={[20, 20]}>
             <Col span={24}>
-              <div className="header-dashboard m-t-40 mb0">
+              <div className="header-dashboard m-t-40 m-b-5">
                 <h2 className="h2 bold mb0">Plant List</h2>
               </div>
 

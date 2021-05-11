@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import { Card, Popconfirm } from 'antd'
-import { useState, useEffect } from 'react'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 
 import Image from 'next/image'
@@ -20,7 +19,7 @@ const PlantCard = ({ plant, onGetEditData, onDeleteHandler }) => {
           actions={[
             <EditOutlined key="edit" onClick={onGetEditData} />,
             <Popconfirm
-              okText="Sure"
+              okText="Delete"
               onConfirm={onDeleteHandler}
               title={`Delete ${plant.plants_name}?`}
             >

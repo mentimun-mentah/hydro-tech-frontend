@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 export const optionsPH = {
   chart: {
     id: 'realtime',
@@ -73,7 +75,25 @@ export const optionsGrowth = {
     height: 350,
     foreColor: '#93999E',
     zoom: { enabled: false },
-    toolbar: { show: false },
+    toolbar: { 
+      show: true,
+      offsetY: '-32',
+      offsetX: '-46',
+      export: {
+        csv: {
+          filename: `Report ${moment().format('LLLL')}`
+        },
+        svg: {
+          filename: `Report ${moment().format('LLLL')}`
+        },
+        png: {
+          filename: `Report ${moment().format('LLLL')}`
+        }
+      },
+      tools: {
+        download: `<button class="ant-btn btn-white btn-export-graphic fw-600 border-radius-2px">Export</button>`,
+      }
+    },
   },
   grid: {
     borderColor: '#93999e24',

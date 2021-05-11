@@ -57,8 +57,8 @@ const HomeLayout = ({ children }) => {
                   <a>Blog</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item key="documentation">
-                <Link href="/blog" as="/blog">
+              <Menu.Item key="docs">
+                <Link href="/docs" as="/docs">
                   <a>Documentation</a>
                 </Link>
               </Menu.Item>
@@ -176,9 +176,9 @@ const HomeLayout = ({ children }) => {
               <a>Blog</a>
             </Link>
           </Menu.Item>
-          <Menu.Item key="dashboard">
-            <Link href="/dashboard" as="/dashboard">
-              <a>Dashboard</a>
+          <Menu.Item key="docs">
+            <Link href="/docs" as="/docs">
+              <a>Documentation</a>
             </Link>
           </Menu.Item>
           {(user && user.username && user.avatar) ? (

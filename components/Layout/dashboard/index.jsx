@@ -76,7 +76,11 @@ const SidebarContainer = ({ children }) => {
   /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
 
   useEffect(() => {
-    const data = router.pathname.split("/")[router.pathname.split("/").length - 1].toUpperCase()
+    let routeNow = router.pathname.split("/")[router.pathname.split("/").length - 1]
+    let data = routeNow.toUpperCase()
+    if(router.pathname.split("/")[router.pathname.split("/").length - 1].startsWith('[')) {
+      data = router.pathname.split("/")[router.pathname.split("/").length - 2].toUpperCase()
+    }
     setSelected(data)
   }, [router])
 
@@ -193,20 +197,6 @@ const SidebarContainer = ({ children }) => {
                   >
                     Add Plants
                   </Menu.Item>
-                  <Menu.SubMenu key="blog-sub" icon={<i className="far fa-blog m-r-10" />} title="Blog">
-                    <Menu.Item 
-                      key={ADD_BLOG}
-                      onClick={() => router.push('/dashboard/add-blog')}
-                    >
-                      Add Blog
-                    </Menu.Item>
-                    <Menu.Item 
-                      key={MANAGE_BLOG}
-                      onClick={() => router.push('/dashboard/add-blog')}
-                    >
-                      Manage Blog
-                    </Menu.Item>
-                  </Menu.SubMenu>
                 </>
               )}
               <Menu.Item 
@@ -216,6 +206,28 @@ const SidebarContainer = ({ children }) => {
               >
                 Accounts
               </Menu.Item>
+              {user && user.role == "admin" && (
+                <>
+                  <Menu.SubMenu 
+                    key="blog-sub" 
+                    icon={<i className="far fa-blog m-r-10" />} 
+                    title={collapsed ? "" : "Blog"}
+                  >
+                    <Menu.Item 
+                      key={ADD_BLOG}
+                      onClick={() => router.push('/dashboard/add-blog')}
+                    >
+                      Add Blog
+                    </Menu.Item>
+                    <Menu.Item 
+                      key={MANAGE_BLOG}
+                      onClick={() => router.push('/dashboard/manage-blog')}
+                    >
+                      Manage Blog
+                    </Menu.Item>
+                  </Menu.SubMenu>
+                </>
+              )}
               <Menu.Item 
                 key={LOGOUT} 
                 icon={<i className="far fa-sign-out" />}
@@ -244,6 +256,19 @@ const SidebarContainer = ({ children }) => {
             background-color: white;
             box-shadow: rgb(0 0 0 / 8%) 3px 8px 20px;
           }
+        }
+        :global(.ant-layout-sider-custom .ant-layout-sider-children .ant-menu-submenu-selected) {
+          color: var(--black);
+        }
+        :global(.ant-layout-sider-custom .ant-layout-sider-children .ant-menu-submenu-selected .ant-menu-item:active, 
+                .ant-layout-sider-custom .ant-layout-sider-children .ant-menu-submenu-selected .ant-menu-submenu-title:active) {
+          border-radius: .8rem;
+        }
+        :global(.ant-menu-submenu:hover > .ant-menu-submenu-title > .ant-menu-submenu-expand-icon, .ant-menu-submenu:hover > .ant-menu-submenu-title > .ant-menu-submenu-arrow) {
+          color: var(--black)!important;
+        }
+        :global(.ant-menu-submenu-arrow) {
+          color: var(--grey);
         }
       `}</style>
     </>

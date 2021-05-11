@@ -24,7 +24,7 @@ import addPlantStyle from 'components/Dashboard/addPlantStyle'
 
 const Editor = dynamic(import('components/Editor'), { ssr: false })
 
-const AddBlog = () => {
+const ManageBlog = () => {
   const dispatch = useDispatch()
 
   const [plant, setPlant] = useState(formPlant)
@@ -41,7 +41,7 @@ const AddBlog = () => {
             <Col span={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
                 <div className="header-dashboard">
-                  <h2 className="h2 bold">{isUpdate ? "Update" : "Add"} Blog</h2>
+                  <h2 className="h2 bold">Update Blog</h2>
                   <Form name="AddBlog" layout="vertical">
                     <Row gutter={[20, 20]}>
                       <Col xl={24} lg={24} md={24} sm={24} xs={24}>
@@ -124,4 +124,4 @@ const AddBlog = () => {
   )
 }
 
-export default withAuth(AddBlog)
+export default withAuth(ManageBlog)
