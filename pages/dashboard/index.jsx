@@ -21,6 +21,7 @@ import pageStyle from "components/Dashboard/pageStyle.js";
 import SetupProfileModal from 'components/Dashboard/SetupProfileModal'
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
+const ReactNipple = dynamic(() => import('react-nipple'), { ssr: false })
 
 const Camera = "/static/images/camera.svg";
 const Sun = "/static/images/sun-outline.gif";
@@ -39,6 +40,8 @@ const initialStatistic = { temp: "0", tank: "0", tds: "0", ldr: "bright", ph: "0
 
 const steps = [ { title: 'Plant', }, { title: 'Camera', }, { title: 'Token', }, { title: 'Control', }, { title: 'Finish', } ];
 
+const MIN = 0, MAX = 180, DELAY = 50
+
 const Dashboard = () => {
   const router = useRouter();
   const screens = useBreakpoint();
@@ -54,10 +57,13 @@ const Dashboard = () => {
   const [heightPh, setHeightPh] = useState(465);
   const [showModalCam, setShowModalCam] = useState(false);
   const [seriesPh, setSeriesPh] = useState(initDataSeries);
+  const [position, setPosition] = useState({ x: 90, y: 90 });
   const [statistic, setStatistic] = useState([initialStatistic]);
   const [size, setSize] = useState({ imgWidth1: 100, imgWidth2: 120, imgWidth3: 140, });
 
   const statisticLength = statistic.length;
+
+  const { x, y } = position
   const { imgWidth1, imgWidth2, imgWidth3 } = size;
 
   const onStepChange = val => {
@@ -119,6 +125,78 @@ const Dashboard = () => {
     }
   }
 
+  const sendServoData = (horizontal, vertical) => {
+    console.log(`kind:set_value_servo,sh:${vertical},sv:${horizontal}`);
+    if (ws && ws.send && ws.readyState == 1 && showModalCam) {
+      ws.send(`kind:set_value_servo,sh:${vertical},sv:${horizontal}`);
+    }
+  }
+
+  // horizontal x
+  const onUp = () => {
+    const data = { ...position, x: x + 2 }
+    if(x < MAX) {
+      setPosition(data)
+      sendServoData(x + 2, y)
+      return
+      setTimeout(() => {
+        sendServoData(x + 2, y)
+        setPosition(data)
+      }, DELAY)
+    }
+  }
+  const onDown = () => {
+    const data = { ...position, x: x - 2 }
+    if(x > MIN) {
+      setPosition(data)
+      sendServoData(x - 2, y)
+      return
+      setTimeout(() => {
+        sendServoData(x - 2, y)
+        setPosition(data)
+      }, DELAY)
+    }
+  }
+  const onLeft = () => {
+    const data = { ...position, y: y - 2 }
+    if(y > MIN) {
+      setPosition(data)
+      sendServoData(x, y - 2)
+      return
+      setTimeout(() => {
+        sendServoData(x, y - 2)
+        setPosition(data)
+      }, DELAY)
+    }
+  }
+  const onRight = () => {
+    const data = { ...position, y: y + 2 }
+    if(y < MAX) {
+      setPosition(data)
+      sendServoData(x, y + 2)
+      return
+      setTimeout(() => {
+        sendServoData(x, y + 2)
+        setPosition(data)
+      }, DELAY)
+    }
+  }
+
+  const onStickMove = (direction) => {
+    switch (direction) {
+      case "BACKWARD":
+        return onUp()
+      case "FORWARD":
+        return onDown()
+      case "RIGHT":
+        return onLeft()
+      case "LEFT":
+        return onRight()
+      default: 
+        return sendServoData(x, y)
+    }
+  }
+
 
   /*MODAL CAMERA*/
   const onShowModalCamHandler = () => {
@@ -146,7 +224,7 @@ const Dashboard = () => {
     else document.body.classList.remove("overflow-hidden");
   }, [showModalCam]);
 
-  const onJoyStickMoved = ({ x, y }) => {
+  const onJoyStickMoved = ({ x, y, direction }) => {
     const center = 90;
     let horizontal = x * 2;
     let vertical = y * 2;
@@ -159,11 +237,15 @@ const Dashboard = () => {
     if (vertical > 0) vertical = center - y * 2;
     if (vertical < 0) vertical = center + Math.abs(y * 2);
 
-    console.log(`horizontal: ${horizontal}, vertical: ${vertical}`);
+    // console.log(`horizontal: ${horizontal}, vertical: ${vertical}`);
 
-    if (ws && ws.send && ws.readyState == 1 && showModalCam) {
-      ws.send(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`);
-    }
+    onStickMove(direction)
+
+    // setPosition({x: horizontal, y: vertical})
+
+    // if (ws && ws.send && ws.readyState == 1 && showModalCam) {
+    //   ws.send(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`);
+    // }
   };
   /*MODAL CAMERA*/
 
@@ -386,6 +468,8 @@ const Dashboard = () => {
         closeIcon={<i className="fas fa-times" />}
         maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
       >
+        <p>horizontal: : {x}</p>
+        <p>vertical: {y}</p>
         {image == "" ? (
           <motion.div
             className="text-center"
