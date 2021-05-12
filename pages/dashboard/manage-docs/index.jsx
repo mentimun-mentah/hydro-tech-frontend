@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { Layout, Row, Col, Form, Input } from 'antd'
 
 import _ from 'lodash'
+import React from 'react'
 import dynamic from 'next/dynamic'
 import Pagination from 'components/Pagination'
 import CardLoading from 'components/Card/CardLoading'

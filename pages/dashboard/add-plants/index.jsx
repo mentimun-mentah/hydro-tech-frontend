@@ -12,6 +12,7 @@ import { imageValidation, imagePreview, uploadButton } from 'lib/imageUploader'
 import { formHeaderHandler, formErrorMessage, signature_exp, resNotification, jsonHeaderHandler } from 'lib/axios'
 
 import _ from 'lodash'
+import React from 'react'
 import axios from 'lib/axios'
 import dynamic from 'next/dynamic'
 import isIn from 'validator/lib/isIn'

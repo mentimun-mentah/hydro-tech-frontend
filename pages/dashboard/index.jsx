@@ -1,7 +1,7 @@
 import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
 import { Joystick } from "react-joystick-component";
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
 import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage, Steps } from "antd";
@@ -28,7 +28,6 @@ const Moon = "/static/images/moon.gif";
 const Loader1 = "/static/images/loader-1.gif";
 const Plant = "/static/images/leaf-outline.gif";
 const WaterTank = "/static/images/water-tank.svg";
-const Lecttuce = "/static/images/plant/lecttuce.png";
 const Sawi = "/static/images/plant/sawi.png";
 const Temperature = "/static/images/temperature.gif";
 

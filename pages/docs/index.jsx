@@ -4,6 +4,7 @@ import { Row, Col, Button, Input, Divider } from 'antd'
 
 import Pagination from 'components/Pagination'
 
+import React from 'react'
 import dynamic from 'next/dynamic'
 import CardLoading from 'components/Card/CardLoading'
 

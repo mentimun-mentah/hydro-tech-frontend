@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { SearchOutlined } from '@ant-design/icons'
 import { Row, Col, Button, Input, Divider } from 'antd'
 
+import React from 'react'
 import dynamic from 'next/dynamic'
 import Pagination from 'components/Pagination'
 import CardLoading from 'components/Card/CardLoading'
