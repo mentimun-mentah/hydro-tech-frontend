@@ -44,9 +44,7 @@ const SidebarContainer = ({ children }) => {
   const wsConnect = () => {
     const cookies = nookies.get()
     if(cookies && cookies.csrf_access_token) {
-      let wsp = "ws"
-      if(process.env.NODE_ENV === "production") wsp = "wss"
-      ws = new WebSocket(`${wsp}://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
+      ws = new WebSocket(`ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
 
       ws.onopen = () => {
         ws.send("Connected");
