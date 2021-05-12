@@ -11,7 +11,8 @@ import * as actions from 'store/actions'
 
 const useBreakpoint = Grid.useBreakpoint
 const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", 
-  ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS", ADD_BLOG = "ADD-BLOG", MANAGE_BLOG = "MANAGE-BLOG"
+  ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS", ADD_BLOG = "ADD-BLOG", MANAGE_BLOG = "MANAGE-BLOG",
+  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS"
 
 export const WebSocketContext = createContext()
 
@@ -43,7 +44,9 @@ const SidebarContainer = ({ children }) => {
   const wsConnect = () => {
     const cookies = nookies.get()
     if(cookies && cookies.csrf_access_token) {
-      ws = new WebSocket(`ws://${process.env.NEXT_PUBLIC_API_URL}/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
+      let wsp = "ws"
+      if(process.env.NODE_ENV === "production") wsp = "wss"
+      ws = new WebSocket(`${wsp}://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
 
       ws.onopen = () => {
         ws.send("Connected");
@@ -224,6 +227,24 @@ const SidebarContainer = ({ children }) => {
                       onClick={() => router.push('/dashboard/manage-blog')}
                     >
                       Manage Blog
+                    </Menu.Item>
+                  </Menu.SubMenu>
+                  <Menu.SubMenu 
+                    key="docs-sub" 
+                    icon={<i className="far fa-book m-r-10" />} 
+                    title={collapsed ? "" : "Documentation"}
+                  >
+                    <Menu.Item 
+                      key={ADD_DOCS}
+                      onClick={() => router.push('/dashboard/add-docs')}
+                    >
+                      Add Docs
+                    </Menu.Item>
+                    <Menu.Item 
+                      key={MANAGE_DOCS}
+                      onClick={() => router.push('/dashboard/manage-docs')}
+                    >
+                      Manage Docs
                     </Menu.Item>
                   </Menu.SubMenu>
                 </>

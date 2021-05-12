@@ -13,13 +13,18 @@ import { formHeaderHandler, formErrorMessage, signature_exp, resNotification, js
 
 import _ from 'lodash'
 import axios from 'lib/axios'
+import dynamic from 'next/dynamic'
 import isIn from 'validator/lib/isIn'
 import * as actions from 'store/actions'
 import Pagination from 'components/Pagination'
-import PlantCard from 'components/Card/PlantAdmin'
 import ErrorMessage from 'components/ErrorMessage'
 import pageStyle from 'components/Dashboard/pageStyle'
+import PlantCardLoading from 'components/Card/PlantLoading'
 import addPlantStyle from 'components/Dashboard/addPlantStyle'
+
+const PlantCardLoadingMemo = React.memo(PlantCardLoading)
+const PlantCard = dynamic(() => import('components/Card/PlantAdmin'), { ssr: false, loading: () => <PlantCardLoadingMemo />  })
+const PlantCardMemo = React.memo(PlantCard)
 
 const formPlantCopy = deepCopy(formPlant)
 
@@ -511,7 +516,7 @@ const AddPlants = () => {
                   <Row gutter={[20, 20]}>
                       {plants && plants.data && plants.data.length > 0 && plants.data.map(plant => (
                         <Col xl={6} lg={8} md={8} sm={12} xs={12} key={plant.plants_id}>
-                          <PlantCard 
+                          <PlantCardMemo 
                             plant={plant} 
                             onGetEditData={() => onGetEditData(plant)}
                             onShowModal={() => setShowModal(!showModal)}

@@ -1,5 +1,4 @@
 import { withAuth } from 'lib/withAuth'
-import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { Layout, Row, Col, Form, Input } from 'antd'
 
@@ -11,12 +10,12 @@ import pageStyle from 'components/Dashboard/pageStyle'
 import addPlantStyle from 'components/Dashboard/addPlantStyle'
 
 const CardLoadingMemo = React.memo(CardLoading)
-const CardBlog = dynamic(() => import('components/Card/BlogAdmin'), { ssr: false, loading: () => <CardLoadingMemo />  })
-const CardBlogMemo = React.memo(CardBlog)
+const CardDocs = dynamic(() => import('components/Card/DocsAdmin'), { ssr: false, loading: () => <CardLoadingMemo />  })
+const CardDocsMemo = React.memo(CardDocs)
 
 const per_page = 12
 
-const ManageBlog = () => {
+const ManageDocumentation = () => {
   return(
     <>
       <Layout>
@@ -25,7 +24,7 @@ const ManageBlog = () => {
           <Row gutter={[20, 20]}>
             <Col span={24}>
               <div className="header-dashboard m-b-5">
-                <h2 className="h2 bold mb0">Manage Blog</h2>
+                <h2 className="h2 bold mb0">Manage Documentation</h2>
               </div>
 
               <Form layout="vertical">
@@ -34,7 +33,9 @@ const ManageBlog = () => {
                     <Form.Item className="">
                       <Input
                         size="large"
-                        placeholder="Search article"
+                        // value={q}
+                        // onChange={e => setQ(e.target.value)}
+                        placeholder="Search documentation"
                         prefix={<i className="far fa-search text-grey" />}
                       />
                     </Form.Item>
@@ -50,7 +51,7 @@ const ManageBlog = () => {
                       <Row gutter={[20, 20]}>
                         {[...Array(12)].map((_, i) => (
                           <Col xl={8} lg={12} md={12} sm={24} xs={24} key={i}>
-                            <CardBlogMemo />
+                            <CardDocsMemo />
                           </Col>
                         ))}
                       </Row>
@@ -84,4 +85,4 @@ const ManageBlog = () => {
   )
 }
 
-export default withAuth(ManageBlog)
+export default withAuth(ManageDocumentation)

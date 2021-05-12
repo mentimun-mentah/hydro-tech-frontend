@@ -1,16 +1,19 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { SearchOutlined } from '@ant-design/icons'
-import { Row, Col, Button, Input, Card, Divider } from 'antd'
+import { Row, Col, Button, Input, Divider } from 'antd'
 
 import Pagination from 'components/Pagination'
 
-import Link from 'next/link'
-import Image from 'next/image'
+import dynamic from 'next/dynamic'
+import CardLoading from 'components/Card/CardLoading'
 
-const Hydro = '/static/images/blog/2.jpeg'
+const CardLoadingMemo = React.memo(CardLoading)
+const CardDocs = dynamic(() => import('components/Card/Docs'), { ssr: false, loading: () => <CardLoadingMemo />  })
+const CardDocsMemo = React.memo(CardDocs)
 
 const Documentation = () => {
+  const [page, setPage] = useState(2)
+
   return(
     <>
       <div className="blog-image">
@@ -44,36 +47,24 @@ const Documentation = () => {
             <Row gutter={[20, 20]}>
               {[...Array(12)].map((_, i) => (
                 <Col xl={8} lg={8} md={8} sm={12} xs={24} key={i}>
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: ".2" }}
-                    className="h-100"
-                  >
-                    <Card 
-                      className="w-100 card-blog" 
-                      bordered={false}
-                      cover={<Image alt="blog" src="/static/images/arduino-boards.jpeg" width={350} height={250} />}
-                    >
-                      <small className="text-grey">Maret 01, 2021</small>
-                      <h1 className="h3 bold truncate line-height-3">
-                        Set-up your IoT devkit
-                      </h1>
-                      <p className="truncate-2">
-                        For sending your first Hello World on NB-IoT you can use an embedded developer kit (devkit). Devkits are available for all NB-IoT modules from different manufactures such as Quectel or ublox.
-                      </p>
-                      <Link href="/docs/asd">
-                        <a>
-                          <Button type="primary" ghost><b>Read more</b></Button>
-                        </a>
-                      </Link>
-                    </Card>
-                  </motion.div>
+                  <CardDocsMemo />
                 </Col>
               ))}
             </Row>
           </Col>
+
+          <Col span={24}>
+            <div className="text-center m-t-20 m-b-20">
+              <Pagination 
+                total={30} 
+                goTo={val => setPage(val)} 
+                current={page} 
+                hideOnSinglePage 
+                pageSize={10}
+              />
+            </div>
+          </Col>
+
         </Row>
       </div>
 

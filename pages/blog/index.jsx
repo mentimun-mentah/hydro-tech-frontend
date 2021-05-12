@@ -2,12 +2,16 @@ import { useState } from 'react'
 import { SearchOutlined } from '@ant-design/icons'
 import { Row, Col, Button, Input, Divider } from 'antd'
 
-import CardBlog from 'components/Card/Blog'
+import dynamic from 'next/dynamic'
 import Pagination from 'components/Pagination'
+import CardLoading from 'components/Card/CardLoading'
+
+const CardLoadingMemo = React.memo(CardLoading)
+const CardBlog = dynamic(() => import('components/Card/Blog'), { ssr: false, loading: () => <CardLoadingMemo />  })
+const CardBlogMemo = React.memo(CardBlog)
 
 
 const Blog = () => {
-  const [q, setQ] = useState("")
   const [page, setPage] = useState(2)
 
   return (
@@ -44,7 +48,7 @@ const Blog = () => {
             <Row gutter={[20, 20]}>
               {[...Array(12)].map((_, i) => (
                 <Col xl={8} lg={8} md={8} sm={12} xs={24} key={i}>
-                  <CardBlog />
+                  <CardBlogMemo />
                 </Col>
               ))}
             </Row>
