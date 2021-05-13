@@ -127,10 +127,6 @@ const Reports = () => {
       <Layout>
         <Layout.Content>
 
-          <CSVLink data={dataSource} headers={headersTableExport}>
-            Download me
-          </CSVLink>
-
           <Row gutter={[20, 20]}>
             <Col xl={24} lg={24} md={24} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>

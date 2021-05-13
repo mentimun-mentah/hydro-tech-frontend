@@ -25,11 +25,6 @@ const ModalConfigCam = ({ visible, onClose }) => {
     }, 3000)
   }
 
-  const onCloseHandler = () => {
-    setLoading(true)
-    onClose()
-  }
-
   return(
     <>
       <Modal
@@ -42,7 +37,7 @@ const ModalConfigCam = ({ visible, onClose }) => {
         visible={visible}
         bodyStyle={{ paddingTop: "0px" }}
         className="modal-modif noselect"
-        onCancel={onCloseHandler}
+        onCancel={onClose}
         closeIcon={<i className="fas fa-times" />}
         maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
       >
