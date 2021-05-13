@@ -1,7 +1,8 @@
+import { CSVLink } from "react-csv"
 import { withAuth } from "lib/withAuth";
 import { useState, useEffect } from 'react'
 import { optionsGrowth } from 'components/Dashboard/apexOption'
-import { Layout, Card, Row, Col, Radio, Tabs, Badge, Timeline, Table, Button, Grid, Select, Space } from 'antd'
+import { Layout, Card, Row, Col, Radio, Tabs, Badge, Table, Button, Grid, Select, Space, Dropdown, Menu } from 'antd'
 
 import { columns, dataSource, progressData } from 'columns/sensorReport'
 import { seriesPHWeek, seriesPHDay, seriesPPMWeek, seriesPPMDay } from 'components/Dashboard/apexOption'
@@ -18,6 +19,18 @@ const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 const DAY = "DAY", WEEK = "WEEK", MONTH = "MONTH"
 const PH = "PH", PPM = "PPM"
 const useBreakpoint = Grid.useBreakpoint
+
+const headersTableExport = [
+  { label: "PH", key: "" }, //ph
+  { label: "Nutrition", key: "" }, //tds
+  { label: "Light Status", key: "" }, //ldr
+  { label: "Water Temp.", key: "" }, //tmp
+  { label: "Water Level", key: "" }, //tank
+  { label: "Time", key: "" },
+  { label: "", key: "" },
+  { label: "", key: "" },
+];
+ 
 
 const Reports = () => {
   const screens = useBreakpoint()
@@ -93,7 +106,16 @@ const Reports = () => {
     }
   }, [selectedAnalysisTime, selectedAnalysis])
 
-
+  const exportMenuTable = (
+    <Menu>
+      <Menu.Item onClick={() => generatePDF(dataSource)} className="fs-12 fw-600">
+        Download PDF
+      </Menu.Item>
+      <Menu.Item onClick={() => generatePDF(dataSource)} className="fs-12 fw-600">
+        Download CSV
+      </Menu.Item>
+    </Menu>
+  )
 
   return(
     <>
@@ -104,6 +126,10 @@ const Reports = () => {
 
       <Layout>
         <Layout.Content>
+
+          <CSVLink data={dataSource} headers={headersTableExport}>
+            Download me
+          </CSVLink>
 
           <Row gutter={[20, 20]}>
             <Col xl={24} lg={24} md={24} sm={24} xs={24}>
@@ -128,9 +154,8 @@ const Reports = () => {
                         onChange={onChangeSelectedAnalysisTimeHanlder} 
                         className="select-no-rounded m-r-82"
                       >
-                        <Select.Option value={DAY}>Daily</Select.Option>
-                        <Select.Option value={WEEK}>Weekly</Select.Option>
-                        <Select.Option value={MONTH}>Monthly</Select.Option>
+                        <Select.Option value={DAY}>Last 7 days</Select.Option>
+                        <Select.Option value={WEEK}>Last 30 days</Select.Option>
                       </Select>
                     </div>
                     <div className="chart">
@@ -191,15 +216,15 @@ const Reports = () => {
                   </Col>
                   <Col lg={12} md={12} sm={12} xs={24}>
                     <Space className={`${!screens.xs && "float-right"}`}>
-                      <Select defaultValue="all">
-                        <Select.Option value="all">All Time</Select.Option>
-                        <Select.Option value="day">Daily</Select.Option>
-                        <Select.Option value="week">Weekly</Select.Option>
-                        <Select.Option value="month">Monthly</Select.Option>
+                      <Select defaultValue="today">
+                        <Select.Option value="today">Today</Select.Option>
+                        <Select.Option value="week">Last 7 days</Select.Option>
+                        <Select.Option value="month">Last 30 days</Select.Option>
+                        <Select.Option value="month2">Last 90 days</Select.Option>
                       </Select>
-                      <Button className="btn-white" onClick={() => generatePDF(dataSource)}>
-                        Export
-                      </Button>
+                      <Dropdown overlay={exportMenuTable} placement="bottomRight">
+                        <Button className="btn-white">Export</Button>
+                      </Dropdown>
                     </Space>
                   </Col>
                 </Row>

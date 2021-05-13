@@ -12,7 +12,7 @@ import * as actions from 'store/actions'
 const useBreakpoint = Grid.useBreakpoint
 const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", 
   ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS", ADD_BLOG = "ADD-BLOG", MANAGE_BLOG = "MANAGE-BLOG",
-  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS"
+  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS", CHAT = "CHAT"
 
 export const WebSocketContext = createContext()
 
@@ -186,6 +186,20 @@ const SidebarContainer = ({ children }) => {
               >
                 Plants
               </Menu.Item>
+              <Menu.Item 
+                key={ACCOUNTS} 
+                icon={<i className="far fa-user" />} 
+                onClick={() => router.push('/dashboard/accounts')}
+              >
+                Accounts
+              </Menu.Item>
+              <Menu.Item 
+                key={CHAT} 
+                icon={<i className="far fa-comments-alt" />} 
+                onClick={() => router.push('/dashboard/chats')}
+              >
+                Room Chat
+              </Menu.Item>
               {user && user.role == "admin" && (
                 <>
                   <Menu.Item 
@@ -195,17 +209,6 @@ const SidebarContainer = ({ children }) => {
                   >
                     Add Plants
                   </Menu.Item>
-                </>
-              )}
-              <Menu.Item 
-                key={ACCOUNTS} 
-                icon={<i className="far fa-user" />} 
-                onClick={() => router.push('/dashboard/accounts')}
-              >
-                Accounts
-              </Menu.Item>
-              {user && user.role == "admin" && (
-                <>
                   <Menu.SubMenu 
                     key="blog-sub" 
                     icon={<i className="far fa-blog m-r-10" />} 
