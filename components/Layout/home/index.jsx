@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useRouter } from 'next/router'
 import { useSelector } from 'react-redux'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu, Row, Col, Button, Divider, Grid, Drawer } from 'antd'
 
@@ -9,11 +10,21 @@ import Image from 'next/image'
 const useBreakpoint = Grid.useBreakpoint
 
 const HomeLayout = ({ children }) => {
-  const { md } = useBreakpoint()
+  const router = useRouter()
+  const { lg } = useBreakpoint()
 
   const user = useSelector(state => state.auth.user)
 
   const [visible, setIsVisible] = useState(false)
+  const [selected, setSelected] = useState("home")
+
+  useEffect(() => {
+    let data = ""
+    if(router.asPath.indexOf("#") == "-1") data = router.pathname.split("/")[1]
+    else data = router.asPath.split("/")[1]
+    setSelected(data)
+    return () => data = ""
+  }, [router])
 
   return(
     <>
@@ -24,19 +35,19 @@ const HomeLayout = ({ children }) => {
           </a>
         </div>
         <div className="menuCon">
-          {md ? (
-            <Menu mode="horizontal" defaultSelectedKeys={["home"]}>
+          {lg ? (
+            <Menu mode="horizontal" defaultSelectedKeys={[selected]}>
               <Menu.Item key="home">
                 <Link href="/#home" as="/#home">
                   <a>Home</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item key="service">
+              <Menu.Item key="#service">
                 <Link href="/#service" as="/#service">
                   <a>Service</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item key="about">
+              <Menu.Item key="#about">
                 <Link href="/#about" as="/#about">
                   <a>About Us</a>
                 </Link>
@@ -46,8 +57,8 @@ const HomeLayout = ({ children }) => {
                   <a>Blog</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item key="documentation">
-                <Link href="/blog" as="/blog">
+              <Menu.Item key="docs">
+                <Link href="/docs" as="/docs">
                   <a>Documentation</a>
                 </Link>
               </Menu.Item>
@@ -165,9 +176,9 @@ const HomeLayout = ({ children }) => {
               <a>Blog</a>
             </Link>
           </Menu.Item>
-          <Menu.Item key="dashboard">
-            <Link href="/dashboard" as="/dashboard">
-              <a>Dashboard</a>
+          <Menu.Item key="docs">
+            <Link href="/docs" as="/docs">
+              <a>Documentation</a>
             </Link>
           </Menu.Item>
           {(user && user.username && user.avatar) ? (

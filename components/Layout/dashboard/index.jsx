@@ -6,10 +6,13 @@ import { useState, useEffect, createContext } from 'react'
 
 import Style from './style'
 import SplitText from './SplitText'
+import nookies from 'nookies'
 import * as actions from 'store/actions'
 
 const useBreakpoint = Grid.useBreakpoint
-const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS"
+const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", 
+  ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS", ADD_BLOG = "ADD-BLOG", MANAGE_BLOG = "MANAGE-BLOG",
+  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS"
 
 export const WebSocketContext = createContext()
 
@@ -27,6 +30,7 @@ const SidebarContainer = ({ children }) => {
 
   const onLogoutHandler = () => {
     dispatch(actions.logout())
+    ws.close()
     router.replace('/')
   }
 
@@ -38,27 +42,24 @@ const SidebarContainer = ({ children }) => {
 
   /*WEBSOCKET*/
   const wsConnect = () => {
-    let tkn =
-      "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5MjQ4MzU1LCJuYmYiOjE2MTkyNDgzNTUsImp0aSI6IjE2MGQ0N2FkLWM1YzctNDFiMy04MDA3LTlmMWJhMTkyNGMwYyIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0Njc2YjFmZS00ZTEyLTRhZDItODViZS01NzVlYzcxOWVmNDQifQ.w3PvDUeTPevHr0cOB6OzlVbZLJag7PH5yZS_n91RlV8";
+    const cookies = nookies.get()
+    if(cookies && cookies.csrf_access_token) {
+      ws = new WebSocket(`ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
 
-    let tkn2 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjE5NTQ3MjA4LCJuYmYiOjE2MTk1NDcyMDgsImp0aSI6IjBiZmFhODViLTcxZmQtNGE2OS05YzVkLWJjY2U3MTA2MTgxZSIsInR5cGUiOiJhY2Nlc3MiLCJmcmVzaCI6ZmFsc2UsImNzcmYiOiI0N2M3ODcwYi1mZDk2LTQwZjYtYTBmYy1jZTkyYmMxYWQ2YTkifQ.XBQncUZojqtBLlqiup2xT7heyQSggaiMWu15RfomEJo";
+      ws.onopen = () => {
+        ws.send("Connected");
+        console.log("Connected");
+        ws.send(`kind:live_cam_false`);
+      };
 
-    // ws = new WebSocket(`ws://192.168.18.37:8000/dashboard/ws?token=${tkn2}`);
-    ws = new WebSocket(`ws://192.168.18.86:8000/dashboard/ws?token=${tkn}`);
-
-    ws.onopen = () => {
-      ws.send("Connected");
-      console.log("Connected");
-      ws.send(`kind:live_cam_false`);
-    };
-
-    ws.onclose = (e) => {
-      ws.close()
-      console.log("Layout Disconected.\nReconnect will be attempted in 1 second.", e.reason);
-      setTimeout(() => {
-        wsConnect()
-      }, 3000);
-    };
+      ws.onclose = (e) => {
+        ws.close()
+        console.log("Layout Disconected.\nReconnect will be attempted in 3 second.", e.reason);
+        setTimeout(() => {
+          wsConnect()
+        }, 3000);
+      };
+    }
 
     ws.onerror = (err) => {
       console.error('Socket encountered error: ', err.message, 'Closing socket');
@@ -76,7 +77,11 @@ const SidebarContainer = ({ children }) => {
   /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
 
   useEffect(() => {
-    const data = router.pathname.split("/")[router.pathname.split("/").length - 1].toUpperCase()
+    let routeNow = router.pathname.split("/")[router.pathname.split("/").length - 1]
+    let data = routeNow.toUpperCase()
+    if(router.pathname.split("/")[router.pathname.split("/").length - 1].startsWith('[')) {
+      data = router.pathname.split("/")[router.pathname.split("/").length - 2].toUpperCase()
+    }
     setSelected(data)
   }, [router])
 
@@ -185,13 +190,15 @@ const SidebarContainer = ({ children }) => {
                 Plants
               </Menu.Item>
               {user && user.role == "admin" && (
-                <Menu.Item 
-                  key={ADD_PLANTS}
-                  icon={<i className="far fa-hand-holding-seedling" />} 
-                  onClick={() => router.push('/dashboard/add-plants')}
-                >
-                  Add Plants
-                </Menu.Item>
+                <>
+                  <Menu.Item 
+                    key={ADD_PLANTS}
+                    icon={<i className="far fa-hand-holding-seedling" />} 
+                    onClick={() => router.push('/dashboard/add-plants')}
+                  >
+                    Add Plants
+                  </Menu.Item>
+                </>
               )}
               <Menu.Item 
                 key={ACCOUNTS} 
@@ -200,6 +207,46 @@ const SidebarContainer = ({ children }) => {
               >
                 Accounts
               </Menu.Item>
+              {user && user.role == "admin" && (
+                <>
+                  <Menu.SubMenu 
+                    key="blog-sub" 
+                    icon={<i className="far fa-blog m-r-10" />} 
+                    title={collapsed ? "" : "Blog"}
+                  >
+                    <Menu.Item 
+                      key={ADD_BLOG}
+                      onClick={() => router.push('/dashboard/add-blog')}
+                    >
+                      Add Blog
+                    </Menu.Item>
+                    <Menu.Item 
+                      key={MANAGE_BLOG}
+                      onClick={() => router.push('/dashboard/manage-blog')}
+                    >
+                      Manage Blog
+                    </Menu.Item>
+                  </Menu.SubMenu>
+                  <Menu.SubMenu 
+                    key="docs-sub" 
+                    icon={<i className="far fa-book m-r-10" />} 
+                    title={collapsed ? "" : "Documentation"}
+                  >
+                    <Menu.Item 
+                      key={ADD_DOCS}
+                      onClick={() => router.push('/dashboard/add-docs')}
+                    >
+                      Add Docs
+                    </Menu.Item>
+                    <Menu.Item 
+                      key={MANAGE_DOCS}
+                      onClick={() => router.push('/dashboard/manage-docs')}
+                    >
+                      Manage Docs
+                    </Menu.Item>
+                  </Menu.SubMenu>
+                </>
+              )}
               <Menu.Item 
                 key={LOGOUT} 
                 icon={<i className="far fa-sign-out" />}
@@ -228,6 +275,19 @@ const SidebarContainer = ({ children }) => {
             background-color: white;
             box-shadow: rgb(0 0 0 / 8%) 3px 8px 20px;
           }
+        }
+        :global(.ant-layout-sider-custom .ant-layout-sider-children .ant-menu-submenu-selected) {
+          color: var(--black);
+        }
+        :global(.ant-layout-sider-custom .ant-layout-sider-children .ant-menu-submenu-selected .ant-menu-item:active, 
+                .ant-layout-sider-custom .ant-layout-sider-children .ant-menu-submenu-selected .ant-menu-submenu-title:active) {
+          border-radius: .8rem;
+        }
+        :global(.ant-menu-submenu:hover > .ant-menu-submenu-title > .ant-menu-submenu-expand-icon, .ant-menu-submenu:hover > .ant-menu-submenu-title > .ant-menu-submenu-arrow) {
+          color: var(--black)!important;
+        }
+        :global(.ant-menu-submenu-arrow) {
+          color: var(--grey);
         }
       `}</style>
     </>

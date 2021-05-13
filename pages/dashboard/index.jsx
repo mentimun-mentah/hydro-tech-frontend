@@ -1,14 +1,13 @@
 import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
 import { Joystick } from "react-joystick-component";
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
 import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage, Steps } from "antd";
 
 import { optionsPH } from "components/Dashboard/apexOption";
 import { WebSocketContext } from 'components/Layout/dashboard';
-import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData, } from "components/Dashboard/apexOption";
 
 import _ from 'lodash'
 import moment from "moment";
@@ -28,17 +27,17 @@ const Moon = "/static/images/moon.gif";
 const Loader1 = "/static/images/loader-1.gif";
 const Plant = "/static/images/leaf-outline.gif";
 const WaterTank = "/static/images/water-tank.svg";
-const Lecttuce = "/static/images/plant/lecttuce.png";
 const Sawi = "/static/images/plant/sawi.png";
 const Temperature = "/static/images/temperature.gif";
 
 const max_width_height = 90;
-const DAY = "DAY", WEEK = "WEEK";
 const useBreakpoint = Grid.useBreakpoint;
 const initDataSeries = [{ name: "pH", data: [] }];
 const initialStatistic = { temp: "0", tank: "0", tds: "0", ldr: "bright", ph: "0", };
 
 const steps = [ { title: 'Plant', }, { title: 'Camera', }, { title: 'Token', }, { title: 'Control', }, { title: 'Finish', } ];
+
+const MIN = 0, MAX = 180, DELAY = 200, COUNT = 3
 
 const Dashboard = () => {
   const router = useRouter();
@@ -52,13 +51,18 @@ const Dashboard = () => {
   const [showModalSetup, setShowModalSetup] = useState(false)
 
   const [image, setImage] = useState("");
+  const [x, setX] = useState(90)
+  const [y, setY] = useState(90)
   const [heightPh, setHeightPh] = useState(465);
+  const [joyStatus, setJoyStatus] = useState("stop")
+  const [joyDirection, setJoyDirection] = useState("")
   const [showModalCam, setShowModalCam] = useState(false);
   const [seriesPh, setSeriesPh] = useState(initDataSeries);
   const [statistic, setStatistic] = useState([initialStatistic]);
   const [size, setSize] = useState({ imgWidth1: 100, imgWidth2: 120, imgWidth3: 140, });
 
   const statisticLength = statistic.length;
+
   const { imgWidth1, imgWidth2, imgWidth3 } = size;
 
   const onStepChange = val => {
@@ -120,6 +124,48 @@ const Dashboard = () => {
     }
   }
 
+  const sendServoData = (horizontal, vertical) => {
+    if (ws && ws.send && ws.readyState == 1 && showModalCam) {
+      ws.send(`kind:set_value_servo,sh:${vertical},sv:${horizontal}`);
+      console.log(`kind:set_value_servo,sh:${vertical},sv:${horizontal}`);
+    }
+  }
+
+  // horizontal x
+  let stateX = x
+  const onUp = () => {
+    if(stateX < MAX) {
+      setX(s => {
+        stateX = stateX + COUNT
+        return s + COUNT
+      })
+    }
+  }
+  const onDown = () => {
+    if(stateX > MIN) {
+      setX(s => {
+        stateX = stateX - COUNT
+        return s - COUNT
+      })
+    }
+  }
+  let stateY = y
+  const onLeft = () => {
+    if(stateY > MIN) {
+      setY(s => {
+        stateY = stateY - COUNT
+        return s - COUNT
+      })
+    }
+  }
+  const onRight = () => {
+    if(stateY < MAX) {
+      setY(s => {
+        stateY = stateY + COUNT
+        return s + COUNT
+      })
+    }
+  }
 
   /*MODAL CAMERA*/
   const onShowModalCamHandler = () => {
@@ -147,24 +193,8 @@ const Dashboard = () => {
     else document.body.classList.remove("overflow-hidden");
   }, [showModalCam]);
 
-  const onJoyStickMoved = ({ x, y }) => {
-    const center = 90;
-    let horizontal = x * 2;
-    let vertical = y * 2;
-
-    if (horizontal == 0) horizontal = center;
-    if (horizontal > 0) horizontal = center - x * 2;
-    if (horizontal < 0) horizontal = center + Math.abs(x * 2);
-
-    if (vertical == 0) vertical = center;
-    if (vertical > 0) vertical = center - y * 2;
-    if (vertical < 0) vertical = center + Math.abs(y * 2);
-
-    console.log(`horizontal: ${horizontal}, vertical: ${vertical}`);
-
-    if (ws && ws.send && ws.readyState == 1 && showModalCam) {
-      ws.send(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`);
-    }
+  const onJoyStickMoved = ({ direction }) => {
+    if(direction) setJoyDirection(direction)
   };
   /*MODAL CAMERA*/
 
@@ -180,6 +210,35 @@ const Dashboard = () => {
       setShowModalSetup(false)
     }
   }, [user])
+
+  useEffect(() => {
+    if((x >= MIN && x <= MAX) && (y >= MIN && y <= MAX)) {
+      sendServoData(x, y)
+    }
+  }, [x, y])
+
+  useEffect(() => {
+    let interval
+
+    if(joyStatus === "start") {
+      interval = setInterval(() => {
+        switch (joyDirection) {
+          case "BACKWARD": return onUp()
+          case "FORWARD": return onDown()
+          case "RIGHT": return onLeft()
+          case "LEFT": return onRight()
+          default: return sendServoData(x, y)
+        }
+      }, DELAY)
+    }
+
+    if(joyStatus === "stop") {
+      setJoyDirection("")
+      clearInterval(interval)
+    }
+
+    return () => clearInterval(interval)
+  }, [joyStatus, joyDirection])
 
   return (
     <>
@@ -388,22 +447,12 @@ const Dashboard = () => {
         maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
       >
         {image == "" ? (
-          <motion.div
-            className="text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <Image width={100} height={100} src={Loader1} alt="loader" />
             <div className="fs-14 m-b-10">Connecting to camera...</div>
           </motion.div>
         ) : (
-          <motion.div
-            className="text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="text-center live-img">
               <AntImage src={image} width={640} height={480} preview={false} />
             </div>
@@ -414,6 +463,8 @@ const Dashboard = () => {
                 baseColor="#00000057"
                 stickColor="#0000008a"
                 move={onJoyStickMoved}
+                start={e => setJoyStatus(e.type)}
+                stop={e => setJoyStatus(e.type)}
               />
             </div>
           </motion.div>
@@ -547,4 +598,3 @@ Dashboard.getInitialProps = async ctx => {
 }
 
 export default withAuth(Dashboard)
-// export default Dashboard;

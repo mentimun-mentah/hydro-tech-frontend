@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
 import { Card, Button, Row, Col, Progress } from 'antd'
 
 import Image from 'next/image'
@@ -44,40 +43,42 @@ const PlantCard = ({ plant, ongoing, onCongrats, getPlantData, onPlantedHandler,
                     format={val => <span className="fs-12 text-grey-1">{val}%</span>}
                   />
                   <Row gutter={[10, 10]} className="w-100 m-t-auto">
-                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
+                    {/* <Col xl={12} lg={12} md={12} sm={24} xs={24}> */}
+                    <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                       <motion.div whileTap={{ scale: 0.96 }}>
                         <Button block type="primary" onClick={(ongoing.ongoing && ongoing.start) ? onCongrats : () => {}}>
                           Finish
                         </Button>
                       </motion.div>
                     </Col>
-                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
-                      <motion.div whileTap={{ scale: 0.96 }}>
-                        <Button block className="btn-white" onClick={onCancelPlantedHandler}>
-                          Cancel
-                        </Button>
-                      </motion.div>
-                    </Col>
+                    {/* <Col xl={12} lg={12} md={12} sm={24} xs={24}> */}
+                    {/*   <motion.div whileTap={{ scale: 0.96 }}> */}
+                    {/*     <Button block className="btn-white" onClick={onCancelPlantedHandler}> */}
+                    {/*       Cancel */}
+                    {/*     </Button> */}
+                    {/*   </motion.div> */}
+                    {/* </Col> */}
                   </Row>
                 </>
               )} 
               {ongoing.ongoing && !ongoing.start && (
                 <>
                   <Row gutter={[10, 10]} className="w-100 m-t-auto">
-                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
+                    {/* <Col xl={12} lg={12} md={12} sm={24} xs={24}> */}
+                    <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                       <motion.div whileTap={{ scale: 0.96 }}>
                         <Button block type="primary" onClick={(ongoing.ongoing && !ongoing.start) ? onPlantedHandler : () => {}}>
                           Planted
                         </Button>
                       </motion.div>
                     </Col>
-                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
-                      <motion.div whileTap={{ scale: 0.96 }}>
-                        <Button block className="btn-white" onClick={onCancelPlantedHandler}>
-                          Cancel
-                        </Button>
-                      </motion.div>
-                    </Col>
+                    {/* <Col xl={12} lg={12} md={12} sm={24} xs={24}> */}
+                    {/*   <motion.div whileTap={{ scale: 0.96 }}> */}
+                    {/*     <Button block className="btn-white" onClick={onCancelPlantedHandler}> */}
+                    {/*       Cancel */}
+                    {/*     </Button> */}
+                    {/*   </motion.div> */}
+                    {/* </Col> */}
                   </Row>
                 </>
               )}

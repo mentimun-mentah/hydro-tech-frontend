@@ -6,7 +6,7 @@ import withReduxStore from 'lib/with-redux-store'
 
 import 'antd/dist/antd.css'
 import 'antd-button-color/dist/css/style.css'
-import 'react-circular-progressbar/dist/styles.css'
+import 'suneditor/dist/css/suneditor.min.css'
 
 const App = ({ Component, pageProps, store }) => {
   return (

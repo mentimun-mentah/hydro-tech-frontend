@@ -15,7 +15,7 @@ import pageStyle from 'components/Dashboard/pageStyle.js'
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
-const DAY = "DAY", WEEK = "WEEK"
+const DAY = "DAY", WEEK = "WEEK", MONTH = "MONTH"
 const PH = "PH", PPM = "PPM"
 const useBreakpoint = Grid.useBreakpoint
 
@@ -126,10 +126,11 @@ const Reports = () => {
                       <Select 
                         value={selectedAnalysisTime}
                         onChange={onChangeSelectedAnalysisTimeHanlder} 
-                        className="select-no-rounded"
+                        className="select-no-rounded m-r-82"
                       >
                         <Select.Option value={DAY}>Daily</Select.Option>
                         <Select.Option value={WEEK}>Weekly</Select.Option>
+                        <Select.Option value={MONTH}>Monthly</Select.Option>
                       </Select>
                     </div>
                     <div className="chart">
@@ -148,10 +149,11 @@ const Reports = () => {
                       <Select 
                         value={selectedGrowth} 
                         onChange={onChangeSelectedGrowthHanlder} 
-                        className="select-no-rounded"
+                        className="select-no-rounded m-r-82"
                       >
                         <Select.Option value={DAY}>Daily</Select.Option>
                         <Select.Option value={WEEK}>Weekly</Select.Option>
+                        <Select.Option value={MONTH}>Monthly</Select.Option>
                       </Select>
                     </div>
                     <div className="chart">
@@ -189,13 +191,13 @@ const Reports = () => {
                   </Col>
                   <Col lg={12} md={12} sm={12} xs={24}>
                     <Space className={`${!screens.xs && "float-right"}`}>
-                      <Select defaultValue="day">
+                      <Select defaultValue="all">
+                        <Select.Option value="all">All Time</Select.Option>
                         <Select.Option value="day">Daily</Select.Option>
                         <Select.Option value="week">Weekly</Select.Option>
                         <Select.Option value="month">Monthly</Select.Option>
-                        <Select.Option value="year">Yearly</Select.Option>
                       </Select>
-                      <Button onClick={() => generatePDF(dataSource)}>
+                      <Button className="btn-white" onClick={() => generatePDF(dataSource)}>
                         Export
                       </Button>
                     </Space>
@@ -303,6 +305,11 @@ const Reports = () => {
         :global(.select-no-rounded .ant-select-selector){
           border-radius: 2px!important;
         }
+
+        :global(.apexcharts-menu-icon){
+          transform: scale(1)!important;
+        }
+
       `}</style>
     </>
   )

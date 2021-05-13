@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 export const optionsPH = {
   chart: {
     id: 'realtime',
@@ -73,7 +75,25 @@ export const optionsGrowth = {
     height: 350,
     foreColor: '#93999E',
     zoom: { enabled: false },
-    toolbar: { show: false },
+    toolbar: { 
+      show: true,
+      offsetY: '-32',
+      offsetX: '-46',
+      export: {
+        csv: {
+          filename: `Report ${moment().format('LLLL')}`
+        },
+        svg: {
+          filename: `Report ${moment().format('LLLL')}`
+        },
+        png: {
+          filename: `Report ${moment().format('LLLL')}`
+        }
+      },
+      tools: {
+        download: `<button class="ant-btn btn-white btn-export-graphic fw-600 border-radius-2px">Export</button>`,
+      }
+    },
   },
   grid: {
     borderColor: '#93999e24',
@@ -100,7 +120,7 @@ export const optionsGrowth = {
     categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
   },
   tooltip: {
-    enabled: true,
+    enabled: false,
     custom: ({series, seriesIndex, dataPointIndex}) => {
       let img = "/static/images/plant/growth/2.png"
       if(dataPointIndex == 3) img = "/static/images/plant/growth/4.png"
@@ -117,6 +137,22 @@ export const optionsGrowth = {
 }
 
 
+const dataLabelsOptions = {
+  enabled: true,
+  style: {
+    fontSize: '12px',
+    fontWeight: 'normal',
+  },
+  background: {
+    enabled: true,
+    foreColor: '#fff',
+    padding: 5,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#fff',
+    opacity: 1,
+  },
+}
 
 export const seriesPHWeek = [{
   name: "PH",
@@ -145,7 +181,7 @@ export const optionsPHWeekData = {
     categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
   },
   tooltip: {
-    enabled: true,
+    enabled: false,
     custom: ({series, seriesIndex, dataPointIndex}) => {
       return(
       '<div class="text-center">'+
@@ -154,6 +190,12 @@ export const optionsPHWeekData = {
         '<span style="color:var(--grey)"></span></p>'+
       '</div>'
       )
+    },
+  },
+  dataLabels: {
+    enabled: true,
+    formatter: (val) => {
+      return val
     },
   }
 }
@@ -164,7 +206,7 @@ export const optionsPHDayData = {
     categories: [...Array(7)].map((_, x) => `Day ${x+1}`),
   },
   tooltip: {
-    enabled: true,
+    enabled: false,
     custom: ({series, seriesIndex, dataPointIndex}) => {
       return(
       '<div class="text-center">'+
@@ -173,6 +215,12 @@ export const optionsPHDayData = {
         '<span style="color:var(--grey)"></span></p>'+
       '</div>'
       )
+    },
+  },
+  dataLabels: {
+    ...dataLabelsOptions,
+    formatter: (val) => {
+      return val
     },
   }
 }
@@ -184,7 +232,7 @@ export const optionsPPMWeekData = {
     categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
   },
   tooltip: {
-    enabled: true,
+    enabled: false,
     custom: ({series, seriesIndex, dataPointIndex}) => {
       return(
       '<div class="text-center">'+
@@ -194,7 +242,13 @@ export const optionsPPMWeekData = {
       '</div>'
       )
     },
-  }
+  },
+  dataLabels: {
+    ...dataLabelsOptions,
+    formatter: (val) => {
+      return val + ' PPM'
+    },
+  },
 }
 
 export const optionsPPMDayData = {
@@ -203,7 +257,7 @@ export const optionsPPMDayData = {
     categories: [...Array(7)].map((_, x) => `Day ${x+1}`),
   },
   tooltip: {
-    enabled: true,
+    enabled: false,
     custom: ({series, seriesIndex, dataPointIndex}) => {
       return(
       '<div class="text-center">'+
@@ -213,7 +267,13 @@ export const optionsPPMDayData = {
       '</div>'
       )
     },
-  }
+  },
+  dataLabels: {
+    ...dataLabelsOptions,
+    formatter: (val) => {
+      return val + ' PPM'
+    },
+  },
 }
 
 
@@ -233,7 +293,7 @@ export const optionsWeekGrowthData = {
     categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
   },
   tooltip: {
-    enabled: true,
+    enabled: false,
     custom: ({series, seriesIndex, dataPointIndex}) => {
       let img = "/static/images/plant/growth/2.png"
       if(dataPointIndex == 3) img = "/static/images/plant/growth/4.png"
@@ -246,7 +306,13 @@ export const optionsWeekGrowthData = {
       '</div>'
       )
     },
-  }
+  },
+  dataLabels: {
+    ...dataLabelsOptions,
+    formatter: (val) => {
+      return val + ' cm'
+    },
+  },
 }
 
 
@@ -257,7 +323,7 @@ export const optionsDayGrowthData = {
     categories: [...Array(7)].map((_, x) => `Day ${x+1}`),
   },
   tooltip: {
-    enabled: true,
+    enabled: false,
     custom: ({series, seriesIndex, dataPointIndex}) => {
       let img = "/static/images/plant/growth/2.png"
       if(dataPointIndex == 6) img = "/static/images/plant/growth/4.png"
@@ -270,5 +336,11 @@ export const optionsDayGrowthData = {
       '</div>'
       )
     },
-  }
+  },
+  dataLabels: {
+    ...dataLabelsOptions,
+    formatter: (val) => {
+      return val + ' cm'
+    },
+  },
 }

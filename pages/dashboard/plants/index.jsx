@@ -18,8 +18,8 @@ import pageStyle from 'components/Dashboard/pageStyle.js'
 import PlantCardLoading from 'components/Card/PlantLoading'
 
 const PlantCardLoadingMemo = React.memo(PlantCardLoading)
-
 const PlantCard = dynamic(() => import('components/Card/Plant'), { ssr: false, loading: () => <PlantCardLoadingMemo />  })
+const PlantCardMemo = React.memo(PlantCard)
 
 const useBreakpoint = Grid.useBreakpoint
 const Badge = '/static/images/badge.svg'
@@ -41,9 +41,10 @@ const Plants = () => {
   const [plantData, setPlantData] = useState({})
   const [isMobile, setIsMobile] = useState(false)
   const [showModal, setShowModal] = useState(false)
-  const [progressPlant, setProgressPlant] = useState({id: "", start: false})
   const [visibleDrawer, setVisibleDrawer] = useState(false)
+  const [showModalBackup, setShowModalBackup] = useState(false)
   const [showModalPlanted, setShowModalPlanted] = useState(false)
+  const [progressPlant, setProgressPlant] = useState({id: "", start: false})
 
   const onShowDrawer = () => {
     setVisibleDrawer(true)
@@ -61,7 +62,7 @@ const Plants = () => {
   const onCancelModalPlantedHandler = () => {
     setProgressPlant({id: plantData.plants_id, start: false})
     setShowModalPlanted(false)
-    setPlantData({})
+    // setPlantData({})
   }
   const onPlantedHandler = () => {
     const data = {...progressPlant, start: true}
@@ -72,12 +73,16 @@ const Plants = () => {
     setProgressPlant({id: "", start: false})
   }
   const onCongratsHandler = () => {
-    setPlantData({})
-    setProgressPlant({id: "", start: false})
+    // setProgressPlant({id: plantData.plants_id, start: false})
+    // setPlantData({})
+    // // setProgressPlant({id: "", start: false})
     setShowModal(true)
     setTimeout(() => {
       reward.current.rewardMe();
     }, 1000)
+    setProgressPlant({id: plantData.plants_id, start: false})
+    setShowModalPlanted(false)
+    setShowModalBackup(false)
   }
 
   useEffect(() => {
@@ -195,6 +200,7 @@ const Plants = () => {
           springAnimation: true
         }}
       >
+        <span className="display-none"></span>
       </Reward>
 
       <Layout>
@@ -205,12 +211,12 @@ const Plants = () => {
               <Row gutter={[20, 20]}>
                 {plants && plants.data && plants.data.length > 0 && plants.data.map(plant => (
                   <Col xl={6} lg={8} md={8} sm={12} xs={12} key={plant.plants_id}>
-                    <PlantCard 
+                    <PlantCardMemo 
                       plant={plant} 
                       onPlantedHandler={onPlantedHandler}
                       onCancelPlantedHandler={onCancelPlantedHandler}
                       ongoing={{ongoing: progressPlant.id == plant.plants_id, start: progressPlant.start}}
-                      onCongrats={(progressPlant.id == plant.plants_id && progressPlant.start) ? onCongratsHandler : () => {}}
+                      onCongrats={(progressPlant.id == plant.plants_id && progressPlant.start) ? () => setShowModalBackup(true) : () => {}}
                       getPlantData={() => getPlantData(plant.plants_id)}
                     />
                   </Col>
@@ -258,7 +264,7 @@ const Plants = () => {
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98, y: 0 }}
             >
-              <Button block onClick={onCloseDrawer} type="primary" size="large">
+              <Button block onClick={onCloseDrawer} type="primary" size="large" disabled={progressPlant.start}>
                 Plant Now!
               </Button>
             </motion.div>
@@ -330,16 +336,37 @@ const Plants = () => {
         maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
       >
         <div className="text-dark text-center">
+          <Image src={`${process.env.NEXT_PUBLIC_API_URL}/static/plants/${plantData.plants_image}`} width="150" height="150" />
           <h3 className="mb-3 h3 bold">Are you already planted {plantData.plants_name}?</h3>
           <Space>
             <Button type="primary" onClick={onOkModalPlantedHandler}>Yes I did</Button>
-            <Button className="btn-white" onClick={onCancelModalPlantedHandler}>No yet</Button>
+            <Button className="btn-white" onClick={onCancelModalPlantedHandler}>Not yet</Button>
+          </Space>
+        </div>
+      </Modal>
+
+      <Modal
+        centered
+        visible={showModalBackup}
+        zIndex={3000}
+        width={416}
+        closable={false}
+        footer={null}
+        className="modal-modif noselect text-center"
+        closeIcon={<i className="fas fa-times" />}
+        maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
+      >
+        <div className="text-dark text-center">
+          <h3 className="mb-3 h3 bold">Do you want to back up the report data on the reports page?</h3>
+          <Space>
+            <Button type="primary" onClick={() => setShowModalBackup(false)}>Yes I want</Button>
+            <Button className="btn-white" onClick={onCongratsHandler}>No</Button>
           </Space>
         </div>
       </Modal>
 
       <AnimatePresence>
-        {(visibleDrawer || showModal || showModalPlanted) && (
+        {(visibleDrawer || showModal || showModalPlanted || showModalBackup) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
