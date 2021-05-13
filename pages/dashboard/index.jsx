@@ -8,7 +8,6 @@ import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage, Steps } fr
 
 import { optionsPH } from "components/Dashboard/apexOption";
 import { WebSocketContext } from 'components/Layout/dashboard';
-import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData, } from "components/Dashboard/apexOption";
 
 import _ from 'lodash'
 import moment from "moment";
@@ -32,14 +31,13 @@ const Sawi = "/static/images/plant/sawi.png";
 const Temperature = "/static/images/temperature.gif";
 
 const max_width_height = 90;
-const DAY = "DAY", WEEK = "WEEK";
 const useBreakpoint = Grid.useBreakpoint;
 const initDataSeries = [{ name: "pH", data: [] }];
 const initialStatistic = { temp: "0", tank: "0", tds: "0", ldr: "bright", ph: "0", };
 
 const steps = [ { title: 'Plant', }, { title: 'Camera', }, { title: 'Token', }, { title: 'Control', }, { title: 'Finish', } ];
 
-const MIN = 0, MAX = 180, DELAY = 200
+const MIN = 0, MAX = 180, DELAY = 200, COUNT = 3
 
 const Dashboard = () => {
   const router = useRouter();
@@ -138,16 +136,16 @@ const Dashboard = () => {
   const onUp = () => {
     if(stateX < MAX) {
       setX(s => {
-        stateX = stateX + 2
-        return s + 2
+        stateX = stateX + COUNT
+        return s + COUNT
       })
     }
   }
   const onDown = () => {
     if(stateX > MIN) {
       setX(s => {
-        stateX = stateX - 2
-        return s - 2
+        stateX = stateX - COUNT
+        return s - COUNT
       })
     }
   }
@@ -155,16 +153,16 @@ const Dashboard = () => {
   const onLeft = () => {
     if(stateY > MIN) {
       setY(s => {
-        stateY = stateY - 2
-        return s - 2
+        stateY = stateY - COUNT
+        return s - COUNT
       })
     }
   }
   const onRight = () => {
     if(stateY < MAX) {
       setY(s => {
-        stateY = stateY + 2
-        return s + 2
+        stateY = stateY + COUNT
+        return s + COUNT
       })
     }
   }
@@ -600,4 +598,3 @@ Dashboard.getInitialProps = async ctx => {
 }
 
 export default withAuth(Dashboard)
-// export default Dashboard;
