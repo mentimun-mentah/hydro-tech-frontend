@@ -34,7 +34,6 @@ const delay = 5000
 
 const Controls = () => {
   const ws = useContext(WebSocketContext)
-  // console.log("## WebSocket", ws.readyState == 1 ? "Connected" : "Disconnect", "##", "\nfrom controls")
 
   const [isSending, setIsSending] = useState(false)
   const [setting, setSetting] = useState(formSetting)
@@ -87,7 +86,6 @@ const Controls = () => {
     if (ws && ws.send && ws.readyState == 1) {
       setIsSending(true)
       ws.send(`${checkData},kind:set_hydro`)
-      console.log(`SEND 1\n${checkData},kind:set_hydro`)
     }
 
   }
@@ -98,7 +96,6 @@ const Controls = () => {
   if(ws && ws.readyState == 1) {
     // kind:Hydro,ph:7.62,temp:24.56,tank:100,tds:421.93,ldr:bright,lamp:off,phup:off,phdown:on,nutrition:on,solenoid:off
     ws.onmessage = (msg) => {
-      // console.log(msg.data)
       let obj = {}
       let msgSplit = msg.data.split(",")
 
@@ -119,16 +116,6 @@ const Controls = () => {
         if(obj.solenoid) setSolenoid(obj.solenoid == "on" ? true : false)
 
         if(obj.nutrition) setNutrition(obj.nutrition == "on" ? true : false)
-
-        // if(obj.phup && !forcePhup) setPhup(obj.phup == "on" ? true : false)
-
-        // if(obj.lamp && !forceLamp) setLamp(obj.lamp == "on" ? true : false)
-
-        // if(obj.phdown && !forcePhdown) setPhdown(obj.phdown == "on" ? true : false)
-
-        // if(obj.solenoid && !forceSolenoid) setSolenoid(obj.solenoid == "on" ? true : false)
-
-        // if(obj.nutrition && !forceNutrition) setNutrition(obj.nutrition == "on" ? true : false)
 
         if(count == 2) {
           count = 0

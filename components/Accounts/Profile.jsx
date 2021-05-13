@@ -100,7 +100,6 @@ const ProfileContainer = () => {
           formErrorMessage("success", res.data.detail)
         })
         .catch(err => {
-          console.log(err)
           setLoadingProfie(false)
           const state = deepCopy(profile)
           const errDetail = err.response.data.detail

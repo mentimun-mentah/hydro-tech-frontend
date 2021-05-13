@@ -48,21 +48,18 @@ const SidebarContainer = ({ children }) => {
 
       ws.onopen = () => {
         ws.send("Connected");
-        console.log("Connected");
         ws.send(`kind:live_cam_false`);
       };
 
-      ws.onclose = (e) => {
+      ws.onclose = () => {
         ws.close()
-        console.log("Layout Disconected.\nReconnect will be attempted in 3 second.", e.reason);
         setTimeout(() => {
           wsConnect()
         }, 3000);
       };
     }
 
-    ws.onerror = (err) => {
-      console.error('Socket encountered error: ', err.message, 'Closing socket');
+    ws.onerror = () => {
       ws.close()
     };
   };

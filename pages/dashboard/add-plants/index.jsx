@@ -251,7 +251,6 @@ const AddPlants = () => {
       }
     }
 
-    console.log(state)
     setIsUpdate(true)
     setPlant(state)
     setImageList(imagePlant)

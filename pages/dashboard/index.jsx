@@ -102,7 +102,6 @@ const Dashboard = () => {
           const { ph, temp, tank, tds, ldr } = obj
           const dataHydro = { ph: ph, temp: temp, tank: tank, tds: tds, ldr: ldr };
           setStatistic((oldState) => [...oldState, dataHydro]);
-          console.log("message from Hydro", JSON.stringify(dataHydro, null, 2))
           
           const x = Math.floor(new Date().getTime() / 1000);
           const y = +dataHydro["ph"];
@@ -116,7 +115,6 @@ const Dashboard = () => {
           }
         }
       } else {
-        console.log("image =>", msg.data)
         if(urlObject) URL.revokeObjectURL(urlObject);
         urlObject = URL.createObjectURL(new Blob([msg.data]));
         setImage(urlObject);
@@ -127,7 +125,6 @@ const Dashboard = () => {
   const sendServoData = (horizontal, vertical) => {
     if (ws && ws.send && ws.readyState == 1 && showModalCam) {
       ws.send(`kind:set_value_servo,sh:${vertical},sv:${horizontal}`);
-      console.log(`kind:set_value_servo,sh:${vertical},sv:${horizontal}`);
     }
   }
 

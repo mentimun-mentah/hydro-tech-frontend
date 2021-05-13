@@ -64,7 +64,7 @@ const ManageDocumentation = () => {
                     <div className="text-center m-t-20 m-b-20">
                       <Pagination 
                         total={45} 
-                        goTo={val => console.log(val)} 
+                        goTo={() => {}} 
                         current={3} 
                         hideOnSinglePage 
                         pageSize={per_page}
