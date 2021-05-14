@@ -105,11 +105,3 @@ export const dataSource = [
     report: { sh: "29", tds: "960", ldr: "Dark", ta: "76", ph: "12.09", time: "April 25, 2021 07:55 AM" },
   },
 ];
-
-export const progressData = [
-  { date: 11, sub: "Planted - Location updated" },
-  { date: 14, sub: "Growing - Early phase" },
-  { date: 17, sub: "Growing - Leaves blooming" },
-  { date: 19, sub: "Growing - Leaves bloom - Expected" },
-  { date: 21, sub: "Growing - Early phase ii - Expected" },
-];

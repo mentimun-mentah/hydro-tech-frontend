@@ -358,6 +358,7 @@ const Plants = () => {
       >
         <div className="text-dark text-center">
           <h3 className="mb-3 h3 bold">Do you want to back up the report data on the reports page?</h3>
+          <p className="mb-3">Because we will immediately delete all the report data after you finish planting</p>
           <Space>
             <Button type="primary" onClick={() => setShowModalBackup(false)}>Yes I want</Button>
             <Button className="btn-white" onClick={onCongratsHandler}>No</Button>

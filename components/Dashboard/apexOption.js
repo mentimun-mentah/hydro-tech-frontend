@@ -75,6 +75,7 @@ export const optionsGrowth = {
     height: 350,
     foreColor: '#93999E',
     zoom: { enabled: false },
+    redrawOnParentResize: true,
     toolbar: { 
       show: true,
       offsetY: '-32',
