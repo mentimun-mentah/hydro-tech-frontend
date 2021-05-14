@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useRouter } from 'next/router'
+import { useState, useEffect } from 'react'
 import { SearchOutlined } from '@ant-design/icons'
 import { Row, Col, Button, Input, Divider } from 'antd'
 
@@ -12,96 +13,47 @@ const CardLoadingMemo = React.memo(CardLoading)
 const CardDocs = dynamic(() => import('components/Card/Docs'), { ssr: false, loading: () => <CardLoadingMemo />  })
 const CardDocsMemo = React.memo(CardDocs)
 
+const DataPage = ({ d }) => (
+  <div id={d}>
+    <h1 className="entry-title">
+      <b>{d} Getting Started with VS Code and PlatformIO IDE for ESP32 and ESP8266 (Windows, Mac OS X, Linux Ubuntu)</b>
+    </h1>
+    {[...Array(4)].map((_,i) => (
+      <div key={i}>
+        <p><br /></p>
+        <p>Learn how to program the ESP32 and ESP8266 NodeMCU boards using VS Code (Microsoft Visual Studio Code) with PlatformIO IDE extension. We cover how to install the software on Windows, Mac OS X or Ubuntu operating systems.</p>
+      </div>
+    ))}
+  </div>
+
+
+)
+
 const Documentation = () => {
+  const router = useRouter()
   const [page, setPage] = useState(2)
+
+  const isDocs = router.pathname.startsWith('/docs')
+
+  useEffect(() => {
+    if(isDocs){
+      document.body.classList.add("bg-white")
+    }
+    else{
+      document.body.classList.remove("bg-white")
+    }
+    return () => document.body.classList.remove("bg-white")
+  }, [isDocs])
 
   return(
     <>
-      <div className="blog-image">
-        <div className="container-fluid p-b-50 p-t-50 blog-image-inner">
-          <Row gutter={[10, 10]} justify="center">
-            <Col xl={22} lg={22} md={24} sm={24} xs={24}>
-              <Row gutter={[20, 20]} justify="center">
-                <Col span={24}>
-                  <div className="text-center bg-whitesmoke--3 w-fit-content ml-auto mr-auto p-l-15 p-r-15 p-b-1 border-radius--5rem">
-                    <h2 className="h1 bold mb1 text-purple">Hydro X Tech</h2>
-                    <h3 className="h2 bold mb1 text-grey-1">"Documentation"</h3>
-                  </div>
-                </Col>
-                <Col xl={10} lg={12} md={16} sm={24} xs={24}>
-                  <Input 
-                    placeholder="Search" 
-                    prefix={<SearchOutlined className="text-grey" />} 
-                    suffix={<Button type="primary">Go</Button>}
-                  />
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </div>
-      </div>
 
-      <div className="container-fluid p-t-50">
-
-        <Row gutter={[10, 10]} justify="center">
-          <Col xl={22} lg={22} md={24} sm={24} xs={24}>
-            <Row gutter={[20, 20]}>
-              {[...Array(12)].map((_, i) => (
-                <Col xl={8} lg={8} md={8} sm={12} xs={24} key={i}>
-                  <CardDocsMemo />
-                </Col>
-              ))}
-            </Row>
-          </Col>
-
-          <Col span={24}>
-            <div className="text-center m-t-20 m-b-20">
-              <Pagination 
-                total={30} 
-                goTo={val => setPage(val)} 
-                current={page} 
-                hideOnSinglePage 
-                pageSize={10}
-              />
-            </div>
-          </Col>
-
-        </Row>
-      </div>
-
-      <Divider className="p-b-10" />
+      {[...Array(40)].map((_, i) => (
+        <DataPage d={i} key={i} />
+      ))}
 
       <style jsx>{`
-        :global(.ant-card.card-blog .ant-card-cover img) {
-          object-fit: cover;
-          border-radius: .5rem;
-        }
-        :global(.ant-card.card-blog .ant-card-body) {
-          padding-top: 0px;
-          padding-left: 0px;
-          padding-right: 0px;
-          padding-bottom: 20px;
-        }
 
-        :global(.card-blog) {
-          background-color: transparent;
-        }
-
-        :global(.blog-image) {
-          padding-top: 74px;
-        }
-
-        :global(.blog-image .blog-image-inner) {
-          background-image: url('/static/images/bg-docs.jpg');
-          background-repeat: no-repeat;
-          background-size: cover;
-          background-position: center;
-        }
-
-        :global(.bg-whitesmoke--3) {
-          background-color: #fafafa4d!important;
-          backdrop-filter: blur(4px);
-        }
       `}</style>
     </>
   )
