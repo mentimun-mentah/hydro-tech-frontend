@@ -41,41 +41,27 @@ const AddDocumentation = () => {
               <Card className="radius1rem shadow1 h-100" bordered={false}>
                 <div className="header-dashboard">
                   <h2 className="h2 bold">Add Documentation</h2>
-                  <Form name="AddBlog" layout="vertical">
+                  <Form name="AddDocs" layout="vertical">
                     <Row gutter={[20, 20]}>
                       <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                         <Form.Item 
-                          label="Photo (750 × 500 px)"
-                          className="m-b-0"
-                        >
-                          <Upload
-                            accept="image/*"
-                            listType="picture-card"
-                            className="avatar-uploader"
-                            disabled={loading}
-                            onPreview={imagePreview}
-                            // onChange={imageChangeHandler}
-                            fileList={imageList.file.value}
-                            beforeUpload={(f) => imageValidation(f, "image", "/plants/create", "post", setLoading, () => {}, "")}
-                          >
-                            {imageList.file.value.length >= 1 ? null : uploadButton(loading)}
-                          </Upload>
-                        </Form.Item>
-                      </Col>
-
-                      <Col span={24}>
-                        <Form.Item 
-                          label="Title"
+                          label="Category"
                           className="m-b-0"
                           // validateStatus={!name.isValid && name.message && "error"}
                         >
-                          <Input
+                          <Select
+                            showSearch
                             size="large"
-                            name="name"
-                            // value={name.value}
-                            // onChange={onChangeHandler}
-                            placeholder="Title"
-                          />
+                            placeholder="Select category"
+                            optionFilterProp="children"
+                            filterOption={(input, option) =>
+                              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            }
+                          >
+                            <Select.Option value="jack">Learn ESP32</Select.Option>
+                            <Select.Option value="lucy">Protocols</Select.Option>
+                            <Select.Option value="asd">Arduino Modules</Select.Option>
+                          </Select>
                           {/* <ErrorMessage item={name} /> */}
                         </Form.Item>
                       </Col>
@@ -86,10 +72,7 @@ const AddDocumentation = () => {
                           className="m-b-0"
                           // validateStatus={!name.isValid && name.message && "error"}
                         >
-                          <Editor 
-                            setContent={() => {}} 
-                            height="200"
-                          />
+                          <Editor setContent={() => {}} height="200" />
                           {/* <ErrorMessage item={name} /> */}
                         </Form.Item>
                       </Col>

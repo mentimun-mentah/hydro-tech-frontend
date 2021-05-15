@@ -14,7 +14,7 @@ import SplitText from './SplitText'
 const useBreakpoint = Grid.useBreakpoint
 const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", 
   ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS", ADD_BLOG = "ADD-BLOG", MANAGE_BLOG = "MANAGE-BLOG",
-  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS", CHAT = "CHAT", ADMIN = "ADMIN"
+  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS", CHAT = "CHAT", ADMIN = "ADMIN", ADD_CATEGORY = "ADD-CATEGORY"
 
 export const WebSocketContext = createContext()
 
@@ -83,7 +83,7 @@ const SidebarContainer = ({ children }) => {
       data = router.pathname.split("/")[router.pathname.split("/").length - 2].toUpperCase()
     }
     setSelected(data)
-    let listAdminRoute = ['add-plants', 'add-blog', 'manage-blog',  'add-docs', 'manage-docs']
+    let listAdminRoute = ['add-plants', 'add-blog', 'manage-blog', 'add-docs', 'manage-docs', 'add-category']
     if(router.pathname.split("/")[2] && isIn(router.pathname.split("/")[2], listAdminRoute)){
       setIsMenuAdmin(true)
     } else {
@@ -221,6 +221,12 @@ const SidebarContainer = ({ children }) => {
                           icon={<i className="far fa-book m-r-10" />} 
                           title={collapsed ? "" : "Documentation"}
                         >
+                          <Menu.Item 
+                            key={ADD_CATEGORY}
+                            onClick={() => router.push('/dashboard/add-category')}
+                          >
+                            Add Category
+                          </Menu.Item>
                           <Menu.Item 
                             key={ADD_DOCS}
                             onClick={() => router.push('/dashboard/add-docs')}
