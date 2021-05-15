@@ -864,10 +864,13 @@
   position: absolute;
 }
 .fixed {
-  position: fixed;
+  position: fixed!important;
 }
 .top-0 {
   top: 0;
+}
+.top-65 {
+  top: 65px!important;
 }
 .right-0 {
   right: 0;

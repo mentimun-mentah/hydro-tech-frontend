@@ -8,7 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "ant-table-extensions": "^1.1.7",
     "antd": "^4.15.5",
     "antd-button-color": "^1.0.4",
     "apexcharts": "^3.26.2",
@@ -26,6 +25,7 @@
     "react-redux": "^7.2.4",
     "react-rewards": "^1.1.2",
     "react-share": "^4.4.0",
+    "react-slugify": "^2.0.3",
     "redux": "^4.1.0",
     "redux-devtools-extension": "^2.13.9",
     "redux-thunk": "^2.3.0",

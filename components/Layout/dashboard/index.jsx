@@ -261,15 +261,6 @@ const SidebarContainer = ({ children }) => {
                     className="ant-menu-scroll"
                     selectedKeys={[selected]}
                   >
-                    {user && user.role == "admin" && (
-                      <Menu.Item 
-                        key={ADMIN}
-                        icon={<i className="far fa-users-crown" />}
-                        onClick={() => setIsMenuAdmin(true)}
-                      >
-                        Admin
-                      </Menu.Item>
-                    )}
                     <Menu.Item 
                       key={CONTROLS} 
                       icon={<i className="far fa-cog" />} 
@@ -305,6 +296,15 @@ const SidebarContainer = ({ children }) => {
                     >
                       Room Chat
                     </Menu.Item>
+                    {user && user.role == "admin" && (
+                      <Menu.Item 
+                        key={ADMIN}
+                        icon={<i className="far fa-users-crown" />}
+                        onClick={() => setIsMenuAdmin(true)}
+                      >
+                        Admin
+                      </Menu.Item>
+                    )}
                     <Menu.Item 
                       key={LOGOUT} 
                       icon={<i className="far fa-sign-out" />}
