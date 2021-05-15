@@ -234,9 +234,8 @@ const Reports = () => {
                             onChange={onChangeSelectedGrowthHanlder} 
                             className="select-no-rounded"
                           >
-                            <Select.Option value={DAY}>Daily</Select.Option>
-                            <Select.Option value={WEEK}>Weekly</Select.Option>
-                            <Select.Option value={MONTH}>Monthly</Select.Option>
+                            <Select.Option value={DAY}>Last 7 days</Select.Option>
+                            <Select.Option value={WEEK}>Last 30 days</Select.Option>
                           </Select>
                           <Dropdown overlay={exportMenuGrowth} trigger={['click']} placement="bottomRight" className="border-radius-2px">
                             <Button className="btn-white">Export</Button>
