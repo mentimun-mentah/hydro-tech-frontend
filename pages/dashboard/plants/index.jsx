@@ -1,4 +1,5 @@
-import { withAuth } from "lib/withAuth";
+import { withAuth } from 'lib/withAuth'
+import { useRouter } from 'next/router'
 import { formErrorMessage } from 'lib/axios'
 import { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
@@ -29,6 +30,7 @@ const per_page = 12
 
 const Plants = () => {
   const reward = useRef()
+  const router = useRouter()
   const dispatch = useDispatch()
   const screens = useBreakpoint()
 
@@ -82,6 +84,11 @@ const Plants = () => {
     }, 1000)
     setProgressPlant({id: plantData.plants_id, start: false})
     setShowModalPlanted(false)
+    setShowModalBackup(false)
+  }
+
+  const onBackupHandler = () => {
+    router.push('/dashboard/reports')
     setShowModalBackup(false)
   }
 
@@ -358,8 +365,9 @@ const Plants = () => {
       >
         <div className="text-dark text-center">
           <h3 className="mb-3 h3 bold">Do you want to back up the report data on the reports page?</h3>
+          <p className="mb-3">Because we will immediately delete all the report data after you finish planting</p>
           <Space>
-            <Button type="primary" onClick={() => setShowModalBackup(false)}>Yes I want</Button>
+            <Button type="primary" onClick={onBackupHandler}>Yes I want</Button>
             <Button className="btn-white" onClick={onCongratsHandler}>No</Button>
           </Space>
         </div>

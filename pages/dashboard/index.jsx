@@ -1,10 +1,9 @@
 import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
-import { Joystick } from "react-joystick-component";
 import { useSelector } from 'react-redux'
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
-import { Layout, Card, Row, Col, Tag, Modal, Grid, Image as AntImage, Steps } from "antd";
+import { Layout, Card, Row, Col, Tag, Modal, Grid, Steps, Divider, Space } from "antd";
 
 import { optionsPH } from "components/Dashboard/apexOption";
 import { WebSocketContext } from 'components/Layout/dashboard';
@@ -17,14 +16,16 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import * as actions from 'store/actions'
 import pageStyle from "components/Dashboard/pageStyle.js";
+import ModalLiveCam from 'components/Dashboard/ModalLiveCam'
+import ModalConfigCam from 'components/Dashboard/ModalConfigCam'
 import SetupProfileModal from 'components/Dashboard/SetupProfileModal'
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const Camera = "/static/images/camera.svg";
+const Camera = "/static/images/camera2.svg";
+const Play = "/static/images/play.svg";
 const Sun = "/static/images/sun-outline.gif";
 const Moon = "/static/images/moon.gif";
-const Loader1 = "/static/images/loader-1.gif";
 const Plant = "/static/images/leaf-outline.gif";
 const WaterTank = "/static/images/water-tank.svg";
 const Sawi = "/static/images/plant/sawi.png";
@@ -50,13 +51,14 @@ const Dashboard = () => {
   const [plantSelected, setPlantSelected] = useState("")
   const [showModalSetup, setShowModalSetup] = useState(false)
 
-  const [image, setImage] = useState("");
   const [x, setX] = useState(90)
   const [y, setY] = useState(90)
+  const [image, setImage] = useState("");
   const [heightPh, setHeightPh] = useState(465);
   const [joyStatus, setJoyStatus] = useState("stop")
   const [joyDirection, setJoyDirection] = useState("")
   const [showModalCam, setShowModalCam] = useState(false);
+  const [showModalCamConfig, setShowModalCamConfig] = useState(false);
   const [seriesPh, setSeriesPh] = useState(initDataSeries);
   const [statistic, setStatistic] = useState([initialStatistic]);
   const [size, setSize] = useState({ imgWidth1: 100, imgWidth2: 120, imgWidth3: 140, });
@@ -102,7 +104,6 @@ const Dashboard = () => {
           const { ph, temp, tank, tds, ldr } = obj
           const dataHydro = { ph: ph, temp: temp, tank: tank, tds: tds, ldr: ldr };
           setStatistic((oldState) => [...oldState, dataHydro]);
-          console.log("message from Hydro", JSON.stringify(dataHydro, null, 2))
           
           const x = Math.floor(new Date().getTime() / 1000);
           const y = +dataHydro["ph"];
@@ -116,7 +117,6 @@ const Dashboard = () => {
           }
         }
       } else {
-        console.log("image =>", msg.data)
         if(urlObject) URL.revokeObjectURL(urlObject);
         urlObject = URL.createObjectURL(new Blob([msg.data]));
         setImage(urlObject);
@@ -127,11 +127,10 @@ const Dashboard = () => {
   const sendServoData = (horizontal, vertical) => {
     if (ws && ws.send && ws.readyState == 1 && showModalCam) {
       ws.send(`kind:set_value_servo,sh:${vertical},sv:${horizontal}`);
-      console.log(`kind:set_value_servo,sh:${vertical},sv:${horizontal}`);
     }
   }
 
-  // horizontal x
+  /*JOYSTICK HANDLER*/
   let stateX = x
   const onUp = () => {
     if(stateX < MAX) {
@@ -166,8 +165,17 @@ const Dashboard = () => {
       })
     }
   }
+  /*JOYSTICK HANDLER*/
 
   /*MODAL CAMERA*/
+  const onShowModalCamConfigHandler = () => {
+    setShowModalCamConfig(true);
+  };
+
+  const onCloseModalCamConfigHandler = () => {
+    setShowModalCamConfig(false);
+  };
+
   const onShowModalCamHandler = () => {
     setShowModalCam(true);
     if (ws && ws.send && ws.readyState == 1) {
@@ -193,6 +201,12 @@ const Dashboard = () => {
     else document.body.classList.remove("overflow-hidden");
   }, [showModalCam]);
 
+  useEffect(() => {
+    if((x >= MIN && x <= MAX) && (y >= MIN && y <= MAX)) {
+      sendServoData(x, y)
+    }
+  }, [x, y])
+
   const onJoyStickMoved = ({ direction }) => {
     if(direction) setJoyDirection(direction)
   };
@@ -210,12 +224,6 @@ const Dashboard = () => {
       setShowModalSetup(false)
     }
   }, [user])
-
-  useEffect(() => {
-    if((x >= MIN && x <= MAX) && (y >= MIN && y <= MAX)) {
-      sendServoData(x, y)
-    }
-  }, [x, y])
 
   useEffect(() => {
     let interval
@@ -267,21 +275,12 @@ const Dashboard = () => {
             <Col lg={8} md={24} sm={24} xs={24}>
               <Row gutter={[20, 20]}>
                 <Col lg={24} md={12} sm={24} xs={24}>
-                  <Card
-                    className="radius1rem shadow1 card-dashboard h-100"
-                    bordered={false}
-                  >
+                  <Card className="radius1rem shadow1 card-dashboard h-100" bordered={false}>
                     <h2 className="h2 bold mb1 line-height-1">
                       Water Temp
                     </h2>
                     <div className="text-center items-center mt2">
-                      <Image
-                        width={imgWidth2}
-                        height={imgWidth2}
-                        src={Temperature}
-                        className="ml5"
-                        alt="temperature"
-                      />
+                      <Image width={imgWidth2} height={imgWidth2} src={Temperature} className="ml5" alt="temperature" />
                       <h3 className="h2 bold mb0 mt2">
                         {statistic[statisticLength - 1].temp}&#176;
                         <span className="regular header-date">C</span>
@@ -291,10 +290,7 @@ const Dashboard = () => {
                 </Col>
 
                 <Col lg={24} md={12} sm={24} xs={24}>
-                  <Card
-                    className="radius1rem shadow1 card-dashboard h-100"
-                    bordered={false}
-                  >
+                  <Card className="radius1rem shadow1 card-dashboard h-100" bordered={false}>
                     <h2 className="h2 bold mb1 line-height-1">
                       Water Tank
                       {statistic[statisticLength - 1].tank < 50 && (
@@ -309,13 +305,7 @@ const Dashboard = () => {
                       {/*Bad / Medium / Good*/}
                     </h2>
                     <div className="text-center items-center mt1">
-                      <Image
-                        width={imgWidth3}
-                        height={imgWidth3}
-                        src={WaterTank}
-                        alt="water-tank"
-                        className="mln1"
-                      />
+                      <Image width={imgWidth3} height={imgWidth3} src={WaterTank} alt="water-tank" className="mln1" />
                       <h3 className="h2 bold mb0">
                         {statistic[statisticLength - 1].tank}%
                       </h3>
@@ -332,23 +322,18 @@ const Dashboard = () => {
               <Card className="radius1rem shadow1 h-100 card-plant-dashboard" bordered={false}>
                 <h2 className="h2 bold mb0 line-height-1 flex justify-between">
                   Plant
-                  <span onClick={onShowModalCamHandler}>
-                    <Image
-                      width={32}
-                      height={32}
-                      src={Camera}
-                      alt="camera"
-                      className="hover-pointer"
-                    />
-                  </span>
+                  <Space>
+                    <span onClick={onShowModalCamConfigHandler}>
+                      <Image width={25} height={25} src={Camera} alt="camera" className="hover-pointer" />
+                    </span>
+                    <Divider type="vertical" className="divider-cam" />
+                    <span onClick={onShowModalCamHandler}>
+                      <Image width={24} height={24} src={Play} alt="camera" className="hover-pointer" />
+                    </span>
+                  </Space>
                 </h2>
-                <div className="text-center items-center mt1">
-                  <Image
-                    width={imgWidth1}
-                    height={imgWidth1}
-                    src={Sawi}
-                    alt="plant"
-                  />
+                <div className="text-center items-center m-t-17">
+                  <Image width={imgWidth1} height={imgWidth1} src={Sawi} alt="plant" />
                   <h3 className="h2 bold mb0">
                     <span className="regular header-date">Sawi Manis</span>
                   </h3>
@@ -364,12 +349,7 @@ const Dashboard = () => {
                   {/*Bad / Good*/}
                 </h2>
                 <div className="text-center items-center mt2">
-                  <Image
-                    width={imgWidth1}
-                    height={imgWidth1}
-                    src={Plant}
-                    alt="plant"
-                  />
+                  <Image width={imgWidth1} height={imgWidth1} src={Plant} alt="plant" />
                   <h3 className="h2 bold mb0">
                     {statistic[statisticLength - 1].tds}
                     <span className="regular header-date"> ppm</span>
@@ -390,12 +370,7 @@ const Dashboard = () => {
                         animate={{ opacity: 1 }} 
                         exit={{ opacity: 0 }}
                       >
-                        <Image
-                          width={imgWidth1}
-                          height={imgWidth1}
-                          src={Sun}
-                          alt="temperature"
-                        />
+                        <Image width={imgWidth1} height={imgWidth1} src={Sun} alt="temperature" />
                         <h3 className="h2 bold mb0">
                           <span className="regular header-date">Bright</span>
                         </h3>
@@ -412,12 +387,7 @@ const Dashboard = () => {
                         animate={{ opacity: 1 }} 
                         exit={{ opacity: 0 }}
                       >
-                        <Image
-                          width={imgWidth1}
-                          height={imgWidth1}
-                          src={Moon}
-                          alt="temperature"
-                        />
+                        <Image width={imgWidth1} height={imgWidth1} src={Moon} alt="temperature" />
                         <h3 className="h2 bold mb0">
                           <span className="regular header-date">Dark</span>
                         </h3>
@@ -431,57 +401,20 @@ const Dashboard = () => {
         </Layout.Content>
       </Layout>
 
-      <Modal
-        centered
-        title={<b>Plant Camera</b>}
-        zIndex="1030"
-        width={700}
-        footer={null}
-        maskClosable={false}
+      <ModalLiveCam
+        image={image}
         visible={showModalCam}
-        onOk={onCloseModalCamHandler}
-        bodyStyle={{ paddingTop: "0px" }}
-        className="modal-modif noselect"
-        onCancel={onCloseModalCamHandler}
-        closeIcon={<i className="fas fa-times" />}
-        maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
-      >
-        {image == "" ? (
-          <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Image width={100} height={100} src={Loader1} alt="loader" />
-            <div className="fs-14 m-b-10">Connecting to camera...</div>
-          </motion.div>
-        ) : (
-          <motion.div className="text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="text-center live-img">
-              <AntImage src={image} width={640} height={480} preview={false} />
-            </div>
-            <div className="joystick-container">
-              <Joystick
-                size={90}
-                throttle={100}
-                baseColor="#00000057"
-                stickColor="#0000008a"
-                move={onJoyStickMoved}
-                start={e => setJoyStatus(e.type)}
-                stop={e => setJoyStatus(e.type)}
-              />
-            </div>
-          </motion.div>
-        )}
-      </Modal>
+        onMove={onJoyStickMoved}
+        onClose={onCloseModalCamHandler}
+        onStart={e => setJoyStatus(e.type)}
+        onStart={e => setJoyStatus(e.type)}
+      />
 
-      <AnimatePresence>
-        {showModalCam && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: ".2" }}
-            className="overlay-blur"
-          />
-        )}
-      </AnimatePresence>
+      <ModalConfigCam
+        image={image}
+        visible={showModalCamConfig}
+        onClose={onCloseModalCamConfigHandler}
+      />
 
       <Modal
         centered
@@ -510,6 +443,18 @@ const Dashboard = () => {
           setPlantSelected={setPlantSelected}
         />
       </Modal>
+
+      <AnimatePresence>
+        {(showModalCam || showModalCamConfig) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: ".2" }}
+            className="overlay-blur"
+          />
+        )}
+      </AnimatePresence>
 
       <style jsx>{pageStyle}</style>
       <style jsx>{`
@@ -585,6 +530,13 @@ const Dashboard = () => {
         :global(.modal-setting-profile.ant-modal .ant-modal-content .ant-modal-body) {
           height: 100vh;
           max-height: 100vh;
+        }
+
+        :global(.divider-cam) {
+          height: 1.5em;
+          margin: 0;
+          margin-left: 1px;
+          border-left: 1px solid rgb(0 0 0 / 24%);
         }
 
       `}</style>

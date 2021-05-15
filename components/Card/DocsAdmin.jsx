@@ -1,9 +1,8 @@
 import { motion } from 'framer-motion'
-import { Card, Popconfirm } from 'antd'
+import { Card, Popconfirm, Tag } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 
 import Link from 'next/link'
-import Image from 'next/image'
 
 const CardDocs = () => {
   return(
@@ -17,14 +16,6 @@ const CardDocs = () => {
         <Card 
           className="w-100 card-blog rounded-card-actions"
           bordered={false}
-          cover={
-            <Image
-              src="/static/images/arduino-boards.jpeg" 
-              width={350} 
-              height={250} 
-              alt="docs" 
-            />
-          }
           actions={[
             <Link href="/dashboard/manage-docs/asd">
               <a>
@@ -40,7 +31,8 @@ const CardDocs = () => {
             </Popconfirm>
           ]}
         >
-          <h1 className="h3 bold truncate line-height-3">Set-up your IoT devkit</h1>
+          <h1 className="h3 bold truncate line-height-3 m-b-5">Set-up your IoT devkit</h1>
+          <Tag className="m-b-5" color="#B6B9C7">Learn ESP32</Tag>
           <p className="truncate-2 m-b-0">
             For sending your first Hello World on NB-IoT you can use an embedded developer kit (devkit). Devkits are available for all NB-IoT modules from different manufactures such as Quectel or ublox.
           </p>

@@ -1,9 +1,10 @@
+import { CSVLink } from "react-csv"
 import { withAuth } from "lib/withAuth";
 import { useState, useEffect } from 'react'
 import { optionsGrowth } from 'components/Dashboard/apexOption'
-import { Layout, Card, Row, Col, Radio, Tabs, Badge, Timeline, Table, Button, Grid, Select, Space } from 'antd'
+import { Layout, Card, Row, Col, Radio, Tabs, Badge, Table, Button, Grid, Select, Space, Dropdown, Menu } from 'antd'
 
-import { columns, dataSource, progressData } from 'columns/sensorReport'
+import { columns, dataSource } from 'columns/sensorReport'
 import { seriesPHWeek, seriesPHDay, seriesPPMWeek, seriesPPMDay } from 'components/Dashboard/apexOption'
 import { seriesDayGrowth, optionsDayGrowthData, seriesWeekGrowth, optionsWeekGrowthData } from 'components/Dashboard/apexOption'
 import { optionsPHWeekData, optionsPHDayData, optionsPPMWeekData, optionsPPMDayData } from 'components/Dashboard/apexOption'
@@ -15,12 +16,24 @@ import pageStyle from 'components/Dashboard/pageStyle.js'
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
-const DAY = "DAY", WEEK = "WEEK", MONTH = "MONTH"
 const PH = "PH", PPM = "PPM"
+const DAY = "DAY", WEEK = "WEEK", MONTH = "MONTH"
+const ANALYSIS = "ANALYSIS", GROWTH = "GROWTH", ALERT = "ALERT"
 const useBreakpoint = Grid.useBreakpoint
+
+const headersTableExport = [
+  { label: "PH", key: "report.ph" }, //ph
+  { label: "Nutrition", key: "report.tds" }, //tds
+  { label: "Light Status", key: "report.ldr" }, //ldr
+  { label: "Water Temp.", key: "report.sh" }, //tmp
+  { label: "Water Level", key: "report.ta" }, //tank
+  { label: "Time", key: "report.time" }
+];
 
 const Reports = () => {
   const screens = useBreakpoint()
+
+  const [activeTab, setActiveTab] = useState(ANALYSIS)
   
   const [selectedGrowth, setSelectedGrowth] = useState(DAY)
   const [selectedGrowthOption, setSelectedGrowthOption] = useState(optionsGrowth)
@@ -93,7 +106,68 @@ const Reports = () => {
     }
   }, [selectedAnalysisTime, selectedAnalysis])
 
+  const getCsvData = () => {
+    const newDataSource = JSON.parse(JSON.stringify(dataSource))
+    newDataSource.map(data => {
+      data.report.tds = data.report.tds + " ppm"
+      data.report.sh = data.report.sh + "°C"
+      data.report.ta = data.report.ta + "%"
+      return data
+    })
+    return newDataSource
+  }
 
+  const getGraphicData = (id, className) => {
+    const v = document.getElementById(id)
+    v.querySelector("."+className).click()
+    return
+  }
+
+  const exportMenuTable = (
+    <Menu>
+      <Menu.Item onClick={() => generatePDF(dataSource)} className="fs-12 fw-600">
+        Download PDF
+      </Menu.Item>
+      <Menu.Item className="fs-12 fw-600">
+        <CSVLink data={getCsvData()} headers={headersTableExport} filename={`Sensor Report ${moment().format('LLL')}.csv`}>
+          Download CSV
+        </CSVLink>
+      </Menu.Item>
+    </Menu>
+  )
+
+  const exportMenuAnalysis = (
+    <Menu>
+      <Menu.Item onClick={() => getGraphicData("chart-analysis", "exportSVG")} className="fs-12 fw-600">
+        Download SVG
+      </Menu.Item>
+      <Menu.Item onClick={() => getGraphicData("chart-analysis", "exportPNG")} className="fs-12 fw-600">
+        Download PNG
+      </Menu.Item>
+      <Menu.Item onClick={() => getGraphicData("chart-analysis", "exportCSV")} className="fs-12 fw-600">
+        Download CSV
+      </Menu.Item>
+    </Menu>
+  )
+
+  const exportMenuGrowth = (
+    <Menu>
+      <Menu.Item onClick={() => getGraphicData("chart-growth", "exportSVG")} className="fs-12 fw-600">
+        Download SVG
+      </Menu.Item>
+      <Menu.Item onClick={() => getGraphicData("chart-growth", "exportPNG")} className="fs-12 fw-600">
+        Download PNG
+      </Menu.Item>
+      <Menu.Item onClick={() => getGraphicData("chart-growth", "exportCSV")} className="fs-12 fw-600">
+        Download CSV
+      </Menu.Item>
+    </Menu>
+  )
+
+  const onTabChange = val => {
+    setActiveTab(val)
+    window.dispatchEvent(new Event('resize'))
+  }
 
   return(
     <>
@@ -108,32 +182,37 @@ const Reports = () => {
           <Row gutter={[20, 20]}>
             <Col xl={24} lg={24} md={24} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <Tabs defaultActiveKey="1">
+                <Tabs activeKey={activeTab} onChange={onTabChange}>
 
-                  <Tabs.TabPane tab="Analysis" key="1">
-                    <div className="flex justify-between">
-                      <Radio.Group 
-                        value={selectedAnalysis} 
-                        onChange={onChangeSelectedAnalysisHanlder}
-                      >
-                        <Radio.Button value={PH}>
-                          <span className="h6">PH</span>
-                        </Radio.Button>
-                        <Radio.Button value={PPM}>
-                          <span className="h6">PPM</span>
-                        </Radio.Button>
-                      </Radio.Group>
-                      <Select 
-                        value={selectedAnalysisTime}
-                        onChange={onChangeSelectedAnalysisTimeHanlder} 
-                        className="select-no-rounded m-r-82"
-                      >
-                        <Select.Option value={DAY}>Daily</Select.Option>
-                        <Select.Option value={WEEK}>Weekly</Select.Option>
-                        <Select.Option value={MONTH}>Monthly</Select.Option>
-                      </Select>
-                    </div>
-                    <div className="chart">
+                  <Tabs.TabPane tab="Analysis" key={ANALYSIS}>
+                    <Row gutter={[0, 0]} align="middle" justify="space-between">
+                      <Col lg={12} md={12} sm={12} xs={24}>
+                        <Radio.Group value={selectedAnalysis} onChange={onChangeSelectedAnalysisHanlder}>
+                          <Radio.Button value={PH}>
+                            <span className="h6">PH</span>
+                          </Radio.Button>
+                          <Radio.Button value={PPM}>
+                            <span className="h6">PPM</span>
+                          </Radio.Button>
+                        </Radio.Group>
+                      </Col>
+                      <Col lg={12} md={12} sm={12} xs={24}>
+                        <Space className={`${!screens.xs && "float-right"}`}>
+                          <Select 
+                            value={selectedAnalysisTime}
+                            onChange={onChangeSelectedAnalysisTimeHanlder} 
+                            className="select-no-rounded"
+                          >
+                            <Select.Option value={DAY}>Last 7 days</Select.Option>
+                            <Select.Option value={WEEK}>Last 30 days</Select.Option>
+                          </Select>
+                          <Dropdown overlay={exportMenuAnalysis} trigger={['click']} placement="bottomRight" className="border-radius-2px">
+                            <Button className="btn-white">Export</Button>
+                          </Dropdown>
+                        </Space>
+                      </Col>
+                    </Row>
+                    <div className="chart chart-analysis" id="chart-analysis">
                       <Chart 
                         type="area"
                         series={selectedAnalysisSeries}
@@ -143,25 +222,33 @@ const Reports = () => {
                     </div>
                   </Tabs.TabPane>
 
-                  <Tabs.TabPane tab="Growth Plant" key="2">
-                    <div className="flex justify-between">
-                      <p></p>
-                      <Select 
-                        value={selectedGrowth} 
-                        onChange={onChangeSelectedGrowthHanlder} 
-                        className="select-no-rounded m-r-82"
-                      >
-                        <Select.Option value={DAY}>Daily</Select.Option>
-                        <Select.Option value={WEEK}>Weekly</Select.Option>
-                        <Select.Option value={MONTH}>Monthly</Select.Option>
-                      </Select>
-                    </div>
-                    <div className="chart">
+                  <Tabs.TabPane tab="Growth Plant" key={GROWTH}>
+                    <Row gutter={[0, 0]} align="middle" justify="space-between">
+                      <Col lg={12} md={12} sm={12} xs={24}>
+                        <p></p>
+                      </Col>
+                      <Col lg={12} md={12} sm={12} xs={24}>
+                        <Space className={`${!screens.xs && "float-right"}`}>
+                          <Select 
+                            value={selectedGrowth} 
+                            onChange={onChangeSelectedGrowthHanlder} 
+                            className="select-no-rounded"
+                          >
+                            <Select.Option value={DAY}>Last 7 days</Select.Option>
+                            <Select.Option value={WEEK}>Last 30 days</Select.Option>
+                          </Select>
+                          <Dropdown overlay={exportMenuGrowth} trigger={['click']} placement="bottomRight" className="border-radius-2px">
+                            <Button className="btn-white">Export</Button>
+                          </Dropdown>
+                        </Space>
+                      </Col>
+                    </Row>
+                    <div className="chart chart-analysis" id="chart-growth">
                       <Chart type="area" series={selectedGrowthSeries} options={selectedGrowthOption} height={300} />
                     </div>
                   </Tabs.TabPane>
 
-                  <Tabs.TabPane tab={<span>Alerts<Badge dot /></span>} key="3">
+                  <Tabs.TabPane tab={<span>Alerts<Badge dot /></span>} key={ALERT}>
                     <p className="header-date">Recent alert</p>
                     <div className="alert-container">
                       <Card className="radius1rem card-alert card-body-p-1 card-warning">
@@ -191,15 +278,15 @@ const Reports = () => {
                   </Col>
                   <Col lg={12} md={12} sm={12} xs={24}>
                     <Space className={`${!screens.xs && "float-right"}`}>
-                      <Select defaultValue="all">
-                        <Select.Option value="all">All Time</Select.Option>
-                        <Select.Option value="day">Daily</Select.Option>
-                        <Select.Option value="week">Weekly</Select.Option>
-                        <Select.Option value="month">Monthly</Select.Option>
+                      <Select defaultValue="today">
+                        <Select.Option value="today">Today</Select.Option>
+                        <Select.Option value="week">Last 7 days</Select.Option>
+                        <Select.Option value="month">Last 30 days</Select.Option>
+                        <Select.Option value="month2">Last 90 days</Select.Option>
                       </Select>
-                      <Button className="btn-white" onClick={() => generatePDF(dataSource)}>
-                        Export
-                      </Button>
+                      <Dropdown overlay={exportMenuTable} trigger={['click']} placement="bottomRight">
+                        <Button className="btn-white">Export</Button>
+                      </Dropdown>
                     </Space>
                   </Col>
                 </Row>
@@ -308,6 +395,10 @@ const Reports = () => {
 
         :global(.apexcharts-menu-icon){
           transform: scale(1)!important;
+        }
+
+        :global(.chart-analysis .apexcharts-menu.apexcharts-menu-open, .chart-analysis .btn-export-graphic){
+          display: none;
         }
 
       `}</style>

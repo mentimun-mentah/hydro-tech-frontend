@@ -4,15 +4,17 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState, useEffect, createContext } from 'react'
 
+import nookies from 'nookies'
+import isIn from 'validator/lib/isIn'
+import * as actions from 'store/actions'
+
 import Style from './style'
 import SplitText from './SplitText'
-import nookies from 'nookies'
-import * as actions from 'store/actions'
 
 const useBreakpoint = Grid.useBreakpoint
 const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", 
   ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS", ADD_BLOG = "ADD-BLOG", MANAGE_BLOG = "MANAGE-BLOG",
-  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS"
+  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS", CHAT = "CHAT", ADMIN = "ADMIN", ADD_CATEGORY = "ADD-CATEGORY"
 
 export const WebSocketContext = createContext()
 
@@ -27,6 +29,7 @@ const SidebarContainer = ({ children }) => {
 
   const [collapsed, setCollapsed] = useState(false)
   const [selected, setSelected] = useState(DASHBOARD)
+  const [isMenuAdmin, setIsMenuAdmin] = useState(false)
 
   const onLogoutHandler = () => {
     dispatch(actions.logout())
@@ -48,21 +51,18 @@ const SidebarContainer = ({ children }) => {
 
       ws.onopen = () => {
         ws.send("Connected");
-        console.log("Connected");
         ws.send(`kind:live_cam_false`);
       };
 
-      ws.onclose = (e) => {
+      ws.onclose = () => {
         ws.close()
-        console.log("Layout Disconected.\nReconnect will be attempted in 3 second.", e.reason);
         setTimeout(() => {
           wsConnect()
         }, 3000);
       };
     }
 
-    ws.onerror = (err) => {
-      console.error('Socket encountered error: ', err.message, 'Closing socket');
+    ws.onerror = () => {
       ws.close()
     };
   };
@@ -79,10 +79,16 @@ const SidebarContainer = ({ children }) => {
   useEffect(() => {
     let routeNow = router.pathname.split("/")[router.pathname.split("/").length - 1]
     let data = routeNow.toUpperCase()
-    if(router.pathname.split("/")[router.pathname.split("/").length - 1].startsWith('[')) {
+    if(routeNow.startsWith('[')) {
       data = router.pathname.split("/")[router.pathname.split("/").length - 2].toUpperCase()
     }
     setSelected(data)
+    let listAdminRoute = ['add-plants', 'add-blog', 'manage-blog', 'add-docs', 'manage-docs', 'add-category']
+    if(router.pathname.split("/")[2] && isIn(router.pathname.split("/")[2], listAdminRoute)){
+      setIsMenuAdmin(true)
+    } else {
+      setIsMenuAdmin(false)
+    }
   }, [router])
 
   return(
@@ -168,92 +174,154 @@ const SidebarContainer = ({ children }) => {
               >
                 Dashboard
               </Menu.Item>
-              <Menu.Item 
-                key={CONTROLS} 
-                icon={<i className="far fa-cog" />} 
-                onClick={() => router.push('/dashboard/controls')}
-              >
-                Controls
-              </Menu.Item>
-              <Menu.Item 
-                key={REPORTS} 
-                icon={<i className="far fa-clipboard-list" />} 
-                onClick={() => router.push('/dashboard/reports')}
-              >
-                Reports
-              </Menu.Item>
-              <Menu.Item 
-                key={PLANTS} 
-                icon={<i className="far fa-seedling" />} 
-                onClick={() => router.push('/dashboard/plants')}
-              >
-                Plants
-              </Menu.Item>
-              {user && user.role == "admin" && (
-                <>
-                  <Menu.Item 
-                    key={ADD_PLANTS}
-                    icon={<i className="far fa-hand-holding-seedling" />} 
-                    onClick={() => router.push('/dashboard/add-plants')}
+
+              <AnimatePresence>
+                {isMenuAdmin && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 100 }}
                   >
-                    Add Plants
-                  </Menu.Item>
-                </>
-              )}
-              <Menu.Item 
-                key={ACCOUNTS} 
-                icon={<i className="far fa-user" />} 
-                onClick={() => router.push('/dashboard/accounts')}
-              >
-                Accounts
-              </Menu.Item>
-              {user && user.role == "admin" && (
-                <>
-                  <Menu.SubMenu 
-                    key="blog-sub" 
-                    icon={<i className="far fa-blog m-r-10" />} 
-                    title={collapsed ? "" : "Blog"}
+                  <Menu 
+                    mode="inline" 
+                    theme="light" 
+                    inlineIndent={15} 
+                    className="ant-menu-scroll"
+                    selectedKeys={[selected]}
+                  >
+                    {user && user.role == "admin" && (
+                      <>
+                        <Menu.Item 
+                          key={ADD_PLANTS}
+                          icon={<i className="far fa-hand-holding-seedling" />} 
+                          onClick={() => router.push('/dashboard/add-plants')}
+                        >
+                          Add Plants
+                        </Menu.Item>
+                        <Menu.SubMenu 
+                          key="blog-sub" 
+                          icon={<i className="far fa-blog m-r-10" />} 
+                          title={collapsed ? "" : "Blog"}
+                        >
+                          <Menu.Item 
+                            key={ADD_BLOG}
+                            onClick={() => router.push('/dashboard/add-blog')}
+                          >
+                            Add Blog
+                          </Menu.Item>
+                          <Menu.Item 
+                            key={MANAGE_BLOG}
+                            onClick={() => router.push('/dashboard/manage-blog')}
+                          >
+                            Manage Blog
+                          </Menu.Item>
+                        </Menu.SubMenu>
+                        <Menu.SubMenu 
+                          key="docs-sub" 
+                          icon={<i className="far fa-book m-r-10" />} 
+                          title={collapsed ? "" : "Documentation"}
+                        >
+                          <Menu.Item 
+                            key={ADD_CATEGORY}
+                            onClick={() => router.push('/dashboard/add-category')}
+                          >
+                            Add Category
+                          </Menu.Item>
+                          <Menu.Item 
+                            key={ADD_DOCS}
+                            onClick={() => router.push('/dashboard/add-docs')}
+                          >
+                            Add Docs
+                          </Menu.Item>
+                          <Menu.Item 
+                            key={MANAGE_DOCS}
+                            onClick={() => router.push('/dashboard/manage-docs')}
+                          >
+                            Manage Docs
+                          </Menu.Item>
+                        </Menu.SubMenu>
+                        <Menu.Item 
+                          key={ADMIN+"BACK"} 
+                          icon={<i className="far fa-long-arrow-left" />}
+                          onClick={() => setIsMenuAdmin(false)}
+                        >
+                          Back
+                        </Menu.Item>
+                      </>
+                    )}
+                  </Menu>
+                  </motion.div>
+                )} 
+              </AnimatePresence>
+              <AnimatePresence>
+                {!isMenuAdmin && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -100 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -100 }}
+                  >
+                  <Menu 
+                    mode="inline" 
+                    theme="light" 
+                    inlineIndent={15} 
+                    className="ant-menu-scroll"
+                    selectedKeys={[selected]}
                   >
                     <Menu.Item 
-                      key={ADD_BLOG}
-                      onClick={() => router.push('/dashboard/add-blog')}
+                      key={CONTROLS} 
+                      icon={<i className="far fa-cog" />} 
+                      onClick={() => router.push('/dashboard/controls')}
                     >
-                      Add Blog
+                      Controls
                     </Menu.Item>
                     <Menu.Item 
-                      key={MANAGE_BLOG}
-                      onClick={() => router.push('/dashboard/manage-blog')}
+                      key={REPORTS} 
+                      icon={<i className="far fa-clipboard-list" />} 
+                      onClick={() => router.push('/dashboard/reports')}
                     >
-                      Manage Blog
-                    </Menu.Item>
-                  </Menu.SubMenu>
-                  <Menu.SubMenu 
-                    key="docs-sub" 
-                    icon={<i className="far fa-book m-r-10" />} 
-                    title={collapsed ? "" : "Documentation"}
-                  >
-                    <Menu.Item 
-                      key={ADD_DOCS}
-                      onClick={() => router.push('/dashboard/add-docs')}
-                    >
-                      Add Docs
+                      Reports
                     </Menu.Item>
                     <Menu.Item 
-                      key={MANAGE_DOCS}
-                      onClick={() => router.push('/dashboard/manage-docs')}
+                      key={PLANTS} 
+                      icon={<i className="far fa-seedling" />} 
+                      onClick={() => router.push('/dashboard/plants')}
                     >
-                      Manage Docs
+                      Plants
                     </Menu.Item>
-                  </Menu.SubMenu>
-                </>
-              )}
-              <Menu.Item 
-                key={LOGOUT} 
-                icon={<i className="far fa-sign-out" />}
-                onClick={onLogoutHandler}
-              >
-                Log Out
-              </Menu.Item>
+                    <Menu.Item 
+                      key={ACCOUNTS} 
+                      icon={<i className="far fa-user" />} 
+                      onClick={() => router.push('/dashboard/accounts')}
+                    >
+                      Accounts
+                    </Menu.Item>
+                    <Menu.Item 
+                      key={CHAT} 
+                      icon={<i className="far fa-comments-alt" />} 
+                      onClick={() => router.push('/dashboard/chats')}
+                    >
+                      Room Chat
+                    </Menu.Item>
+                    {user && user.role == "admin" && (
+                      <Menu.Item 
+                        key={ADMIN}
+                        icon={<i className="far fa-users-crown" />}
+                        onClick={() => setIsMenuAdmin(true)}
+                      >
+                        Admin
+                      </Menu.Item>
+                    )}
+                    <Menu.Item 
+                      key={LOGOUT} 
+                      icon={<i className="far fa-sign-out" />}
+                      onClick={onLogoutHandler}
+                    >
+                      Log Out
+                    </Menu.Item>
+                  </Menu>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Menu>
           </div>
         </Layout.Sider>

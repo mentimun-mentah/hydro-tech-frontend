@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux'
 import AuthLayout from './Auth'
 import HomeLayout from './home'
 import DasboardLayout from './dashboard'
+import DocumentationLayout from './docs'
 import * as actions from 'store/actions'
 
 const Layout = ({ children }) => {
@@ -29,7 +30,7 @@ const Layout = ({ children }) => {
   if(isHome) layout = <HomeLayout>{children}</HomeLayout>
   if(isDashboard) layout = <DasboardLayout>{children}</DasboardLayout>
   if(isAuth) layout = <AuthLayout>{children}</AuthLayout>
-  // if(isNoLayout) layout = <>{children}</>
+  if(isNoLayout) layout = <DocumentationLayout>{children}</DocumentationLayout>
 
   return layout
 }

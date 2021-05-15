@@ -113,7 +113,7 @@ body {
   border-right-width: 0px !important;
 }
 
-.ant-input-number:focus, .ant-input-number-focusedm, .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
+.ant-input-number:focus, .ant-input-number-focused, .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover {
   border-color: var(--grey-0)!important;
 }
 

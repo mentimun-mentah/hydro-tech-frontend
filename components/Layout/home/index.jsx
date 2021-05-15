@@ -36,10 +36,15 @@ const HomeLayout = ({ children }) => {
         </div>
         <div className="menuCon">
           {lg ? (
-            <Menu mode="horizontal" defaultSelectedKeys={[selected]}>
+            <Menu mode="horizontal" defaultSelectedKeys={[selected]} style={{minWidth: 'max-content'}}>
               <Menu.Item key="home">
                 <Link href="/#home" as="/#home">
                   <a>Home</a>
+                </Link>
+              </Menu.Item>
+              <Menu.Item key="#service4">
+                <Link href="/#service" as="/#service">
+                  <a>Service</a>
                 </Link>
               </Menu.Item>
               <Menu.Item key="#service">
