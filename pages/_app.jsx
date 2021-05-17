@@ -5,6 +5,8 @@ import Layout from 'components/Layout'
 import withReduxStore from 'lib/with-redux-store'
 
 import 'antd/dist/antd.css'
+import 'swiper/swiper.min.css'
+import 'swiper/components/navigation/navigation.min.css'
 import 'antd-button-color/dist/css/style.css'
 import 'suneditor/dist/css/suneditor.min.css'
 

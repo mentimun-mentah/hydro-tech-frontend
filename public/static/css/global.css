@@ -241,6 +241,10 @@ body {
   color: var(--green)!important;
 }
 
+.text-white {
+  color: var(--white)!important;
+}
+
 .text-black {
   color: var(--black)!important;
 }

@@ -30,6 +30,7 @@
     "redux-devtools-extension": "^2.13.9",
     "redux-thunk": "^2.3.0",
     "suneditor-react": "^2.16.5",
+    "swiper": "^6.6.1",
     "validator": "^13.6.0"
   }
 }
