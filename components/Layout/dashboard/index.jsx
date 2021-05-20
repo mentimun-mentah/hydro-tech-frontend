@@ -167,13 +167,6 @@ const SidebarContainer = ({ children }) => {
               >
                 Home
               </Menu.Item>
-              <Menu.Item 
-                key={DASHBOARD} 
-                icon={<i className="far fa-house-flood" />}
-                onClick={() => router.push('/dashboard')}
-              >
-                Dashboard
-              </Menu.Item>
 
               <AnimatePresence>
                 {isMenuAdmin && (
@@ -267,6 +260,13 @@ const SidebarContainer = ({ children }) => {
                     className="ant-menu-scroll"
                     selectedKeys={[selected]}
                   >
+                    <Menu.Item 
+                      key={DASHBOARD} 
+                      icon={<i className="far fa-house-flood" />}
+                      onClick={() => router.push('/dashboard')}
+                    >
+                      Dashboard
+                    </Menu.Item>
                     <Menu.Item 
                       key={CONTROLS} 
                       icon={<i className="far fa-cog" />} 
