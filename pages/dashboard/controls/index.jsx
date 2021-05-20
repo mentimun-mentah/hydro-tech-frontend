@@ -471,6 +471,57 @@ const Controls = () => {
               </Card>
             </Col>
           </Row>
+
+          <Row gutter={[20, 20]} className="m-t-20">
+            <Col span={24}>
+              <Card className="radius1rem shadow1 h-100" bordered={false}>
+                <div className="header-dashboard">
+                  <h2 className="h2 bold mb0">
+                    Servo Settings
+                  </h2>
+                </div>
+                <Form name="settings" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
+                  <Row gutter={[20, 20]}>
+                    <Col xl={12} lg={12} md={12} sm={24}>
+                      <Form.Item 
+                        label="Servo X" 
+                        className="m-b-0"
+                      >
+                        <InputNumber
+                          {...inputNumberProps}
+                          placeholder="Servo X"
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xl={12} lg={12} md={12} sm={24}>
+                      <Form.Item
+                        label="Servo Y"
+                        className="m-b-0"
+                      >
+                        <InputNumber
+                          {...inputNumberProps}
+                          placeholder="Servo Y"
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col xl={24} lg={24} md={24} sm={24}>
+                      <Form.Item className="m-b-0">
+                        <Button 
+                          type="primary"
+                          size="large"
+                          className="p-l-30 p-r-30"
+                          disabled={isSending || ws.readyState !== 1}
+                          // onClick={onSubmitHandler}
+                        >
+                          <b>Save</b>
+                        </Button>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Form>
+              </Card>
+            </Col>
+          </Row>
           
         </Layout.Content>
       </Layout>

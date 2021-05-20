@@ -248,7 +248,7 @@ const Reports = () => {
                     </div>
                   </Tabs.TabPane>
 
-                  <Tabs.TabPane tab={<span>Alerts<Badge dot /></span>} key={ALERT}>
+                  <Tabs.TabPane tab="Alerts" key={ALERT}>
                     <p className="header-date">Recent alert</p>
                     <div className="alert-container">
                       <Card className="radius1rem card-alert card-body-p-1 card-warning">
