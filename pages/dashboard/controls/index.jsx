@@ -40,19 +40,10 @@ const Controls = () => {
   const [isSystemSetting, setIsSystemSetting] = useState(true)
 
   const [lamp, setLamp] = useState(false)
-  const [forceLamp, setForceLamp] = useState(false)
-
   const [solenoid, setSolenoid] = useState(false)
-  const [forceSolenoid, setForceSolenoid] = useState(false)
-
   const [phup, setPhup] = useState(false)
-  const [forcePhup, setForcePhup] = useState(false)
-
   const [phdown, setPhdown] = useState(false)
-  const [forcePhdown, setForcePhdown] = useState(false)
-
   const [nutrition, setNutrition] = useState(false)
-  const [forceNutrition, setForceNutrition] = useState(false)
 
   const { phmax, phmin, tdsmin, phcal, tdscal, tankheight, tankmin } = setting
 
@@ -140,9 +131,6 @@ const Controls = () => {
 
       const data = `lamp:${val?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
-
-      if(!lamp) setForceLamp(val)
-      else setForceLamp(val)
     }
   }
 
@@ -157,9 +145,6 @@ const Controls = () => {
 
       const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${val?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
-
-      if(!solenoid) setForceSolenoid(val)
-      else setForceSolenoid(val)
     }
   }
 
@@ -174,9 +159,6 @@ const Controls = () => {
 
       const data = `lamp:${lamp?"on":"off"},phup:${val?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
-
-      if(!phup) setForcePhup(val)
-      else setForcePhup(val)
     }
   }
 
@@ -191,9 +173,6 @@ const Controls = () => {
 
       const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${val?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
-
-      if(!phdown) setForcePhdown(val)
-      else setForcePhdown(val)
     }
   }
 
@@ -208,9 +187,6 @@ const Controls = () => {
 
       const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${val?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
       sendWsHandler(data)
-
-      if(!nutrition) setForceNutrition(val)
-      else setForceNutrition(val)
     }
   }
 
@@ -484,23 +460,27 @@ const Controls = () => {
                   <Row gutter={[20, 20]}>
                     <Col xl={12} lg={12} md={12} sm={24}>
                       <Form.Item 
-                        label="Servo X" 
+                        label="Servo Horizontal" 
                         className="m-b-0"
                       >
                         <InputNumber
                           {...inputNumberProps}
-                          placeholder="Servo X"
+                          step={1}
+                          defaultValue={90}
+                          placeholder="Servo Horizontal (0-180)"
                         />
                       </Form.Item>
                     </Col>
                     <Col xl={12} lg={12} md={12} sm={24}>
                       <Form.Item
-                        label="Servo Y"
+                        label="Servo Vertical"
                         className="m-b-0"
                       >
                         <InputNumber
                           {...inputNumberProps}
-                          placeholder="Servo Y"
+                          step={1}
+                          defaultValue={90}
+                          placeholder="Servo Vertical (0-180)"
                         />
                       </Form.Item>
                     </Col>

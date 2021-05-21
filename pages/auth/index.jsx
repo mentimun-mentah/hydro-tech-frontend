@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { Form, Input, Button, Divider, Image, Row, Col, Steps, Card } from 'antd'
 
 import Router from 'next/router'
 import nookies from 'nookies'
