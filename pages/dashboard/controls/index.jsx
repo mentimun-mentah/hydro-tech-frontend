@@ -1,6 +1,6 @@
 import { withAuth } from "lib/withAuth";
 import { useState, useContext } from 'react'
-import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag } from 'antd'
+import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag, Popover } from 'antd'
 
 import { enterPressHandler } from 'lib/utility'
 import { formSetting } from 'formdata/controlSetting'
@@ -316,7 +316,7 @@ const Controls = () => {
                 </div>
                 <Form name="settings" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                   <Row gutter={[20, 20]}>
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item 
                         label="PH Maximum" 
                         className="m-b-0"
@@ -330,7 +330,7 @@ const Controls = () => {
                         />
                       </Form.Item>
                     </Col>
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
                         label="PH Minimum"
                         className="m-b-0"
@@ -345,7 +345,7 @@ const Controls = () => {
                       </Form.Item>
                     </Col>
 
-                    <Col xl={24} lg={24} md={24} sm={24}>
+                    <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                       <Form.Item
                         label="TDS Minimum"
                         className="m-b-0"
@@ -360,7 +360,7 @@ const Controls = () => {
                       </Form.Item>
                     </Col>
 
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
                         label="PH Calibration"
                         className="m-b-0"
@@ -373,7 +373,7 @@ const Controls = () => {
                         />
                       </Form.Item>
                     </Col>
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
                         label="TDS Calibration"
                         className="m-b-0"
@@ -387,7 +387,7 @@ const Controls = () => {
                       </Form.Item>
                     </Col>
 
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
                         label="Water Tank Height"
                         className="m-b-0"
@@ -408,7 +408,7 @@ const Controls = () => {
                       </Form.Item>
                     </Col>
 
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
                         label="Water Tank Minimum"
                         className="m-b-0"
@@ -429,7 +429,7 @@ const Controls = () => {
                       </Form.Item>
                     </Col>
 
-                    <Col xl={24} lg={24} md={24} sm={24}>
+                    <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                       <Form.Item className="m-b-0">
                         <Button 
                           type="primary"
@@ -453,12 +453,18 @@ const Controls = () => {
               <Card className="radius1rem shadow1 h-100" bordered={false}>
                 <div className="header-dashboard">
                   <h2 className="h2 bold mb0">
-                    Servo Settings
+                    Servo Settings 
+                    <Popover 
+                      trigger="hover"
+                      content={<span>This setting is useful for returning <br />the servo position to its original position</span>} 
+                    >
+                      <span className="fs-16 text-grey-1 hover-pointer p-l-5"><i className="far fa-info-circle" /></span>
+                    </Popover>
                   </h2>
                 </div>
                 <Form name="settings" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                   <Row gutter={[20, 20]}>
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item 
                         label="Servo Horizontal" 
                         className="m-b-0"
@@ -471,7 +477,7 @@ const Controls = () => {
                         />
                       </Form.Item>
                     </Col>
-                    <Col xl={12} lg={12} md={12} sm={24}>
+                    <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
                         label="Servo Vertical"
                         className="m-b-0"
@@ -484,7 +490,7 @@ const Controls = () => {
                         />
                       </Form.Item>
                     </Col>
-                    <Col xl={24} lg={24} md={24} sm={24}>
+                    <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                       <Form.Item className="m-b-0">
                         <Button 
                           type="primary"
