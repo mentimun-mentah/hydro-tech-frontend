@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { Row, Col, Card } from 'antd'
-import { animateScroll } from 'react-scroll';
+import { animateScroll } from 'react-scroll'
+import { Row, Col, Card, Grid, Divider } from 'antd'
 
 import dynamic from 'next/dynamic'
 import PeopleChat from 'components/Chats/People'
@@ -28,7 +28,11 @@ const generateName = () => {
 }
 
 
+const useBreakpoint = Grid.useBreakpoint
+
 const Chats = () => {
+  const { lg }= useBreakpoint()
+
   useEffect(() => {
     animateScroll.scrollToBottom({containerId: 'chat-content'});
     const timeout = setTimeout(() => {
@@ -38,13 +42,13 @@ const Chats = () => {
   }, [])
 
   const bindings = {
-    custom: {
-      key: 'B',
-      shiftKey: true,
-      handler: function(range, context) {
+    send: {
+      key: 'Enter',
+      shiftKey: false,
+      handler: (range, context) => {
         console.log("HAHAHAI", range, context)
       }
-    },
+    }
   }
 
   return(
@@ -54,12 +58,19 @@ const Chats = () => {
           <Col xl={18} lg={18} md={20} sm={20} xs={20} className="border-right">
             <div id="chat-content" className="chat-wrapper chat-content">
               {[...Array(30)].map((_,i) => (
-                <ChatItem 
-                  key={i}
-                  avatar={`https://i.pravatar.cc/50?u=${i}`}
-                  name={generateName()}
-                  message={`${i} ${generateName()} ${generateName()} ${generateName()} ${generateName()} ${generateName()} ${generateName()}`}
-                />
+                <>
+                  {i == 29 ? (
+                    <Divider className="date-divider" plain>Today</Divider>
+                  ) : (
+                    <Divider className="date-divider" plain>May 21, 2021</Divider>
+                  )}
+                  <ChatItem 
+                    key={i}
+                    name={generateName()}
+                    avatar={`https://i.pravatar.cc/50?u=${i}`}
+                    message={`${i} ${generateName()} ${generateName()} ${generateName()} ${generateName()}`}
+                  />
+                </>
               ))}
             </div>
             <div className="chat-input-wrapper">
@@ -68,24 +79,31 @@ const Chats = () => {
                 className="chat-input"
                 modules={{
                   toolbar: toolbarOptions.toolbar,
-                  keyboard: {
-                    bindings: bindings
-                  }
-
+                  keyboard: { bindings: bindings }
                 }}
                 onChange={val => console.log(val)}
+                placeholder="Press enter to send message"
               />
             </div>
           </Col>
           <Col xl={6} lg={6} md={4} sm={4} xs={4}>
             <div className="chat-user-wrapper">
-              <h1 className="bold h4">People</h1>
               <div className="user-wrapper">
+                <h1 className="bold h5 caps ls-0">Online {lg && '- 5'}</h1>
+                {[...Array(5)].map((_,i) => (
+                  <PeopleChat
+                    key={i}
+                    online
+                    name={generateName()}
+                    avatar={`https://i.pravatar.cc/50?u=${i}`}
+                  />
+                ))}
+                <h1 className="bold h5 caps ls-0">Offline {lg && '- 124'}</h1>
                 {[...Array(30)].map((_,i) => (
                   <PeopleChat
                     key={i}
-                    avatar={`https://i.pravatar.cc/50?u=${i}`}
                     name={generateName()}
+                    avatar={`https://i.pravatar.cc/50?u=${i}`}
                   />
                 ))}
               </div>
@@ -120,12 +138,12 @@ const Chats = () => {
         .user-wrapper {
           overflow-y: scroll;
           overflow-x: hidden;
-          height: calc(100% - 35px);
+          height: 100%;
         }
         .chat-wrapper {
           overflow-y: scroll;
           overflow-x: hidden;
-          height: calc(100vh - 100px - 25px - 100px - 0.5em);
+          height: calc(100vh - 100px - 35px - 100px - 0.5em);
         }
 
         :global(.chat-content) {
@@ -146,6 +164,7 @@ const Chats = () => {
         }
 
         .chat-input-wrapper {
+          margin-top: 10px;
           margin-right: 20px;
         }
         :global(.chat-input .ql-toolbar.ql-snow .ql-formats) {
@@ -153,6 +172,8 @@ const Chats = () => {
         }
         :global(.chat-input .ql-toolbar.ql-snow) {
           padding: 5px;
+          overflow: auto;
+          white-space: nowrap;
           border-top-left-radius: .5rem;
           border-top-right-radius: .5rem;
         }
@@ -180,6 +201,16 @@ const Chats = () => {
         }
         :global(.ql-snow .ql-picker.ql-header .ql-picker-item::before) {
           font-size: .9em;
+        }
+
+        :global(.ant-divider.date-divider) {
+          margin-top: 0;
+          font-size: 12px;
+          font-weight: bold;
+          color: var(--grey);
+        }
+        :global(.ant-divider.date-divider::before, .ant-divider.date-divider::after) {
+          top: 0%;
         }
       `}</style>
     </>

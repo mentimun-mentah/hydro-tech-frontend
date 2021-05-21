@@ -1,9 +1,9 @@
 import { Row, Col } from 'antd'
 
+import moment from 'moment'
 import Image from 'next/image'
 
 const ChatItem = ({ avatar, name, message }) => {
-
   return (
     <>
       <Row gutter={[10,10]} className="m-b-10 chat-item" wrap={false}>
@@ -17,7 +17,7 @@ const ChatItem = ({ avatar, name, message }) => {
           />
         </Col>
         <Col flex="auto" className="truncate">
-          <h4 className="bold truncate m-b-0">{name}</h4>
+          <h4 className="bold truncate m-b-0">{name} <span className="text-grey fs-12">{moment().format('LT')}</span></h4>
           <p className="m-b-0 message-item">{message}</p>
         </Col>
       </Row>
