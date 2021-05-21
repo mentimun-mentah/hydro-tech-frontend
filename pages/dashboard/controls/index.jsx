@@ -1,6 +1,6 @@
 import { withAuth } from "lib/withAuth";
 import { useState, useContext } from 'react'
-import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag, Popover } from 'antd'
+import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag } from 'antd'
 
 import { enterPressHandler } from 'lib/utility'
 import { formSetting } from 'formdata/controlSetting'
@@ -452,15 +452,10 @@ const Controls = () => {
             <Col span={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
                 <div className="header-dashboard">
-                  <h2 className="h2 bold mb0">
-                    Servo Settings 
-                    <Popover 
-                      trigger="hover"
-                      content={<span>This setting is useful for returning <br />the servo position to its original position</span>} 
-                    >
-                      <span className="fs-16 text-grey-1 hover-pointer p-l-5"><i className="far fa-info-circle" /></span>
-                    </Popover>
-                  </h2>
+                  <h2 className="h2 bold mb0">Servo Settings</h2>
+                  <span className="header-date">
+                    This setting is to return the servo to its original position
+                  </span>
                 </div>
                 <Form name="settings" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                   <Row gutter={[20, 20]}>

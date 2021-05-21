@@ -2,7 +2,7 @@ import { CSVLink } from "react-csv"
 import { withAuth } from "lib/withAuth";
 import { useState, useEffect } from 'react'
 import { optionsGrowth } from 'components/Dashboard/apexOption'
-import { Layout, Card, Row, Col, Radio, Tabs, Badge, Table, Button, Grid, Select, Space, Dropdown, Menu } from 'antd'
+import { Layout, Card, Row, Col, Radio, Tabs, Table, Button, Grid, Select, Space, Dropdown, Menu } from 'antd'
 
 import { columns, dataSource } from 'columns/sensorReport'
 import { seriesPHWeek, seriesPHDay, seriesPPMWeek, seriesPPMDay } from 'components/Dashboard/apexOption'
@@ -17,7 +17,7 @@ import pageStyle from 'components/Dashboard/pageStyle.js'
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 const PH = "PH", PPM = "PPM"
-const DAY = "DAY", WEEK = "WEEK", MONTH = "MONTH"
+const DAY = "DAY", WEEK = "WEEK"
 const ANALYSIS = "ANALYSIS", GROWTH = "GROWTH", ALERT = "ALERT"
 const useBreakpoint = Grid.useBreakpoint
 
@@ -249,7 +249,24 @@ const Reports = () => {
                   </Tabs.TabPane>
 
                   <Tabs.TabPane tab="Alerts" key={ALERT}>
-                    <p className="header-date">Recent alert</p>
+                    <Row gutter={[0, 0]} align="middle" justify="space-between" className="m-b-10">
+                      <Col lg={12} md={12} sm={12} xs={24}>
+                        <p className="header-date m-b-0">Recent alert</p>
+                      </Col>
+                      <Col lg={12} md={12} sm={12} xs={24}>
+                        <Space className={`${!screens.xs && "float-right"}`}>
+                          <Select 
+                            defaultValue="Today"
+                            onChange={onChangeSelectedGrowthHanlder} 
+                            className="select-no-rounded"
+                          >
+                            <Select.Option value="Today">Today</Select.Option>
+                            <Select.Option value="3 days">Last 3 days</Select.Option>
+                            <Select.Option value={DAY}>Last 7 days</Select.Option>
+                          </Select>
+                        </Space>
+                      </Col>
+                    </Row>
                     <div className="alert-container">
                       <Card className="radius1rem card-alert card-body-p-1 card-warning">
                         <h3 className="bold line-height-1 title">Water Tank</h3>

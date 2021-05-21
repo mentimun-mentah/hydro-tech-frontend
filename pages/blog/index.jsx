@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { SearchOutlined } from '@ant-design/icons'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Row, Col, Card, Button, Divider, Input } from 'antd'
+import { Row, Col, Card, Button, Divider, Input, Select, Form, Grid } from 'antd'
 import { Navigation, Pagination as PagiSwiper, Scrollbar, A11y } from 'swiper'
 
 import React from 'react'
@@ -15,10 +15,12 @@ import CardLoading from 'components/Card/CardLoading'
 const CardLoadingMemo = React.memo(CardLoading)
 const CardBlog = dynamic(() => import('components/Card/Blog'), { ssr: false, loading: () => <CardLoadingMemo />  })
 const CardBlogMemo = React.memo(CardBlog)
+const useBreakpoint = Grid.useBreakpoint
 
 SwiperCore.use([Navigation, PagiSwiper, Scrollbar, A11y]);
 
 const Blog = () => {
+  const { lg }= useBreakpoint()
   const [page, setPage] = useState(2)
 
   return (
@@ -92,16 +94,29 @@ const Blog = () => {
 
             <div className="m-t-20">
               <Row gutter={[10,10]} className="m-b-10">
-                <Col xl={14} lg={14} md={14} sm={24} xs={24}>
+                <Col span={24}>
                   <h2 className="h2 bold m-b-0">All Articles</h2>
                 </Col>
-                <Col xl={10} lg={10} md={10} sm={24} xs={24}>
+              </Row>
+
+              <Row gutter={[10,10]} className="m-b-0" justify="space-between">
+                <Col xl={10} lg={14} md={14} sm={14} xs={14}>
                   <Input placeholder="Search article" prefix={<SearchOutlined />} />
+                </Col>
+                <Col xl={5} lg={5} md={10} sm={10} xs={10}>
+                  <Form name="basic">
+                    <Form.Item label={`${lg ? 'Order by: ' : ''}`}>
+                      <Select defaultValue="Newest" className="w-100">
+                        <Select.Option value="Newest">Newest</Select.Option>
+                        <Select.Option value="Oldest">Oldest</Select.Option>
+                      </Select>
+                    </Form.Item>
+                  </Form>
                 </Col>
               </Row>
 
               <Row gutter={[20, 20]}>
-                {[...Array(12)].map((_, i) => (
+                {[...Array(8)].map((_, i) => (
                   <Col xl={6} lg={6} md={8} sm={12} xs={24} key={i}>
                     <CardBlogMemo />
                   </Col>
