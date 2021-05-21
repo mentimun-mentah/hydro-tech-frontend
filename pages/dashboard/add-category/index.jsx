@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { withAuth } from "lib/withAuth";
 import { AnimatePresence, motion } from 'framer-motion'
 import { EditOutlined, DeleteOutlined, LoadingOutlined } from '@ant-design/icons'
 import { Layout, Card, Row, Col, Form, Button, Input, Popconfirm } from 'antd'
@@ -138,4 +139,4 @@ const AddCategory = () => {
   )
 }
 
-export default AddCategory
+export default withAuth(AddCategory)

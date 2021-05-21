@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { withAuth } from "lib/withAuth";
 import { animateScroll } from 'react-scroll'
 import { Row, Col, Card, Grid, Divider } from 'antd'
 
@@ -31,7 +32,7 @@ const generateName = () => {
 const useBreakpoint = Grid.useBreakpoint
 
 const Chats = () => {
-  const { lg }= useBreakpoint()
+  const { md, lg }= useBreakpoint()
 
   useEffect(() => {
     animateScroll.scrollToBottom({containerId: 'chat-content'});
@@ -89,7 +90,7 @@ const Chats = () => {
           <Col xl={6} lg={6} md={4} sm={4} xs={4}>
             <div className="chat-user-wrapper">
               <div className="user-wrapper">
-                <h1 className="bold h5 caps ls-0">Online {lg && '- 5'}</h1>
+                <h1 className="bold h5 caps ls-0">On{md && 'line'} {lg && '- 5'}</h1>
                 {[...Array(5)].map((_,i) => (
                   <PeopleChat
                     key={i}
@@ -98,7 +99,7 @@ const Chats = () => {
                     avatar={`https://i.pravatar.cc/50?u=${i}`}
                   />
                 ))}
-                <h1 className="bold h5 caps ls-0">Offline {lg && '- 124'}</h1>
+                <h1 className="bold h5 caps ls-0">Off{md && 'line'} {lg && '- 124'}</h1>
                 {[...Array(30)].map((_,i) => (
                   <PeopleChat
                     key={i}
@@ -172,7 +173,8 @@ const Chats = () => {
         }
         :global(.chat-input .ql-toolbar.ql-snow) {
           padding: 5px;
-          overflow: auto;
+          overflow: hidden;
+          overflow-x: scroll;
           white-space: nowrap;
           border-top-left-radius: .5rem;
           border-top-right-radius: .5rem;
@@ -217,4 +219,4 @@ const Chats = () => {
   )
 }
 
-export default Chats
+export default withAuth(Chats)
