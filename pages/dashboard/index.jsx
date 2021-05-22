@@ -1,5 +1,6 @@
 import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
+import { formErrorMessage } from 'lib/axios'
 import { useSelector, useDispatch } from 'react-redux'
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
@@ -27,7 +28,6 @@ const Sun = "/static/images/sun-outline.gif";
 const Moon = "/static/images/moon.gif";
 const Plant = "/static/images/leaf-outline.gif";
 const WaterTank = "/static/images/water-tank.svg";
-const Sawi = "/static/images/plant/sawi.png";
 const Temperature = "/static/images/temperature.gif";
 
 const max_width_height = 90;
@@ -54,17 +54,20 @@ const Dashboard = () => {
   const [x, setX] = useState(90)
   const [y, setY] = useState(90)
   const [image, setImage] = useState("");
+  const [loading, setLoading] = useState(false);
   const [heightPh, setHeightPh] = useState(465);
+  const [plantData, setPlantData] = useState({})
   const [joyStatus, setJoyStatus] = useState("stop")
   const [joyDirection, setJoyDirection] = useState("")
   const [showModalCam, setShowModalCam] = useState(false);
-  const [showModalCamConfig, setShowModalCamConfig] = useState(false);
   const [seriesPh, setSeriesPh] = useState(initDataSeries);
   const [statistic, setStatistic] = useState([initialStatistic]);
+  const [showModalCamConfig, setShowModalCamConfig] = useState(false);
   const [size, setSize] = useState({ imgWidth1: 100, imgWidth2: 120, imgWidth3: 140, });
 
   const statisticLength = statistic.length;
 
+  const { mySetting } = settingUsers
   const { imgWidth1, imgWidth2, imgWidth3 } = size;
 
   const onStepChange = val => {
@@ -243,10 +246,27 @@ const Dashboard = () => {
 
   useEffect(() => {
     if(user && user.role !== "admin") {
-      setShowModalSetup(settingUsers.mySetting === null)
+      setShowModalSetup(mySetting === null)
+    }
+    if(user && settingUsers && mySetting && mySetting.plants_id) {
+      getPlantData(mySetting.plants_id)
     }
   }, [settingUsers, user])
   /*MODAL SETUP ACCOUNT*/
+
+  const getPlantData = (id) => {
+    setLoading(true)
+    axios.get(`/plants/get-plant/${id}`)
+      .then(res => {
+        setLoading(false)
+        setPlantData(res.data)
+      })
+      .catch(() => {
+        setLoading(false)
+        formErrorMessage("error", "Something was wrong when fetching data")
+      })
+  }
+
 
   return (
     <>
@@ -256,6 +276,7 @@ const Dashboard = () => {
           {moment().format("dddd, DD MMMM YYYY")}
         </span>
       </div>
+
 
       <Layout>
         <Layout.Content>
@@ -271,6 +292,7 @@ const Dashboard = () => {
                 </div>
               </Card>
             </Col>
+
 
             <Col lg={8} md={24} sm={24} xs={24}>
               <Row gutter={[20, 20]}>
@@ -288,6 +310,7 @@ const Dashboard = () => {
                     </div>
                   </Card>
                 </Col>
+
 
                 <Col lg={24} md={12} sm={24} xs={24}>
                   <Card className="radius1rem shadow1 card-dashboard h-100" bordered={false}>
@@ -317,29 +340,40 @@ const Dashboard = () => {
             </Col>
           </Row>
 
+
           <Row gutter={[20, 20]} style={{ marginTop: "20px" }}>
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100 card-plant-dashboard" bordered={false}>
                 <h2 className="h2 bold mb0 line-height-1 flex justify-between">
                   Plant
-                  <Space>
-                    <span onClick={onShowModalCamConfigHandler}>
-                      <Image width={25} height={25} src={Camera} alt="camera" className="hover-pointer" />
-                    </span>
-                    <Divider type="vertical" className="divider-cam" />
-                    <span onClick={onShowModalCamHandler}>
-                      <Image width={24} height={24} src={Play} alt="camera" className="hover-pointer" />
-                    </span>
-                  </Space>
+                  {mySetting && mySetting.setting_users_camera && (
+                    <Space>
+                      <span onClick={onShowModalCamConfigHandler}>
+                        <Image width={25} height={25} src={Camera} alt="camera" className="hover-pointer" />
+                      </span>
+                      <Divider type="vertical" className="divider-cam" />
+                      <span onClick={onShowModalCamHandler}>
+                        <Image width={24} height={24} src={Play} alt="camera" className="hover-pointer" />
+                      </span>
+                    </Space>
+                  )}
                 </h2>
-                <div className="text-center items-center m-t-17">
-                  <Image width={imgWidth1} height={imgWidth1} src={Sawi} alt="plant" />
-                  <h3 className="h2 bold mb0">
-                    <span className="regular header-date">Sawi Manis</span>
-                  </h3>
-                </div>
+                {plantData && plantData.plants_image && (
+                  <div className="text-center items-center m-t-17">
+                    <Image 
+                      width={imgWidth1} 
+                      height={imgWidth1}
+                      src={`${process.env.NEXT_PUBLIC_API_URL}/static/plants/${plantData.plants_image}`}
+                      alt="plant"
+                    />
+                    <h3 className="h2 bold mb0">
+                      <span className="regular header-date">{plantData.plants_name}</span>
+                    </h3>
+                  </div>
+                )}
               </Card>
             </Col>
+
 
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100 monitor-card" bordered={false}>
@@ -357,6 +391,7 @@ const Dashboard = () => {
                 </div>
               </Card>
             </Col>
+
 
             <Col xl={8} lg={8} md={24} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100 monitor-card" bordered={false}>
@@ -400,6 +435,7 @@ const Dashboard = () => {
           </Row>
         </Layout.Content>
       </Layout>
+
 
       <ModalLiveCam
         image={image}
