@@ -33,7 +33,8 @@ const headersTableExport = [
 const Reports = () => {
   const screens = useBreakpoint()
 
-  const [activeTab, setActiveTab] = useState(ANALYSIS)
+  // const [activeTab, setActiveTab] = useState(ANALYSIS)
+  const [activeTab, setActiveTab] = useState(ALERT)
   
   const [selectedGrowth, setSelectedGrowth] = useState(DAY)
   const [selectedGrowthOption, setSelectedGrowthOption] = useState(optionsGrowth)
@@ -268,15 +269,16 @@ const Reports = () => {
                       </Col>
                     </Row>
                     <div className="alert-container">
-                      <Card className="radius1rem card-alert card-body-p-1 card-warning">
-                        <h3 className="bold line-height-1 title">Water Tank</h3>
-                        <p className="m-b-0 sub">Water remaining 20%</p>
-                      </Card>
-
-                      <Card className="radius1rem card-alert card-body-p-1 card-warning">
-                        <h3 className="bold line-height-1 title">Water Tank</h3>
-                        <p className="m-b-0 sub">Water remaining 20%</p>
-                      </Card>
+                      {[...Array(3)].map((_,i) => (
+                        <Card 
+                          key={i}
+                          title={<h3 className="bold title-alert line-height-1 m-b-0">Water Tank</h3>}
+                          className="radius1rem card-alert card-body-p-1 card-warning"
+                          extra={<span className="text-grey fs-12">{moment().format("LLL")}</span>}
+                        >
+                          <p className="m-b-0 sub">Water remaining 2{i}%</p>
+                        </Card>
+                      ))}
                     </div>
                   </Tabs.TabPane>
                 </Tabs>
@@ -376,6 +378,7 @@ const Reports = () => {
         }
         :global(.ant-card.card-body-p-1 .ant-card-body){
           padding: 15px!important;
+          padding-top: 0px!important;
           border-radius: 1rem;
         }
         :global(.card-alert:not(:last-of-type)){
@@ -386,6 +389,17 @@ const Reports = () => {
         }
         :global(.ant-card.card-warning){
           border-color: #f39c12;
+        }
+        :global(.ant-card.card-warning .ant-card-head){
+          padding: 0 15px;
+          border: unset;
+        }
+        :global(.ant-card.card-warning .ant-card-head .ant-card-head-title, .ant-card.card-warning .ant-card-head .ant-card-extra){
+          padding-top: 15px;
+          padding-bottom: 0.5em;
+        }
+        :global(.ant-card.card-warning .ant-card-head .ant-card-head-title .title-alert){
+          color: #e67e22;
         }
         :global(.ant-card.card-warning .ant-card-body > .title){
           color: #e67e22;
