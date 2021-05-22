@@ -1,64 +1,164 @@
-import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { jsonHeaderHandler } from 'lib/axios'
+import { useRouter } from 'next/router'
+import { withAuth } from "lib/withAuth";
+import { useState, useEffect } from 'react'
+import { LoadingOutlined } from '@ant-design/icons'
 import { useDispatch, useSelector } from 'react-redux'
-import { Card, Row, Col, Image as AntImage, Form, Button, Space, Typography } from "antd"
+import { deepCopy, enterPressHandler } from 'lib/utility'
+import { jsonHeaderHandler, formErrorMessage } from 'lib/axios'
+import { Card, Row, Col, Form, Button, Space, Typography, Modal, Input } from "antd"
+import { formVerifyPassword, formVerifyPasswordIsValid } from 'formdata/configPassword'
+
 
 import Image from 'next/image'
+import ErrorMessage from 'components/ErrorMessage'
 import SplitText from 'components/Layout/dashboard/SplitText'
 
 import axios from 'lib/axios'
-import nookies from 'nookies'
 import * as actions from 'store/actions'
 
 const Loader1 = "/static/images/loader-1.gif";
-const Lecttuce = "/static/images/plant/lecttuce.png";
 const IoTCamera = "/static/images/iot-camera-1.png";
-const plantList = ["Bayam", "Brokoli", "Kangkung", "Kubis", "Pakcoy", "Seledri", "Selada"]
 
 
-const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelected }) => {
+const SetupProfileModal = ({ current, onStepChange }) => {
+  const router = useRouter()
   const dispatch = useDispatch()
 
   const user = useSelector(state => state.auth.user)
   const plants = useSelector(state => state.plant.plant)
-  const iot_token = useSelector(state => state.auth.iot_token)
 
-  const [loading, setLoading] = useState(false)
   const [token, setToken] = useState("")
+  const [camera, setCamera] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [selectedPlant, setSelectedPlant] = useState("")
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [verifyPassword, setVerifyPassword] = useState(formVerifyPassword)
+
+  const { verify_password } = verifyPassword
+
+  /* INPUT CHANGE FUNCTION */
+  const onVerifyChangeHandler = e => {
+    const value = e.target.value
+    const data = {
+      ...verifyPassword,
+      verify_password: {
+        ...verifyPassword["verify_password"],
+        value: value, isValid: true, message: null,
+      },
+    };
+    setVerifyPassword(data)
+  }
+  /* INPUT CHANGE FUNCTION */
 
   /* SUBMIT FORM FUNCTION */
-  const onCreateTokenHanlder = e => {
+  const onCreateTokenHandler = e => {
     e.persist()
     setLoading(true)
     axios.post("/users/create-iot-token", null, jsonHeaderHandler())
       .then(res => {
         setLoading(false)
         setToken(res.data.token)
-        nookies.set(null, 'iot_token_cookies', res.data.token, {
-          maxAge: 30 * 24 * 60 * 60,
-          path: '/',
-        })
         dispatch(actions.getIotToken())
       })
       .catch(err => {
         setLoading(false)
+        console.log()
         const errDetail = err.response.data.detail;
         const freshRequired = "Fresh token required";
         if(typeof errDetail === "string" && errDetail === freshRequired) {
+          setShowConfirmPassword(true)
+        }
+        if(err.response.status === 401) {
+          router.replace('/')
           dispatch(actions.logout())
         }
+
       })
   }
   /* SUBMIT FORM FUNCTION */
 
-  const onFinishSetup = () => {
-    onStepChange(4)
-    nookies.set(null, 'final_setup', 'true', {
-      maxAge: 30 * 24 * 60 * 60,
-      path: '/',
-    })
+  /* SUBMIT FORM PASSWORD */
+  const submitVerifyPassword = e => {
+    e.persist()
+    if(formVerifyPasswordIsValid(verifyPassword, setVerifyPassword)){
+      setLoading(true)
+      const data = { password: verify_password.value }
+      axios.post("/users/fresh-token", data, jsonHeaderHandler())
+        .then(() => {
+          setLoading(true)
+          onCreateTokenHandler(e)
+          setShowConfirmPassword(false)
+          setVerifyPassword(formVerifyPassword)
+        })
+        .catch(err => {
+          const state = deepCopy(verifyPassword)
+          const errDetail = err.response.data.detail;
+          if(typeof errDetail === "string" && errDetail === signature_exp) {
+            axios.post("/users/fresh-token", data, jsonHeaderHandler())
+              .then(() => {
+                setLoading(true)
+                onCreateTokenHandler(e)
+                setShowConfirmPassword(false)
+                setVerifyPassword(formVerifyPassword)
+              })
+          }
+          if(typeof errDetail === "string" && errDetail !== signature_exp) {
+            setLoading(false);
+            state.verify_password.value = state.verify_password.value;
+            state.verify_password.isValid = false;
+            state.verify_password.message = errDetail;
+          } 
+          if(typeof errDetail !== "string") {
+            setLoading(false);
+            errDetail.map((data) => {
+              let key = data.loc[data.loc.length - 1] === "password" ? "verify_password" : "verify_password";
+              if(state[key]) {
+                state[key].value = state[key].value;
+                state[key].isValid = false;
+                state[key].message = data.msg;
+              }
+            });
+          }
+          setVerifyPassword(state);
+        })
+    }
   }
+  /* SUBMIT FORM PASSWORD */
+
+  const onFinishSetup = () => {
+    const data = {
+      camera: camera,
+      token: token,
+      plant_id: selectedPlant
+    }
+
+    setLoading(true)
+    axios.post('/setting-users/create', data, jsonHeaderHandler())
+      .then(res => {
+        onStepChange(4)
+        setLoading(false)
+        formErrorMessage("success", res.data.detail)
+      })
+      .catch(err => {
+        setLoading(false)
+        const errDetail = err.response.data.detail;
+        if(typeof errDetail === "string"){
+          formErrorMessage("error", errDetail)
+        } else {
+          formErrorMessage("error", "Something was wrong!")
+        }
+      })
+  }
+
+  const onCameraChange = val => {
+    setCamera(val)
+    onStepChange(2)
+  }
+
+  useEffect(() => {
+    dispatch(actions.getUser())
+  }, [current])
 
   return(
     <>
@@ -80,15 +180,12 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                           className="card-plantlist"
                         >
                           <Card 
-                            className={`radius1rem card-body-p-1 ${plantSelected === plant.plants_id && "card-plantlist-selected"}`}
-                            onClick={() => setPlantSelected(plant.plants_id)}
+                            className={`radius1rem card-body-p-1 ${selectedPlant === plant.plants_id && "card-plantlist-selected"}`}
+                            onClick={() => setSelectedPlant(plant.plants_id)}
                           >
                             <Row gutter={[10,10]}>
                               <Col className="col-image-plantlist noselect">
-                                <AntImage 
-                                  width={60}
-                                  height={60} 
-                                  preview={false}
+                                <Image width={60} height={60} 
                                   src={`${process.env.NEXT_PUBLIC_API_URL}/static/plants/${plant.plants_image}`}
                                   alt="plant" className="align-sub noselect" 
                                 />
@@ -115,7 +212,7 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                       size="large" 
                       type="primary" 
                       onClick={() => onStepChange(1)}
-                      disabled={plantSelected === ""}
+                      disabled={selectedPlant === ""}
                     >
                       <b>Next</b>
                     </Button>
@@ -143,14 +240,14 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                             size="large" 
                             type="primary"
                             className="p-l-15 p-r-15" 
-                            onClick={() => onStepChange(2)}
+                            onClick={() => onCameraChange(true)}
                           >
                             Yes
                           </Button>
                           <Button 
                             size="large" 
                             className="btn-white p-l-15 p-r-15" 
-                            onClick={() => onStepChange(2)}
+                            onClick={() => onCameraChange(false)}
                           >
                             No
                           </Button>
@@ -170,9 +267,7 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                       <Col span={24}>
                         {token ? (
                           <>
-                            <h1 className="bold h2 text-center">
-                              Your IoT Token
-                            </h1>
+                            <h1 className="bold h2 text-center">Your IoT Token</h1>
                             <Card className="card-token m-b-10">
                               <Typography.Paragraph className="m-b-0 text-danger force-select overflow-wrap-anywhere">
                                 {token}
@@ -212,13 +307,14 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                       ) : (
                         <Col span={24}>
                           <Space align="center" className="w-100 justify-center">
-                            <Button
+                            <Button 
                               size="large"
-                              type="primary"
+                              type="primary" 
                               className="p-l-15 p-r-15"
-                              onClick={onCreateTokenHanlder}
+                              disabled={loading}
+                              onClick={onCreateTokenHandler}
                             >
-                              Create Token
+                              {loading ? <LoadingOutlined /> : "Create Token"}
                             </Button>
                           </Space>
                         </Col>
@@ -244,13 +340,14 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
                       </Col>
                       <Col span={24}>
                         <Space align="center" className="w-100 justify-center">
-                          <Button
+                          <Button 
                             size="large"
-                            type="primary"
+                            type="primary" 
                             className="p-l-15 p-r-15"
+                            disabled={loading}
                             onClick={onFinishSetup}
                           >
-                            Go now
+                            {loading ? <LoadingOutlined /> : "Go now"}
                           </Button>
                         </Space>
                       </Col>
@@ -287,6 +384,43 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
           </div>
         </Col>
       </Row>
+
+      <Modal
+        centered
+        title={<b>Confirm Password</b>}
+        width={500}
+        zIndex="1035"
+        footer={null}
+        maskClosable={false}
+        className="modal-modif"
+        visible={showConfirmPassword}
+        bodyStyle={{paddingTop: "0px"}}
+        closeIcon={false}
+        afterClose={() => setVerifyPassword(formVerifyPassword)}
+        maskStyle={{backgroundColor: "rgba(0, 0, 0, 0.45)"}}
+      >
+        <Form layout="vertical" onKeyUp={e => enterPressHandler(e, submitVerifyPassword)}>
+          <Form.Item 
+            label="Password"
+            className="m-b-15"
+            validateStatus={!verify_password.isValid && verify_password.message && "error"}
+          >
+            <Input.Password
+              size="large"
+              name="password"
+              placeholder="Password"
+              value={verify_password.value}
+              onChange={onVerifyChangeHandler}
+            />
+            <ErrorMessage item={verify_password} />
+          </Form.Item>
+          <Form.Item className="mb0">
+            <Button size="large" block type="primary" onClick={submitVerifyPassword}>
+              {showConfirmPassword && loading ? <LoadingOutlined /> : "Generate Token"}
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <style jsx>{`
         .step-container {
@@ -341,9 +475,12 @@ const SetupProfileModal = ({ current, setPlantSelected, onStepChange, plantSelec
         :global(.overflow-wrap-anywhere) {
           overflow-wrap: anywhere;
         }
+        :global(.ant-message) {
+          z-index: 1050;
+        }
       `}</style>
     </>
   )
 }
 
-export default SetupProfileModal
+export default withAuth(SetupProfileModal)

@@ -1,6 +1,6 @@
 import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
 import { Layout, Card, Row, Col, Tag, Modal, Grid, Steps, Divider, Space } from "antd";
@@ -10,7 +10,6 @@ import { WebSocketContext } from 'components/Layout/dashboard';
 
 import _ from 'lodash'
 import moment from "moment";
-import nookies from 'nookies'
 import axios from 'lib/axios'
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -42,13 +41,14 @@ const MIN = 0, MAX = 180, DELAY = 200, COUNT = 3
 
 const Dashboard = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const screens = useBreakpoint();
   const ws = useContext(WebSocketContext)
 
   const user = useSelector(state => state.auth.user)
+  const settingUsers = useSelector(state => state.settingUsers)
 
   const [current, setCurrent] = useState(0)
-  const [plantSelected, setPlantSelected] = useState("")
   const [showModalSetup, setShowModalSetup] = useState(false)
 
   const [x, setX] = useState(90)
@@ -213,19 +213,6 @@ const Dashboard = () => {
   /*MODAL CAMERA*/
 
   useEffect(() => {
-    const cookies = nookies.get()
-    if(user && user.role !== "admin" && !Boolean(cookies.final_setup)){
-      setShowModalSetup(true)
-    }
-  }, [user])
-
-  useEffect(() => {
-    if(user && user.role === "admin") {
-      setShowModalSetup(false)
-    }
-  }, [user])
-
-  useEffect(() => {
     let interval
 
     if(joyStatus === "start") {
@@ -247,6 +234,19 @@ const Dashboard = () => {
 
     return () => clearInterval(interval)
   }, [joyStatus, joyDirection])
+
+  /*MODAL SETUP ACCOUNT*/
+  useEffect(() => {
+    dispatch(actions.getSettingUsersMySetting())
+    dispatch(actions.getSettingUsersProgressPlant())
+  }, [])
+
+  useEffect(() => {
+    if(user && user.role !== "admin") {
+      setShowModalSetup(settingUsers.mySetting === null)
+    }
+  }, [settingUsers, user])
+  /*MODAL SETUP ACCOUNT*/
 
   return (
     <>
@@ -421,8 +421,8 @@ const Dashboard = () => {
         title={" "}
         zIndex="1030"
         footer={null}
-        maskClosable={false}
         closable={false}
+        maskClosable={false}
         visible={showModalSetup}
         className="modal-setting-profile noselect"
         maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
@@ -439,8 +439,6 @@ const Dashboard = () => {
         <SetupProfileModal
           current={current}
           onStepChange={onStepChange}
-          plantSelected={plantSelected}
-          setPlantSelected={setPlantSelected}
         />
       </Modal>
 
@@ -545,7 +543,9 @@ const Dashboard = () => {
 };
 
 Dashboard.getInitialProps = async ctx => {
-  let res = await axios.get(`/plants/all-plants?page=1&per_page=100`)
+  if(ctx.req) axios.defaults.headers.get.Cookie = ctx.req.headers.cookie;
+
+  let res = await axios.get(`/plants/all-plants?page=1&per_page=200`)
   ctx.store.dispatch(actions.getPlantSuccess(res.data))
 }
 
