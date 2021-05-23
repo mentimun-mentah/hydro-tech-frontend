@@ -5,7 +5,7 @@ import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag } from '
 
 import { enterPressHandler, deepCopy } from 'lib/utility'
 import { WebSocketContext } from 'components/Layout/dashboard'
-import { jsonHeaderHandler, signature_exp, resNotification } from 'lib/axios'
+import { jsonHeaderHandler, signature_exp, resNotification, formErrorMessage } from 'lib/axios'
 import { formSetting, formServo, formServoIsValid, formSettingIsValid } from 'formdata/controlSetting'
 
 import moment from 'moment'
@@ -24,8 +24,6 @@ const WaterPumpOff = '/static/images/water-pump-off.svg'
 
 const inputNumberProps = {
   step: "0.01",
-  min: 0,
-  max: 10000,
   size: "large",
   className: "w-100"
 }
@@ -62,7 +60,7 @@ const Controls = () => {
 
   /* SUBMIT FORM FUNCTION */
   const onSubmitHandler = e => {
-    e.preventDefault()
+    e && e.preventDefault()
     let data = ""
     if(ph_max.value !== "" && ph_max.value !== null) data += "phmax:" + parseFloat(ph_max.value).toFixed(2) + ","
     if(ph_min.value !== "" && ph_min.value !== null) data += "phmin:" + parseFloat(ph_min.value).toFixed(2) + ","
@@ -77,11 +75,12 @@ const Controls = () => {
     if(checkData === ",") checkData = data.slice(0, -1)
     else checkData = data
 
+    console.log(`${checkData},kind:set_hydro`)
+
     if (ws && ws.send && ws.readyState == 1) {
       setIsSending(true)
       ws.send(`${checkData},kind:set_hydro`)
     }
-
   }
   /* SUBMIT FORM FUNCTION */
 
@@ -191,6 +190,87 @@ const Controls = () => {
 
 
   /* CONTROL SETTING FUNCTION */
+  const onChangeControlType = val => {
+    setIsSystemSetting(val)
+    axios.put("/setting-users/change-control-type", null, jsonHeaderHandler())
+      .then(res => {
+        formErrorMessage("success", res.data.detail)
+      })
+      .catch(err => {
+        const errDetail = err.response.data.detail;
+        if(errDetail == signature_exp) {
+          formErrorMessage("success", `Successfully change the control type to ${val}.`)
+        }
+        else if(typeof(errDetail) === "string" && errDetail !== signature_exp){
+          formErrorMessage("error", errDetail)
+        }
+        else {
+          formErrorMessage("error", "Something was wrong!")
+        }
+      })
+    
+    let data = ""
+    if(ph_cal.value !== "" && ph_cal.value !== null) data += "phcal:" + parseFloat(ph_cal.value).toFixed(2) + ","
+    if(tds_cal.value !== "" && tds_cal.value !== null) data += "tdscal:" + parseFloat(tds_cal.value).toFixed(2) + ","
+    if(tank_height.value !== "" && tank_height.value !== null) data += "tankheight:" + tank_height.value + ","
+    if(tank_min.value !== "" && tank_min.value !== null) data += "tankmin:" + tank_min.value + ","
+
+    if(!isSystemSetting && val) {
+      if(settingUsers && settingUsers.mySetting) {
+        const { plants_ph_max: ph_max, plants_ph_min: ph_min, plants_tds_min: tds_min } = settingUsers.mySetting
+        const dataSetting = {
+          ...setting, 
+          ph_max: { value: ph_max, isValid: true, message: null },
+          ph_min: { value: ph_min, isValid: true, message: null },
+          tds_min: { value: tds_min, isValid: true, message: null },
+        }
+        setSetting(dataSetting)
+
+        if(ph_max) data += "phmax:" + parseFloat(ph_max).toFixed(2) + ","
+        if(ph_min) data += "phmin:" + parseFloat(ph_min).toFixed(2) + ","
+        if(tds_min) data += "tdsmin:" + parseFloat(tds_min).toFixed(2) + ","
+
+        let checkData = data.slice(-1)
+        // check if there is "," in the last of the string and will deleted
+        if(checkData === ",") checkData = data.slice(0, -1)
+        else checkData = data
+
+        console.log(`${checkData},kind:set_hydro`)
+        if (ws && ws.send && ws.readyState == 1) {
+          setIsSending(true)
+          ws.send(`${checkData},kind:set_hydro`)
+        }
+      }
+    }
+    if(isSystemSetting && !val) {
+      if(settingUsers && settingUsers.mySetting) {
+        const { setting_users_ph_max: ph_max, setting_users_ph_min: ph_min, setting_users_tds_min: tds_min } = settingUsers.mySetting
+        const dataSetting = {
+          ...setting, 
+          ph_max: { value: ph_max, isValid: true, message: null },
+          ph_min: { value: ph_min, isValid: true, message: null },
+          tds_min: { value: tds_min, isValid: true, message: null },
+        }
+        setSetting(dataSetting)
+
+        if(ph_max) data += "phmax:" + parseFloat(ph_max).toFixed(2) + ","
+        if(ph_min) data += "phmin:" + parseFloat(ph_min).toFixed(2) + ","
+        if(tds_min) data += "tdsmin:" + parseFloat(tds_min).toFixed(2) + ","
+
+        let checkData = data.slice(-1)
+        // check if there is "," in the last of the string and will deleted
+        if(checkData === ",") checkData = data.slice(0, -1)
+        else checkData = data
+
+        console.log(`${checkData},kind:set_hydro`)
+        if (ws && ws.send && ws.readyState == 1) {
+          setIsSending(true)
+          ws.send(`${checkData},kind:set_hydro`)
+        }
+      }
+    }
+  }
+
   const onChangeHandler = (e, item) => {
     const data = {
       ...setting,
@@ -200,7 +280,7 @@ const Controls = () => {
   }
 
   const onSubmitControlSetting = e => {
-    e.preventDefault()
+    e && e.preventDefault()
     if(formSettingIsValid(setting, setSetting)) {
       setLoading(true)
       const data = {
@@ -213,17 +293,22 @@ const Controls = () => {
         tank_min: tank_min.value
       }
 
+      console.log(data)
+
       axios.put("/setting-users/change-settings", data, jsonHeaderHandler())
         .then(res => {
           setLoading(false)
           resNotification("success", "Success", res.data.detail)
+          onSubmitHandler()
         })
         .catch(err => {
           setLoading(false)
           const state = deepCopy(setting)
+          console.log(err)
           const errDetail = err.response.data.detail;
           if(errDetail == signature_exp) {
             resNotification("success", "Success", "Successfully update the control setting.")
+            onSubmitHandler()
           }
           else if(typeof(errDetail) === "string" && errDetail !== signature_exp){
             formErrorMessage("error", errDetail)
@@ -301,14 +386,15 @@ const Controls = () => {
 
   useEffect(() => {
     if(settingUsers && settingUsers.mySetting) {
-      console.log(settingUsers.mySetting)
       // for servo
       const { setting_users_servo_horizontal: servo_horizontal, setting_users_servo_vertical: servo_vertical, setting_users_camera } = settingUsers.mySetting
       // for control setting
+      const { setting_users_control_type: control_type, plants_ph_max, plants_ph_min, plants_tds_min } = settingUsers.mySetting
       const { setting_users_tds_cal: tds_cal, setting_users_tank_height: tank_height, setting_users_tank_min: tank_min } = settingUsers.mySetting
       const { setting_users_ph_max: ph_max, setting_users_ph_min: ph_min, setting_users_tds_min: tds_min, setting_users_ph_cal: ph_cal } = settingUsers.mySetting
 
       setCamera(setting_users_camera)
+      setIsSystemSetting(control_type)
 
       const dataServo = {
         ...servo,
@@ -319,9 +405,9 @@ const Controls = () => {
 
       const dataSetting = {
         ...setting, 
-        ph_max: { value: ph_max, isValid: true, message: null },
-        ph_min: { value: ph_min, isValid: true, message: null },
-        tds_min: { value: tds_min, isValid: true, message: null },
+        ph_max: { value: control_type ? plants_ph_max : ph_max, isValid: true, message: null },
+        ph_min: { value: control_type ? plants_ph_min : ph_min, isValid: true, message: null },
+        tds_min: { value: control_type ? plants_tds_min : tds_min, isValid: true, message: null },
         ph_cal: { value: ph_cal, isValid: true, message: null },
         tds_cal: { value: tds_cal, isValid: true, message: null },
         tank_height: { value: tank_height, isValid: true, message: null },
@@ -454,7 +540,10 @@ const Controls = () => {
                       </h2>
                     </Col>
                     <Col>
-                      <Switch checked={isSystemSetting} onChange={val => setIsSystemSetting(val)} />
+                      <Switch 
+                        checked={isSystemSetting} 
+                        onChange={onChangeControlType} 
+                      />
                     </Col>
                   </Row>
                   <span className="header-date">Change value of component to get the best settings for your hydroponics</span>
@@ -617,7 +706,7 @@ const Controls = () => {
                       This setting is to return the servo to its original position
                     </span>
                   </div>
-                  <Form name="settings" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
+                  <Form name="settings" layout="vertical">
                     <Row gutter={[20, 20]}>
                       <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                         <Form.Item 
