@@ -1,10 +1,8 @@
-import { Row, Col, Comment, Button, Input, Divider, Space, Avatar, Form } from 'antd'
+import { Row, Col, Divider, Space } from 'antd'
 import { EmailIcon, FacebookIcon, TwitterIcon, TelegramIcon, LineIcon } from 'react-share'
 import { EmailShareButton, FacebookShareButton, TwitterShareButton, TelegramShareButton, LineShareButton } from 'react-share'
 
 import Image from 'next/image'
-import Pagination from 'components/Pagination'
-import Comments from 'components/Comments'
 
 const link = "www.google.com"
 
