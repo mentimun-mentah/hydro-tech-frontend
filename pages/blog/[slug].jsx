@@ -72,53 +72,6 @@ const BlogSlug = () => {
                 <h3><em>Why Should One Choose Hydroponics ?</em></h3>
                 <p><em>Hydroponics is good for all types of growers. Scientists have discovered that plants are healthier, juicier and bigger in nature when this process is adopted. Compared to all other techniques, this is more simple, easy and cost-effective when it comes to gardening. Just with the prior basic knowledge of techniques and methods, it is an easy process to adopt.</em></p>
 
-                <Divider />
-
-                <Comment
-                  avatar={
-                    <Avatar
-                      src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                      alt="Han Solo"
-                    />
-                  }
-                  content={
-                    <>
-                      <Form.Item className="m-b-10">
-                        <Input.TextArea rows={4} placeholder="Write your comments here..." />
-                      </Form.Item>
-                      <Form.Item>
-                        <Button htmlType="submit" type="primary">
-                          Add Comment
-                        </Button>
-                      </Form.Item>
-                    </>
-                  }
-                />
-
-                <Comments 
-                  head 
-                  body="message" 
-                  content="We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure)."
-                >
-                  <Comments 
-                    body="message" 
-                    content="We supply a series of design principles, practical patterns and high quality design resources."
-                  />
-                  <Comments 
-                    body="reply"
-                  />
-                </Comments>
-
-                <div className="text-center m-t-20 m-b-20">
-                  <Pagination 
-                    total={50} 
-                    goTo={() => {}} 
-                    current={1} 
-                    hideOnSinglePage 
-                    pageSize={20}
-                  />
-                </div>
-
               </Col>
 
             </Row>
