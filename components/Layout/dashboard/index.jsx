@@ -29,6 +29,7 @@ const SidebarContainer = ({ children }) => {
 
   const user = useSelector(state => state.auth.user)
 
+  const [activeUser, setActiveUser] = useState({total_online: 0, total_offline: 0, online_user: [], offline_user: []})
   const [collapsed, setCollapsed] = useState(false)
   const [selected, setSelected] = useState(DASHBOARD)
   const [isMenuAdmin, setIsMenuAdmin] = useState(false)
@@ -54,7 +55,14 @@ const SidebarContainer = ({ children }) => {
       const chatURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
       ws2 = new ReconnectingWebSocket(hydroURL)
       wsChat2 = new ReconnectingWebSocket(chatURL)
-      console.log(wsChat2)
+
+      if(router.pathname === "/dashboard/chats") {
+        wsChat2.onmessage = msg => {
+          if((msg.data.indexOf("total_online") !== -1) && (msg.data.indexOf("total_offline") !== -1)) {
+            setActiveUser(JSON.parse(msg.data))
+          }
+        }
+      }
 
       ws2.onopen = () => {
         if (ws2.readyState == 1) {
@@ -333,7 +341,7 @@ const SidebarContainer = ({ children }) => {
           </div>
         </Layout.Sider>
         <Layout className="main-layout">
-          <WebSocketContext.Provider value={{ws: ws2, wsChat: wsChat2}}>
+          <WebSocketContext.Provider value={{ws: ws2, wsChat: wsChat2, activeUser: activeUser}}>
             {children}
           </WebSocketContext.Provider>
         </Layout>

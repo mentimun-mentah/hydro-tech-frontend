@@ -1,10 +1,16 @@
 import { Row, Col, Badge } from 'antd'
+import { motion } from 'framer-motion'
 
 import Image from 'next/image'
 
 const People = ({ avatar, name, online }) => {
   return (
     <>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+     >
       <Row align="middle" gutter={[10,10]} className={`${!online && 'op--5' } m-b-10 people-container`} wrap={false}>
         <Col flex="none">
           {online ? (
@@ -19,6 +25,7 @@ const People = ({ avatar, name, online }) => {
           <h4 className="fw-600 truncate">{name}</h4>
         </Col>
       </Row>
+    </motion.div>
 
       <style jsx>{`
         :global(.op--5) {
