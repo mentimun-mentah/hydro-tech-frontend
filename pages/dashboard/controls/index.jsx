@@ -1,4 +1,5 @@
 import { withAuth } from "lib/withAuth";
+import { useRouter } from "next/router";
 import { useSelector, useDispatch } from 'react-redux'
 import { useState, useContext, useEffect } from 'react'
 import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag } from 'antd'
@@ -36,8 +37,9 @@ const switchInitialProps = {
 const delay = 5000
 
 const Controls = () => {
+  const router = useRouter()
   const dispatch = useDispatch()
-  const ws = useContext(WebSocketContext)
+  const { ws } = useContext(WebSocketContext)
 
   const settingUsers = useSelector(state => state.settingUsers)
 
@@ -84,33 +86,36 @@ const Controls = () => {
   }
   /* SUBMIT FORM FUNCTION */
 
+
   /*WEBSOCKET MESSAGE*/
   let count = 0
   if(ws && ws.readyState == 1) {
     // kind:Hydro,ph:7.62,temp:24.56,tank:100,tds:421.93,ldr:bright,lamp:off,phup:off,phdown:on,nutrition:on,solenoid:off
-    ws.onmessage = (msg) => {
-      let obj = {}
-      let msgSplit = msg.data.split(",")
+    if(router.pathname === "/dashboard/controls") {
+      ws.onmessage = (msg) => {
+        let obj = {}
+        let msgSplit = msg.data.split(",")
 
-      for(let val of msgSplit){
-        let newVal = val.split(":")
-        obj[newVal[0]] = newVal[1]
-      }
-
-      if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
-        if(isSending) count = count + 1
-        
-        if(obj.phup) setPhup(obj.phup == "on" ? true : false)
-        if(obj.lamp) setLamp(obj.lamp == "on" ? true : false)
-        if(obj.phdown) setPhdown(obj.phdown == "on" ? true : false)
-        if(obj.solenoid) setSolenoid(obj.solenoid == "on" ? true : false)
-        if(obj.nutrition) setNutrition(obj.nutrition == "on" ? true : false)
-
-        if(count == 2) {
-          count = 0
-          setIsSending(false)
+        for(let val of msgSplit){
+          let newVal = val.split(":")
+          obj[newVal[0]] = newVal[1]
         }
 
+        if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
+          if(isSending) count = count + 1
+          
+          if(obj.phup) setPhup(obj.phup == "on" ? true : false)
+          if(obj.lamp) setLamp(obj.lamp == "on" ? true : false)
+          if(obj.phdown) setPhdown(obj.phdown == "on" ? true : false)
+          if(obj.solenoid) setSolenoid(obj.solenoid == "on" ? true : false)
+          if(obj.nutrition) setNutrition(obj.nutrition == "on" ? true : false)
+
+          if(count == 2) {
+            count = 0
+            setIsSending(false)
+          }
+
+        }
       }
     }
   }

@@ -43,7 +43,7 @@ const Dashboard = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const screens = useBreakpoint();
-  const ws = useContext(WebSocketContext)
+  const { ws } = useContext(WebSocketContext)
 
   const user = useSelector(state => state.auth.user)
   const settingUsers = useSelector(state => state.settingUsers)
@@ -93,36 +93,38 @@ const Dashboard = () => {
 
   if(ws && ws.readyState == 1) {
     let urlObject;
-    ws.onmessage = (msg) => {
-      if(typeof msg.data == "string") {
-        let obj = {}
-        let msgSplit = msg.data.split(",")
+    if(router && router.pathname === "/dashboard") {
+      ws.onmessage = (msg) => {
+        if(typeof msg.data == "string") {
+          let obj = {}
+          let msgSplit = msg.data.split(",")
 
-        for(let val of msgSplit){
-          let newVal = val.split(":")
-          obj[newVal[0]] = newVal[1]
-        }
-
-        if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
-          const { ph, temp, tank, tds, ldr } = obj
-          const dataHydro = { ph: ph, temp: temp, tank: tank, tds: tds, ldr: ldr };
-          setStatistic((oldState) => [...oldState, dataHydro]);
-          
-          const x = Math.floor(new Date().getTime() / 1000);
-          const y = +dataHydro["ph"];
-
-          let { data } = seriesPh[0];
-          data.push({ x, y });
-          setSeriesPh([{ ...seriesPh[0], data }]);
-
-          if (ApexCharts && ApexCharts.exec) {
-            ApexCharts && ApexCharts.exec && ApexCharts.exec("realtime", "updateSeries", seriesPh);
+          for(let val of msgSplit){
+            let newVal = val.split(":")
+            obj[newVal[0]] = newVal[1]
           }
+
+          if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
+            const { ph, temp, tank, tds, ldr } = obj
+            const dataHydro = { ph: ph, temp: temp, tank: tank, tds: tds, ldr: ldr };
+            setStatistic((oldState) => [...oldState, dataHydro]);
+            
+            const x = Math.floor(new Date().getTime() / 1000);
+            const y = +dataHydro["ph"];
+
+            let { data } = seriesPh[0];
+            data.push({ x, y });
+            setSeriesPh([{ ...seriesPh[0], data }]);
+
+            if (ApexCharts && ApexCharts.exec) {
+              ApexCharts && ApexCharts.exec && ApexCharts.exec("realtime", "updateSeries", seriesPh);
+            }
+          }
+        } else {
+          if(urlObject) URL.revokeObjectURL(urlObject);
+          urlObject = URL.createObjectURL(new Blob([msg.data]));
+          setImage(urlObject);
         }
-      } else {
-        if(urlObject) URL.revokeObjectURL(urlObject);
-        urlObject = URL.createObjectURL(new Blob([msg.data]));
-        setImage(urlObject);
       }
     }
   }

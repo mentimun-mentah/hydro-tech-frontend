@@ -7,6 +7,7 @@ import { useState, useEffect, createContext } from 'react'
 import nookies from 'nookies'
 import isIn from 'validator/lib/isIn'
 import * as actions from 'store/actions'
+import ReconnectingWebSocket from 'reconnecting-websocket'
 
 import Style from './style'
 import SplitText from './SplitText'
@@ -18,7 +19,8 @@ const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBO
 
 export const WebSocketContext = createContext()
 
-let ws = {};
+let ws2 = {}
+let wsChat2 = {}
 
 const SidebarContainer = ({ children }) => {
   const router = useRouter()
@@ -33,7 +35,8 @@ const SidebarContainer = ({ children }) => {
 
   const onLogoutHandler = () => {
     dispatch(actions.logout())
-    ws.close()
+    ws2.close()
+    wsChat2.close()
     router.replace('/')
   }
 
@@ -43,38 +46,42 @@ const SidebarContainer = ({ children }) => {
     else setCollapsed(false)
   }, [screens])
 
-  /*WEBSOCKET*/
-  const wsConnect = () => {
-    const cookies = nookies.get()
-    if(cookies && cookies.csrf_access_token) {
-      ws = new WebSocket(`ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
-
-      ws.onopen = () => {
-        ws.send("Connected");
-        ws.send(`kind:live_cam_false`);
-      };
-
-      ws.onclose = () => {
-        ws.close()
-        setTimeout(() => {
-          wsConnect()
-        }, 3000);
-      };
-    }
-
-    ws.onerror = () => {
-      ws.close()
-    };
-  };
-  /*WEBSOCKET*/
-
-  /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
   useEffect(() => {
-    if (ws.readyState !== 1) {
-      wsConnect();
+    const cookies = nookies.get()
+
+    if(cookies && cookies.csrf_access_token) {
+      const hydroURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`
+      const chatURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
+      ws2 = new ReconnectingWebSocket(hydroURL)
+      wsChat2 = new ReconnectingWebSocket(chatURL)
+      console.log(wsChat2)
+
+      ws2.onopen = () => {
+        if (ws2.readyState == 1) {
+          console.log("Hydro Connected");
+          ws2.send(`kind:live_cam_false`);
+        }
+      };
+
+      wsChat2.onopen = () => {
+        console.log("Chat Connected");
+      };
     }
-  }, []);
-  /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
+
+    window.addEventListener("beforeunload", alertUser);
+
+    return () => {
+      window.removeEventListener("beforeunload", alertUser)
+      ws2.close()
+      wsChat2.close()
+    }
+  }, [])
+
+  const alertUser = e => {
+    // e.preventDefault()
+    // e.returnValue = ''
+    wsChat2.close()
+  }
 
   useEffect(() => {
     let routeNow = router.pathname.split("/")[router.pathname.split("/").length - 1]
@@ -326,7 +333,7 @@ const SidebarContainer = ({ children }) => {
           </div>
         </Layout.Sider>
         <Layout className="main-layout">
-          <WebSocketContext.Provider value={ws}>
+          <WebSocketContext.Provider value={{ws: ws2, wsChat: wsChat2}}>
             {children}
           </WebSocketContext.Provider>
         </Layout>

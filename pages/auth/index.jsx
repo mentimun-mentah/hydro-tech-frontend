@@ -43,9 +43,13 @@ Auth.getInitialProps = (ctx) => {
      cookies.csrf_refresh_token !== "null" && cookies.csrf_access_token !== "null" &&
      cookies.csrf_refresh_token !== "undefined" && cookies.csrf_access_token !== "undefined"
   ) {
-    process.browser
-      ? Router.replace("/", "/") //Redirec from Client Side
-      : ctx.res.writeHead(302, { Location: "/" }).end(); //Redirec from Server Side
+    if(process.browser) {
+      Router.replace("/", "/") //Redirec from Client Side
+    }
+    if(ctx.res) {
+      ctx.res.writeHead(302, { Location: "/" }); //Redirec from Server Side
+      ctx.res.end();
+    }
   }
 };
 
