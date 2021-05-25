@@ -17,7 +17,7 @@ const ChatItem = ({ avatar, time, name, message }) => {
           />
         </Col>
         <Col flex="auto" className="truncate">
-          <h4 className="bold truncate m-b-0">{name} <span className="text-grey fs-12">{moment(time).format('LT')}</span></h4>
+          <h4 className="bold truncate m-b-0 text-capitalize">{name} <span className="text-grey fs-12">{moment(time).format('LT')}</span></h4>
           <p className="m-b-0 message-item" dangerouslySetInnerHTML={{__html: message}}></p>
         </Col>
       </Row>

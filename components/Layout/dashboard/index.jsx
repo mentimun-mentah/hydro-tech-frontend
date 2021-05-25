@@ -19,8 +19,8 @@ const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBO
 
 export const WebSocketContext = createContext()
 
-let ws2 = {}
-let wsChat2 = {}
+let ws = {}
+let wsChat = {}
 
 const SidebarContainer = ({ children }) => {
   const router = useRouter()
@@ -36,8 +36,8 @@ const SidebarContainer = ({ children }) => {
 
   const onLogoutHandler = () => {
     dispatch(actions.logout())
-    ws2.close()
-    wsChat2.close()
+    ws.close()
+    wsChat.close()
     router.replace('/')
   }
 
@@ -53,25 +53,24 @@ const SidebarContainer = ({ children }) => {
     if(cookies && cookies.csrf_access_token) {
       const hydroURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`
       const chatURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
-      ws2 = new ReconnectingWebSocket(hydroURL)
-      wsChat2 = new ReconnectingWebSocket(chatURL)
+      ws = new ReconnectingWebSocket(hydroURL)
+      wsChat = new ReconnectingWebSocket(chatURL)
 
-      if(router.pathname === "/dashboard/chats") {
-        wsChat2.onmessage = msg => {
-          if((msg.data.indexOf("total_online") !== -1) && (msg.data.indexOf("total_offline") !== -1)) {
-            setActiveUser(JSON.parse(msg.data))
-          }
+      wsChat.onmessage = msg => {
+        if((msg.data.indexOf("total_online") !== -1) && (msg.data.indexOf("total_offline") !== -1)) {
+          setActiveUser(JSON.parse(msg.data))
         }
       }
 
-      ws2.onopen = () => {
-        if (ws2.readyState == 1) {
+      ws.onopen = () => {
+        if (ws.readyState == 1) {
           console.log("Hydro Connected");
-          ws2.send(`kind:live_cam_false`);
+          ws.send(`kind:live_cam_false`);
         }
       };
 
-      wsChat2.onopen = () => {
+      wsChat.onopen = () => {
+        wsChat.send('kind:get_list_user_status')
         console.log("Chat Connected");
       };
     }
@@ -80,15 +79,15 @@ const SidebarContainer = ({ children }) => {
 
     return () => {
       window.removeEventListener("beforeunload", alertUser)
-      ws2.close()
-      wsChat2.close()
+      ws.close()
+      wsChat.close()
     }
   }, [])
 
-  const alertUser = e => {
+  const alertUser = () => {
     // e.preventDefault()
     // e.returnValue = ''
-    wsChat2.close()
+    wsChat.close()
   }
 
   useEffect(() => {
@@ -341,7 +340,7 @@ const SidebarContainer = ({ children }) => {
           </div>
         </Layout.Sider>
         <Layout className="main-layout">
-          <WebSocketContext.Provider value={{ws: ws2, wsChat: wsChat2, activeUser: activeUser}}>
+          <WebSocketContext.Provider value={{ws: ws, wsChat: wsChat, activeUser: activeUser}}>
             {children}
           </WebSocketContext.Provider>
         </Layout>

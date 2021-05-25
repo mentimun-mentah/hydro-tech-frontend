@@ -1,9 +1,11 @@
 import { useRouter } from "next/router";
 import { withAuth } from "lib/withAuth";
+import { useSelector } from 'react-redux'
 import { animateScroll } from 'react-scroll'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useContext, useState, useMemo } from 'react'
 import { WebSocketContext } from 'components/Layout/dashboard';
-import { Row, Col, Card, Grid, Divider, Button, Skeleton } from 'antd'
+import { Row, Col, Card, Grid, Divider, Button, Skeleton, Empty } from 'antd'
 
 import _ from 'lodash'
 import moment from 'moment'
@@ -29,6 +31,9 @@ const init_slicing = 20
 
 const Chats = () => {
   const router = useRouter();
+
+  const user = useSelector(state => state.auth.user)
+
   const { md, lg } = useBreakpoint()
   const { wsChat, activeUser } = useContext(WebSocketContext)
 
@@ -57,10 +62,7 @@ const Chats = () => {
         setPage(res.data.page)
         setMessage(res.data.data.reverse())
       })
-      .catch(err => {
-        console.log(err.response)
-      })
-
+      .catch(() => { }) 
     animateScroll.scrollToBottom({containerId: 'chat-content'});
     const timeout = setTimeout(() => {
       animateScroll.scrollToBottom({containerId: 'chat-content'});
@@ -71,6 +73,7 @@ const Chats = () => {
   useEffect(() => {
     setDataUser(activeUser)
     setLoadingInitUser(true)
+
     if(activeUser.online_user && activeUser.online_user.length > 0) {
       const copyUserOnline = [...activeUser.online_user]
       const data = {
@@ -103,6 +106,10 @@ const Chats = () => {
         .catch(() => {
           setLoadingInitUser(false)
         })
+    }
+
+    return () => {
+      setLoadingInitUser(false)
     }
   }, [activeUser])
 
@@ -150,7 +157,6 @@ const Chats = () => {
     audio.play();
   }
 
-
   if(wsChat && wsChat.readyState == 1) {
     if(router && router.pathname === "/dashboard/chats") {
       wsChat.onmessage = (msg) => {
@@ -158,10 +164,12 @@ const Chats = () => {
           setDataUser(JSON.parse(msg.data))
         }
         else {
-          const newMessage = [...message, JSON.parse(msg.data)]
+          const dataMessage = JSON.parse(msg.data)
+          let newMessage = [...message, dataMessage]
+          newMessage = _.uniqBy(newMessage, 'chats_id')
           setMessage(newMessage)
-          animateScroll.scrollToBottom({containerId: 'chat-content'});
-          playSound()
+          animateScroll.scrollToBottom({containerId: 'scrollableDiv'});
+          if(user.id !== dataMessage.users_id) playSound()
         }
       }
     }
@@ -228,11 +236,12 @@ const Chats = () => {
         setPage(s => s + 1)
         setPage(res.data.page)
         if(res.data && res.data.length == 0) setHasMore(false)
-        setMessage(s => res.data.data.reverse().concat(s))
+
+        let newMessage = [...res.data.data.reverse(), ...message]
+        newMessage = _.uniqBy(newMessage, 'chats_id')
+        setMessage(newMessage)
       })
-      .catch(err => {
-        console.log(err.response)
-      })
+      .catch(() => {})
   }
 
   const fetchUser = () => {
@@ -247,7 +256,6 @@ const Chats = () => {
     }
 
     if(dataUser.online_user.length === onlineUser.length) {
-      console.log("masuk")
       axios.post('/users/get-multiple-user', dataOffline)
         .then(res => {
           const copyUserOffline = [...offlineUser]
@@ -305,14 +313,14 @@ const Chats = () => {
                   scrollableTarget="scrollableDiv"
                 >
                   {loading ? (
-                    <>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                       <Image width={75} height={75} src={Loader1} alt="loader" />
                       <p className="text-grey">Loading message</p>
-                    </>
+                    </motion.div>
                   ) : (
                     <>
-                      {message && message.length > 0 && message.map((msg, i) => (
-                        <div key={msg.chats_id}>
+                      {message && message.length > 0 ? message.map((msg, i) => (
+                        <motion.div key={msg.chats_id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                           {setDate(i)}
                           <ChatItem 
                             name={msg.users_username}
@@ -320,8 +328,12 @@ const Chats = () => {
                             message={msg.chats_message}
                             avatar={`${process.env.NEXT_PUBLIC_API_URL}/static/avatars/${msg.users_avatar}`}
                           />
-                        </div>
-                      ))}
+                        </motion.div>
+                      )) : (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} >
+                          <Empty className="m-t-150 m-b-150" description={<span className="text-grey">No message</span>} /> 
+                        </motion.div>
+                      )}
                     </>
                   )}
                 </InfiniteScroll>
@@ -363,26 +375,26 @@ const Chats = () => {
                   ) : (
                     <>
                       <h1 className="bold h5 caps ls-0">On{md && 'line'} {lg && `- ${total_online}`}</h1>
-                      <>
+                      <AnimatePresence initial={false}>
                         {onlineUser && onlineUser.length > 0 && onlineUser.map(user => (
                           <PeopleChat
                             online
                             key={user.id}
-                            name={user.username + " - " + user.id}
+                            name={user.username}
                             avatar={`${process.env.NEXT_PUBLIC_API_URL}/static/avatars/${user.avatar}`}
                           />
                         ))}
-                      </>
+                      </AnimatePresence>
                       <h1 className="bold h5 caps ls-0">Off{md && 'line'} {lg && `- ${total_offline}`}</h1>
-                      <>
+                      <AnimatePresence initial={false}>
                         {offlineUser && offlineUser.length > 0 && offlineUser.map(user => (
                           <PeopleChat
                             key={user.id}
-                            name={user.username + " - " + user.id}
+                            name={user.username}
                             avatar={`${process.env.NEXT_PUBLIC_API_URL}/static/avatars/${user.avatar}`}
                           />
                         ))}
-                      </>
+                      </AnimatePresence>
                     </>
                   )}
                 </InfiniteScroll>
