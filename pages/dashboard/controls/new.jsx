@@ -2,7 +2,7 @@ import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
 import { useSelector, useDispatch } from 'react-redux'
 import { useState, useContext, useEffect } from 'react'
-import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag, message } from 'antd'
+import { Layout, Card, Row, Col, Switch, Form, Button, InputNumber, Tag, Input } from 'antd'
 
 import { enterPressHandler, deepCopy } from 'lib/utility'
 import { WebSocketContext } from 'components/Layout/dashboard'
@@ -13,7 +13,6 @@ import moment from 'moment'
 import axios from 'lib/axios'
 import Image from 'next/image'
 import * as actions from 'store/actions'
-import RcInputNumber from 'rc-input-number'
 import ErrorMessage from 'components/ErrorMessage'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
@@ -23,8 +22,6 @@ const PumpOff = '/static/images/pump-off.svg'
 const LampOff = '/static/images/lamp-off.svg'
 const WaterPumpOn = '/static/images/water-pump-on.svg'
 const WaterPumpOff = '/static/images/water-pump-off.svg'
-
-message.config({ maxCount: 1 });
 
 const inputNumberProps = {
   step: "0.01",
@@ -124,78 +121,6 @@ const Controls = () => {
   }
   /*WEBSOCKET MESSAGE*/
 
-  const sendWsHandler = (data) => { ws.send(data) }
-
-  const onLampChange = val => {
-    if(ws && ws.send && ws.readyState == 1) {
-      setLamp(val)
-      setIsSending(true)
-
-      setTimeout(() => {
-        setIsSending(true)
-      }, delay)
-
-      const data = `lamp:${val?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
-      sendWsHandler(data)
-    }
-  }
-
-  const onSolenoidChange = val => {
-    if(ws && ws.send && ws.readyState == 1) {
-      setSolenoid(val)
-      setIsSending(true)
-
-      setTimeout(() => {
-        setIsSending(true)
-      }, delay)
-
-      const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${val?"on":"off"},kind:set_hydro`
-      sendWsHandler(data)
-    }
-  }
-
-  const onPhupChange = val => {
-    if(ws && ws.send && ws.readyState == 1) {
-      setPhup(val)
-      setIsSending(true)
-
-      setTimeout(() => {
-        setIsSending(true)
-      }, delay)
-
-      const data = `lamp:${lamp?"on":"off"},phup:${val?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
-      sendWsHandler(data)
-    }
-  }
-
-  const onPhdownChange = val => {
-    if(ws && ws.send && ws.readyState == 1) {
-      setPhdown(val)
-      setIsSending(true)
-
-      setTimeout(() => {
-        setIsSending(true)
-      }, delay)
-
-      const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${val?"on":"off"},nutrition:${nutrition?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
-      sendWsHandler(data)
-    }
-  }
-
-  const onNutritionChange = val => {
-    if(ws && ws.send && ws.readyState == 1) {
-      setNutrition(val)
-      setIsSending(true)
-
-      setTimeout(() => {
-        setIsSending(true)
-      }, delay)
-
-      const data = `lamp:${lamp?"on":"off"},phup:${phup?"on":"off"},phdown:${phdown?"on":"off"},nutrition:${val?"on":"off"},solenoid:${solenoid?"on":"off"},kind:set_hydro`
-      sendWsHandler(data)
-    }
-  }
-
 
   /* CONTROL SETTING FUNCTION */
   const onChangeControlType = val => {
@@ -216,84 +141,9 @@ const Controls = () => {
           formErrorMessage("error", "Something was wrong!")
         }
       })
-
-    let data = ""
-
-    // from false to true
-    if(val) {
-      if(settingUsers && settingUsers.mySetting) {
-        const { plants_ph_max, plants_ph_min, plants_tds_min } = settingUsers.mySetting
-        const copySetting = deepCopy(setting)
-        const dataSetting = {
-          ...copySetting, 
-          ph_max: { value: plants_ph_max, isValid: true, message: null },
-          ph_min: { value: plants_ph_min, isValid: true, message: null },
-          tds_min: { value: plants_tds_min, isValid: true, message: null },
-        }
-        console.log("from false to true", dataSetting)
-        setSetting(dataSetting)
-
-        if(settingUsers.mySetting.plants_ph_max) {
-          data += "phmax:" + parseFloat(plants_ph_max).toFixed(2) + ","
-        }
-        if(settingUsers.mySetting.plants_ph_min) {
-          data += "phmin:" + parseFloat(plants_ph_min).toFixed(2) + ","
-        }
-        if(settingUsers.mySetting.plants_tds_min) {
-          data += "tdsmin:" + parseFloat(plants_tds_min).toFixed(2) + ","
-        }
-
-        let checkData = data.slice(-1)
-        // check if there is "," in the last of the string and will deleted
-        if(checkData === ",") checkData = data.slice(0, -1)
-        else checkData = data
-
-        console.log(`${checkData},kind:set_hydro`)
-        if (ws && ws.send && ws.readyState == 1) {
-          setIsSending(true)
-          ws.send(`${checkData},kind:set_hydro`)
-        }
-
-      }
-    } else {
-
-      if(settingUsers && settingUsers.mySetting) {
-        const { setting_users_ph_max, setting_users_ph_min, setting_users_tds_min } = settingUsers.mySetting
-        const copySetting = deepCopy(setting)
-        const dataSetting = {
-          ...copySetting, 
-          ph_max: { value: setting_users_ph_max, isValid: true, message: null },
-          ph_min: { value: setting_users_ph_min, isValid: true, message: null },
-          tds_min: { value: setting_users_tds_min, isValid: true, message: null },
-        }
-        setSetting(dataSetting)
-
-        console.log("from true to false", dataSetting)
-
-        if(settingUsers.mySetting.setting_users_ph_max) {
-          data += "phmax:" + parseFloat(setting_users_ph_max).toFixed(2) + ","
-        }
-        if(settingUsers.mySetting.setting_users_ph_min) {
-          data += "phmin:" + parseFloat(setting_users_ph_min).toFixed(2) + ","
-        }
-        if(settingUsers.mySetting.setting_users_tds_min) {
-          data += "tdsmin:" + parseFloat(setting_users_tds_min).toFixed(2) + ","
-        }
-
-        let checkData = data.slice(-1)
-        // check if there is "," in the last of the string and will deleted
-        if(checkData === ",") checkData = data.slice(0, -1)
-        else checkData = data
-
-        console.log(`${checkData},kind:set_hydro`)
-        if (ws && ws.send && ws.readyState == 1) {
-          setIsSending(true)
-          ws.send(`${checkData},kind:set_hydro`)
-        }
-
-      }
-    }
   }
+
+  console.log(setting)
 
   const onChangeHandler = (e, item) => {
     const data = {
@@ -417,14 +267,16 @@ const Controls = () => {
   }, [])
 
   useEffect(() => {
-    console.log(settingUsers)
     if(settingUsers && settingUsers.mySetting) {
       // for servo
-      const { setting_users_servo_horizontal: servo_horizontal, setting_users_servo_vertical: servo_vertical, setting_users_camera } = settingUsers.mySetting
+      const { setting_users_servo_horizontal: servo_horizontal, setting_users_servo_vertical: servo_vertical } = settingUsers.mySetting
+      const {  setting_users_camera } = settingUsers.mySetting
       // for control setting
       const { setting_users_control_type: control_type, plants_ph_max, plants_ph_min, plants_tds_min } = settingUsers.mySetting
-      const { setting_users_tds_cal: tds_cal, setting_users_tank_height: tank_height, setting_users_tank_min: tank_min } = settingUsers.mySetting
-      const { setting_users_ph_max: ph_max, setting_users_ph_min: ph_min, setting_users_tds_min: tds_min, setting_users_ph_cal: ph_cal } = settingUsers.mySetting
+      const { setting_users_tds_cal: tds_cal, setting_users_tank_height: tank_height } = settingUsers.mySetting
+      const { setting_users_tank_min: tank_min } = settingUsers.mySetting
+      const { setting_users_ph_max: ph_max, setting_users_ph_min: ph_min } = settingUsers.mySetting
+      const { setting_users_tds_min: tds_min, setting_users_ph_cal: ph_cal } = settingUsers.mySetting
 
       setCamera(setting_users_camera)
       setIsSystemSetting(control_type)
@@ -451,6 +303,72 @@ const Controls = () => {
     }
   }, [settingUsers])
 
+
+  useEffect(() => {
+    if(isSystemSetting) {
+
+    }
+
+    if(val) {
+      const { plants_ph_max, plants_ph_min, plants_tds_min } = settingUsers.mySetting
+      const copySetting = deepCopy(setting)
+      const dataSetting = {
+        ...copySetting, 
+        ph_max: { value: plants_ph_max, isValid: true, message: null },
+        ph_min: { value: plants_ph_min, isValid: true, message: null },
+        tds_min: { value: plants_tds_min, isValid: true, message: null },
+      }
+      console.log("1 - from false to true", dataSetting)
+      setSetting(dataSetting)
+
+      if(plants_ph_max) data += "phmax:" + parseFloat(plants_ph_max).toFixed(2) + ","
+      if(plants_ph_min) data += "phmin:" + parseFloat(plants_ph_min).toFixed(2) + ","
+      if(plants_tds_min) data += "tdsmin:" + parseFloat(plants_tds_min).toFixed(2) + ","
+
+      let checkData = data.slice(-1)
+      // check if there is "," in the last of the string and will deleted
+      if(checkData === ",") checkData = data.slice(0, -1)
+      else checkData = data
+
+      console.log(`1 - ${checkData},kind:set_hydro`)
+      if (ws && ws.send && ws.readyState == 1) {
+        setIsSending(true)
+        ws.send(`${checkData},kind:set_hydro`)
+      }
+
+      console.log("\n\n")
+    } 
+    else {
+      const { setting_users_ph_max, setting_users_ph_min, setting_users_tds_min } = settingUsers.mySetting
+      const copySetting = deepCopy(setting)
+      const dataSetting = {
+        ...copySetting, 
+        ph_max: { value: setting_users_ph_max, isValid: true, message: null },
+        ph_min: { value: setting_users_ph_min, isValid: true, message: null },
+        tds_min: { value: setting_users_tds_min, isValid: true, message: null },
+      }
+      setSetting(dataSetting)
+
+      console.log("2 - from true to false", dataSetting)
+
+      if(setting_users_ph_max) data += "phmax:" + parseFloat(setting_users_ph_max).toFixed(2) + ","
+      if(setting_users_ph_min) data += "phmin:" + parseFloat(setting_users_ph_min).toFixed(2) + ","
+      if(setting_users_tds_min) data += "tdsmin:" + parseFloat(setting_users_tds_min).toFixed(2) + ","
+
+      let checkData = data.slice(-1)
+      // check if there is "," in the last of the string and will deleted
+      if(checkData === ",") checkData = data.slice(0, -1)
+      else checkData = data
+
+      console.log(`2 - ${checkData},kind:set_hydro`)
+      if (ws && ws.send && ws.readyState == 1) {
+        setIsSending(true)
+        ws.send(`${checkData},kind:set_hydro`)
+      }
+      console.log("\n\n")
+    }
+  }, [isSystemSetting])
+
   return(
     <>
       <div className="header-dashboard">
@@ -460,106 +378,6 @@ const Controls = () => {
 
       <Layout>
         <Layout.Content>
-
-          <Row gutter={[20, 20]}>
-            <Col xl={7} lg={7} md={{ span: 12, order: 2 }} sm={{ span: 12, order: 2 }} xs={{ span: 24, order: 2 }}>
-              <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <h2 className="h2 bold mb1 line-height-1">
-                  Lamp
-                </h2>
-                <div className="text-center items-center mt2">
-                  <Image className="p-t-5 p-b-5 p-l-5 p-r-5" width={100} height={100} src={lamp ? LampOn : LampOff} alt="lamp" />
-                  <Row justify="space-around">
-                    <Col span={24}>
-                      <Switch 
-                        checked={lamp} 
-                        onChange={onLampChange} 
-                        disabled={isSending}
-                      />
-                      <p className="mb0 mt1">
-                        {lamp ? "On" : "Off"}
-                      </p>
-                    </Col>
-                  </Row>
-                </div>
-              </Card>
-            </Col>
-
-            <Col xl={10} lg={{ span: 10, order: 2 }} md={{ span: 24, order: 1 }} sm={24} xs={24}>
-              <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <h2 className="h2 bold line-height-1">Nutrition Pump</h2>
-                <div className="text-center items-center">
-                  <Image width={100} height={100} src={(phup || phdown || nutrition) ? PumpOn : PumpOff} alt="plant" />
-                  <Row justify="space-around">
-                    <Col span={8}>
-                      <Switch 
-                        checked={phup} 
-                        disabled={isSending}
-                        onChange={onPhupChange}
-                        {...switchInitialProps}
-                      />
-                      <p className="mb0 mt1">
-                        pH Up
-                      </p>
-                    </Col>
-                    <Col span={8}>
-                      <Switch
-                        checked={phdown}
-                        disabled={isSending}
-                        onChange={onPhdownChange}
-                        {...switchInitialProps}
-                      />
-                      <p className="mb0 mt1">
-                        pH Down
-                      </p>
-                    </Col>
-                    <Col span={8}>
-                      <Switch
-                        checked={nutrition}
-                        disabled={isSending}
-                        onChange={onNutritionChange}
-                        {...switchInitialProps}
-                      />
-                      <p className="mb0 mt1">
-                        Nutrition
-                      </p>
-                    </Col>
-                  </Row>
-                </div>
-              </Card>
-            </Col>
-
-            <Col xl={7} lg={7} md={{ span: 12, order: 3 }} sm={{ span: 12, order: 3 }} xs={{ span: 24, order: 3 }}>
-              <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <h2 className="h2 bold mb1 line-height-1">
-                  Solenoid valve
-                </h2>
-                <div className="text-center items-center mt2">
-                  <Image 
-                    alt="WaterPump" 
-                    width={100}
-                    height={100}
-                    className="p-t-5 p-b-5 p-l-5 p-r-5"
-                    src={solenoid ? WaterPumpOn : WaterPumpOff}
-                  />
-                  <Row justify="space-around">
-                    <Col span={24}>
-                      <Switch 
-                        checked={solenoid} 
-                        onChange={onSolenoidChange} 
-                        disabled={isSending} 
-                      />
-                      <p className="mb0 mt1">
-                        {solenoid ? "On" : "Off"}
-                      </p>
-                    </Col>
-                  </Row>
-                </div>
-              </Card>
-            </Col>
-          </Row>
-
-
 
 
           <Row gutter={[20, 20]} className="m-t-20">
@@ -578,6 +396,7 @@ const Controls = () => {
                   </Row>
                   <span className="header-date">Change value of component to get the best settings for your hydroponics</span>
                 </div>
+
                 <Form name="control-settings" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                   <Row gutter={[20, 20]}>
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
@@ -585,13 +404,13 @@ const Controls = () => {
                         label={`PH Maximum - ${ph_max.value}`}
                         className="m-b-0"
                       >
-                        <RcInputNumber
-                          step="0.01"
-                          min={0} max={20}
-                          value={ph_max.value}
-                          className="w-100 rc-number-lg"
-                          prefixCls="ant-input-number"
-                          placeholder="PH Maximum"
+                        <InputNumber 
+                          min={1}
+                          max={20}
+                          step="0.01" 
+                          size="large"
+                          className="w-100"
+                          value={ph_max.value} 
                           disabled={isSystemSetting}
                           onChange={e => onChangeHandler(e, "ph_max")}
                         />
@@ -603,13 +422,13 @@ const Controls = () => {
                         label={`PH Minimum - ${ph_min.value}`}
                         className="m-b-0"
                       >
-                        <InputNumber
-                          step="0.01"
+                        <InputNumber 
+                          min={1}
+                          max={20}
+                          step="0.01" 
                           size="large"
-                          min={0} max={20}
                           className="w-100"
-                          value={ph_min.value}
-                          placeholder="PH Minimum"
+                          value={ph_min.value} 
                           disabled={isSystemSetting}
                           onChange={e => onChangeHandler(e, "ph_min")}
                         />
@@ -622,16 +441,6 @@ const Controls = () => {
                         label={`TDS Minimum - ${tds_min.value}`}
                         className="m-b-0"
                       >
-                        <InputNumber
-                          step="0.01"
-                          size="large"
-                          className="w-100"
-                          min={0} max={3000}
-                          value={tds_min.value}
-                          placeholder="TDS Minimum"
-                          disabled={isSystemSetting}
-                          onChange={e => onChangeHandler(e, "tds_min")}
-                        />
                         <ErrorMessage item={tds_min} />
                       </Form.Item>
                     </Col>
@@ -641,13 +450,6 @@ const Controls = () => {
                         label={`PH Calibration - ${ph_cal.value}`}
                         className="m-b-0"
                       >
-                        <InputNumber
-                          {...inputNumberProps}
-                          min={0} max={10000}
-                          placeholder="PH Calibration"
-                          value={ph_cal.value}
-                          onChange={e => onChangeHandler(e, "ph_cal")}
-                        />
                         <ErrorMessage item={ph_cal} />
                       </Form.Item>
                     </Col>
@@ -656,13 +458,6 @@ const Controls = () => {
                         label={`TDS Calibration - ${tds_cal.value}`}
                         className="m-b-0"
                       >
-                        <InputNumber
-                          {...inputNumberProps}
-                          min={0} max={10000}
-                          placeholder="TDS Calibration"
-                          value={tds_cal.value}
-                          onChange={e => onChangeHandler(e, "tds_cal")}
-                        />
                         <ErrorMessage item={tds_cal} />
                       </Form.Item>
                     </Col>
@@ -811,15 +606,6 @@ const Controls = () => {
       `}</style>
     </>
   )
-}
-
-Controls.getInitialProps = async ctx => {
-  if(ctx.req) axios.defaults.headers.get.Cookie = ctx.req.headers.cookie;
-  try {
-    const res = await axios.get("/setting-users/my-setting")
-    ctx.store.dispatch(actions.getSettingUsersMySettingSuccess(res.data))
-  }
-  catch (err) {}
 }
 
 export default withAuth(Controls)

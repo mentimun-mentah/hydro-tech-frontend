@@ -31,6 +31,13 @@ const App = ({ Component, pageProps, store }) => {
           <Component {...pageProps} />
         </Layout>
       </Provider>
+
+      <style jsx global>{`
+        .rc-number-lg, .rc-number-lg input {
+          height: 38px;
+          font-size: 16px;
+        }
+      `}</style>
     </>
   )
 }

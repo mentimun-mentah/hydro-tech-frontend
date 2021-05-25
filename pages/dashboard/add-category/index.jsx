@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { EditOutlined, DeleteOutlined, LoadingOutlined } from '@ant-design/icons'
 import { Layout, Card, Row, Col, Form, Button, Input, Popconfirm } from 'antd'
 
-import Pagination from 'components/Pagination'
 import ErrorMessage from 'components/ErrorMessage'
 import pageStyle from 'components/Dashboard/pageStyle'
 import addPlantStyle from 'components/Dashboard/addPlantStyle'
@@ -113,18 +112,7 @@ const AddCategory = () => {
                       </motion.div>
                     </Col>
                   ))}
-                <Col xl={24} lg={24} md={24} sm={24}>
-                  <div className="text-center m-t-20 m-b-20">
-                    <Pagination 
-                      total={17} 
-                      goTo={val => (val)} 
-                      current={3} 
-                      hideOnSinglePage 
-                      pageSize={5}
-                    />
-                  </div>
-                </Col>
-              </Row>
+                </Row>
               </AnimatePresence>
 
 

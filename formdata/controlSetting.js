@@ -1,11 +1,6 @@
 // ws.send("kind:set_hydro,lamp:off,phup:off,phdown:off,nutrition:off,solenoid:off,ph_max:8.0,ph_min:3.0,tds_min:650,ph_cal:0.45,tds_cal:127.28,tank_height:600,tank_min:200")
 
 export const formSetting = {
-  // lamp: { value: "off", isValid: true, message: null },
-  // phup: { value: "off", isValid: true, message: null },
-  // phdown: { value: "off", isValid: true, message: null },
-  // nutrition: { value: "off", isValid: true, message: null },
-  // solenoid: { value: "off", isValid: true, message: null },
   ph_max: { value: "0", isValid: true, message: null },
   ph_min: { value: "0", isValid: true, message: null },
   tds_min: { value: "0", isValid: true, message: null },
