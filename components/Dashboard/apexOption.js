@@ -115,7 +115,7 @@ export const optionsGrowth = {
     },
     colors: ['#18a88069']
   },
-  yaxis: { min: 1, tickAmount: 4 },
+  yaxis: { min: 0, tickAmount: 4 },
   xaxis: {
     max: 4,
     categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
@@ -276,6 +276,9 @@ export const optionsPPMDayData = {
     },
   },
 }
+
+
+
 
 
 export const seriesWeekGrowth = [{

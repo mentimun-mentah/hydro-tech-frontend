@@ -36,8 +36,12 @@ const SidebarContainer = ({ children }) => {
 
   const onLogoutHandler = () => {
     dispatch(actions.logout())
-    ws.close()
-    wsChat.close()
+    if (ws && ws.send && ws.readyState == 1) {
+      ws.close()
+    }
+    if (wsChat && wsChat.send && wsChat.readyState == 1) {
+      wsChat.close()
+    }
     router.replace('/')
   }
 
@@ -54,7 +58,7 @@ const SidebarContainer = ({ children }) => {
       const hydroURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`
       const chatURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
       ws = new ReconnectingWebSocket(hydroURL)
-      wsChat = new ReconnectingWebSocket(chatURL, [], {debug: true})
+      wsChat = new ReconnectingWebSocket(chatURL)
 
       wsChat.onmessage = msg => {
         if((msg.data.indexOf("total_online") !== -1) && (msg.data.indexOf("total_offline") !== -1)) {
@@ -86,9 +90,9 @@ const SidebarContainer = ({ children }) => {
   }, [])
 
   const alertUser = () => {
-    // e.preventDefault()
-    // e.returnValue = ''
-    wsChat.close()
+    if (wsChat && wsChat.send && wsChat.readyState == 1) {
+      wsChat.close()
+    }
   }
 
   useEffect(() => {
