@@ -1,6 +1,6 @@
-import { useSelector } from 'react-redux'
 import { useState, useEffect } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
+import { useSelector, useDispatch } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Modal, Button, Form, Card, Divider, Input, Typography } from 'antd'
 
@@ -9,10 +9,12 @@ import { jsonHeaderHandler, signature_exp, formErrorMessage } from 'lib/axios'
 import { formVerifyPassword, formVerifyPasswordIsValid } from 'formdata/configPassword'
 
 import axios from 'lib/axios'
+import * as actions from 'store/actions'
 import ErrorMessage from 'components/ErrorMessage'
 
 
 const TokenContainer = () => {
+  const dispatch = useDispatch()
   const settingUsers = useSelector(state => state.settingUsers)
 
   const [iotToken, setIotToken] = useState("")
@@ -130,6 +132,15 @@ const TokenContainer = () => {
     setVerifyPassword(formVerifyPassword)
     setShowConfirmPassword(false)
   }
+
+  useEffect(() => {
+    dispatch(actions.getSettingUsersMySetting())
+    const timeout = setTimeout(() => {
+      dispatch(actions.getSettingUsersMySetting())
+    }, 2000)
+
+    return () => clearTimeout(timeout)
+  }, [])
 
   useEffect(() => {
     if(settingUsers && settingUsers.mySetting) {

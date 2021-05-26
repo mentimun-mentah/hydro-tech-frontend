@@ -188,18 +188,34 @@ const Dashboard = () => {
     }
   };
 
+  /* function for reset servo value acter closing modal */
+  const onResetServoSetting = () => {
+    if(settingUsers && mySetting && mySetting.setting_users_servo_horizontal && mySetting.setting_users_servo_horizontal) {
+      const { setting_users_servo_horizontal: horizontal, setting_users_servo_vertical: vertical } = mySetting
+      ws.send(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`);
+    } else {
+      ws.send(`kind:set_value_servo,sh:90,sv:90`);
+    }
+  }
+
   const onCloseModalCamHandler = () => {
     setShowModalCam(false);
     if (ws && ws.send && ws.readyState == 1) {
       ws.send(`kind:live_cam_false`);
+      onResetServoSetting();
       setImage("");
     }
   };
 
   useEffect(() => {
     if (ws && ws.send && ws.readyState == 1) {
-      if (showModalCam) ws.send(`kind:live_cam_true`);
-      else ws.send(`kind:live_cam_false`);
+      if (showModalCam) {
+        ws.send(`kind:live_cam_true`);
+      }
+      else {
+        ws.send(`kind:live_cam_false`);
+        onResetServoSetting();
+      }
     }
 
     if (showModalCam) document.body.classList.add("overflow-hidden");
@@ -240,12 +256,25 @@ const Dashboard = () => {
     return () => clearInterval(interval)
   }, [joyStatus, joyDirection])
 
-  /*MODAL SETUP ACCOUNT*/
+
+  const berforeReloadPage = () => {
+    if (ws && ws.send && ws.readyState == 1) {
+      ws.send(`kind:live_cam_false`);
+      onResetServoSetting();
+    }
+  }
+
   useEffect(() => {
     dispatch(actions.getSettingUsersMySetting())
     dispatch(actions.getSettingUsersProgressPlant())
+
+    window.addEventListener("beforeunload", berforeReloadPage);
+    return () => {
+      window.removeEventListener("beforeunload", berforeReloadPage)
+    }
   }, [])
 
+  /*MODAL SETUP ACCOUNT*/
   useEffect(() => {
     if(user && user.role !== "admin") {
       setShowModalSetup(mySetting === null)
@@ -445,7 +474,7 @@ const Dashboard = () => {
         onMove={onJoyStickMoved}
         onClose={onCloseModalCamHandler}
         onStart={e => setJoyStatus(e.type)}
-        onStart={e => setJoyStatus(e.type)}
+        onStop={e => setJoyStatus(e.type)}
       />
 
       <ModalConfigCam

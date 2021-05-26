@@ -54,7 +54,7 @@ const SidebarContainer = ({ children }) => {
       const hydroURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`
       const chatURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
       ws = new ReconnectingWebSocket(hydroURL)
-      wsChat = new ReconnectingWebSocket(chatURL)
+      wsChat = new ReconnectingWebSocket(chatURL, [], {debug: true})
 
       wsChat.onmessage = msg => {
         if((msg.data.indexOf("total_online") !== -1) && (msg.data.indexOf("total_offline") !== -1)) {
@@ -73,6 +73,7 @@ const SidebarContainer = ({ children }) => {
         wsChat.send('kind:get_list_user_status')
         console.log("Chat Connected");
       };
+
     }
 
     window.addEventListener("beforeunload", alertUser);
