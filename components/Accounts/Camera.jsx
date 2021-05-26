@@ -1,12 +1,49 @@
-import { useState } from 'react'
-import { Space, Row, Col, Switch } from 'antd'
+import { useSelector } from 'react-redux'
+import { useState, useEffect } from 'react'
+import { Space, Row, Col, Switch, message } from 'antd'
 
+import { jsonHeaderHandler, signature_exp, formErrorMessage } from 'lib/axios'
+
+import axios from 'lib/axios'
 import Image from 'next/image'
 
 const IoTCamera = "/static/images/iot-camera-1.png";
 
+message.config({ maxCount: 1 });
+
 const CameraContainer = () => {
-  const [camera, setCamera] = useState(true)
+  const settingUsers = useSelector(state => state.settingUsers)
+
+  const [camera, setCamera] = useState(false)
+
+  /* CHANGE CAMERA FUNCTION */
+  const onChangeCamera = val => {
+    setCamera(val)
+    axios.put('/setting-users/change-camera', null, jsonHeaderHandler())
+      .then(res => {
+        formErrorMessage("success", res.data.detail)
+      })
+      .catch(err => {
+        const errDetail = err.response.data.detail;
+        if(errDetail == signature_exp) {
+          formErrorMessage("success", `Successfully change the camera to ${val}.`)
+        }
+        else if(typeof(errDetail) === "string" && errDetail !== signature_exp) {
+          formErrorMessage("error", errDetail)
+        }
+        else {
+          formErrorMessage("error", "Something was wrong!")
+        }
+      })
+  }
+  /* CHANGE CAMERA FUNCTION */
+
+  useEffect(() => {
+    if(settingUsers && settingUsers.mySetting) {
+      setCamera(settingUsers.mySetting.setting_users_camera)
+    }
+  }, [settingUsers])
+
 
   return (
     <>
@@ -24,7 +61,7 @@ const CameraContainer = () => {
                       checked={camera}
                       checkedChildren="ON"
                       unCheckedChildren="OFF"
-                      onChange={val => setCamera(val)} 
+                      onChange={onChangeCamera} 
                     />
                   </Col>
                 </Row>

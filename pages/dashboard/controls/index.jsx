@@ -124,7 +124,9 @@ const Controls = () => {
   }
   /*WEBSOCKET MESSAGE*/
 
-  const sendWsHandler = (data) => { ws.send(data) }
+  const sendWsHandler = (data) => { 
+    ws.send(data) 
+  }
 
   const onLampChange = val => {
     if(ws && ws.send && ws.readyState == 1) {
@@ -230,7 +232,6 @@ const Controls = () => {
           ph_min: { value: plants_ph_min, isValid: true, message: null },
           tds_min: { value: plants_tds_min, isValid: true, message: null },
         }
-        console.log("from false to true", dataSetting)
         setSetting(dataSetting)
 
         if(settingUsers.mySetting.plants_ph_max) {
@@ -248,15 +249,16 @@ const Controls = () => {
         if(checkData === ",") checkData = data.slice(0, -1)
         else checkData = data
 
-        console.log(`${checkData},kind:set_hydro`)
         if (ws && ws.send && ws.readyState == 1) {
           setIsSending(true)
+          console.log(`${checkData},kind:set_hydro`)
           ws.send(`${checkData},kind:set_hydro`)
         }
 
       }
     } else {
 
+      // from true to false
       if(settingUsers && settingUsers.mySetting) {
         const { setting_users_ph_max, setting_users_ph_min, setting_users_tds_min } = settingUsers.mySetting
         const copySetting = deepCopy(setting)
@@ -267,30 +269,6 @@ const Controls = () => {
           tds_min: { value: setting_users_tds_min, isValid: true, message: null },
         }
         setSetting(dataSetting)
-
-        console.log("from true to false", dataSetting)
-
-        if(settingUsers.mySetting.setting_users_ph_max) {
-          data += "phmax:" + parseFloat(setting_users_ph_max).toFixed(2) + ","
-        }
-        if(settingUsers.mySetting.setting_users_ph_min) {
-          data += "phmin:" + parseFloat(setting_users_ph_min).toFixed(2) + ","
-        }
-        if(settingUsers.mySetting.setting_users_tds_min) {
-          data += "tdsmin:" + parseFloat(setting_users_tds_min).toFixed(2) + ","
-        }
-
-        let checkData = data.slice(-1)
-        // check if there is "," in the last of the string and will deleted
-        if(checkData === ",") checkData = data.slice(0, -1)
-        else checkData = data
-
-        console.log(`${checkData},kind:set_hydro`)
-        if (ws && ws.send && ws.readyState == 1) {
-          setIsSending(true)
-          ws.send(`${checkData},kind:set_hydro`)
-        }
-
       }
     }
   }
@@ -411,13 +389,7 @@ const Controls = () => {
     return () => clearTimeout(timeout)
   }, [])
 
-
   useEffect(() => {
-    dispatch(actions.getSettingUsersMySetting())
-  }, [])
-
-  useEffect(() => {
-    console.log(settingUsers)
     if(settingUsers && settingUsers.mySetting) {
       // for servo
       const { setting_users_servo_horizontal: servo_horizontal, setting_users_servo_vertical: servo_vertical, setting_users_camera } = settingUsers.mySetting
@@ -582,7 +554,7 @@ const Controls = () => {
                   <Row gutter={[20, 20]}>
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item 
-                        label={`PH Maximum - ${ph_max.value}`}
+                        label={`PH Maximum`}
                         className="m-b-0"
                       >
                         <RcInputNumber
@@ -600,7 +572,7 @@ const Controls = () => {
                     </Col>
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
-                        label={`PH Minimum - ${ph_min.value}`}
+                        label={`PH Minimum`}
                         className="m-b-0"
                       >
                         <InputNumber
@@ -619,7 +591,7 @@ const Controls = () => {
 
                     <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                       <Form.Item
-                        label={`TDS Minimum - ${tds_min.value}`}
+                        label={`TDS Minimum`}
                         className="m-b-0"
                       >
                         <InputNumber
@@ -638,7 +610,7 @@ const Controls = () => {
 
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
-                        label={`PH Calibration - ${ph_cal.value}`}
+                        label={`PH Calibration`}
                         className="m-b-0"
                       >
                         <InputNumber
@@ -653,7 +625,7 @@ const Controls = () => {
                     </Col>
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
                       <Form.Item
-                        label={`TDS Calibration - ${tds_cal.value}`}
+                        label={`TDS Calibration`}
                         className="m-b-0"
                       >
                         <InputNumber

@@ -1,7 +1,11 @@
+import { useEffect } from 'react'
 import { withAuth } from 'lib/withAuth'
+import { useDispatch } from 'react-redux'
 import { Layout, Tabs, Row, Col } from 'antd'
 
 import moment from 'moment'
+import axios from 'lib/axios'
+import * as actions from 'store/actions'
 import Token from 'components/Accounts/Token'
 import Camera from 'components/Accounts/Camera'
 import Profile from 'components/Accounts/Profile'
@@ -9,6 +13,12 @@ import Password from 'components/Accounts/Password'
 import pageStyle from 'components/Dashboard/pageStyle.js'
 
 const Accounts = () => {
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(actions.getSettingUsersMySetting())
+  }, [])
+
   return (
     <>
       <div className="header-dashboard">
@@ -119,5 +129,13 @@ const Accounts = () => {
   )
 }
 
+Accounts.getInitialProps = async ctx => {
+  if(ctx.req) axios.defaults.headers.get.Cookie = ctx.req.headers.cookie;
+  try {
+    const res = await axios.get("/setting-users/my-setting")
+    ctx.store.dispatch(actions.getSettingUsersMySettingSuccess(res.data))
+  }
+  catch (err) { }
+}
+
 export default withAuth(Accounts)
-// export default Accounts

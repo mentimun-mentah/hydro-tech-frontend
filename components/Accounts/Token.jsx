@@ -1,6 +1,6 @@
+import { useSelector } from 'react-redux'
 import { useState, useEffect } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
-import { useDispatch, useSelector } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Modal, Button, Form, Card, Divider, Input, Typography } from 'antd'
 
@@ -9,16 +9,13 @@ import { jsonHeaderHandler, signature_exp, formErrorMessage } from 'lib/axios'
 import { formVerifyPassword, formVerifyPasswordIsValid } from 'formdata/configPassword'
 
 import axios from 'lib/axios'
-import nookies from 'nookies'
-import * as actions from 'store/actions'
 import ErrorMessage from 'components/ErrorMessage'
 
 
 const TokenContainer = () => {
-  const dispatch = useDispatch()
+  const settingUsers = useSelector(state => state.settingUsers)
 
-  const iot_token = useSelector(state => state.auth.iot_token)
-
+  const [iotToken, setIotToken] = useState("")
   const [loading, setLoading] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [verifyPassword, setVerifyPassword] = useState(formVerifyPassword)
@@ -39,6 +36,29 @@ const TokenContainer = () => {
   }
   /* INPUT CHANGE FUNCTION */
 
+  const onUpdateTokenHandler = token => {
+    const data = {
+      token: token
+    }
+    axios.put('/setting-users/change-token', data, jsonHeaderHandler())
+      .then(res => {
+        formErrorMessage("success", res.data.detail)
+      })
+      .catch(err => {
+        setLoading(false)
+        const errDetail = err.response.data.detail;
+        if(errDetail == signature_exp) {
+          formErrorMessage("success", "Successfully change the user token.")
+        }
+        else if(typeof(errDetail) === "string" && errDetail !== signature_exp) {
+          formErrorMessage("error", errDetail)
+        }
+        else {
+          formErrorMessage("error", "Something was wrong!")
+        }
+      })
+  }
+
   /* SUBMIT FORM FUNCTION */
   const onSubmitHandler = e => {
     e.persist()
@@ -46,12 +66,8 @@ const TokenContainer = () => {
     axios.post("/users/create-iot-token", null, jsonHeaderHandler())
       .then(res => {
         setLoading(false)
-        formErrorMessage("success", "Success generate new token.")
-        nookies.set(null, 'iot_token_cookies', res.data.token, {
-          maxAge: 30 * 24 * 60 * 60,
-          path: '/',
-        })
-        dispatch(actions.getIotToken())
+        setIotToken(res.data.token)
+        onUpdateTokenHandler(res.data.token)
       })
       .catch(err => {
         setLoading(false)
@@ -116,24 +132,16 @@ const TokenContainer = () => {
   }
 
   useEffect(() => {
-    dispatch(actions.getIotToken())
-  }, [])
-
-  useEffect(() => {
-    const cookies = nookies.get()
-    if(!cookies.iot_token_cookies && iot_token) {
-        nookies.set(null, 'iot_token_cookies', iot_token, {
-          maxAge: 30 * 24 * 60 * 60,
-          path: '/',
-        })
+    if(settingUsers && settingUsers.mySetting) {
+      setIotToken(settingUsers.mySetting.setting_users_token)
     }
-  }, [iot_token])
+  }, [settingUsers])
 
   return (
     <>
       <h1 className="fs-16 bold">IoT Token</h1>
       <pre></pre>
-      {iot_token ? (
+      {iotToken ? (
         <>
           <p className="mb-0">This is your IoT Token, your personal password for the Hydro X Tech API. Keep it safe!</p>
 
@@ -141,7 +149,7 @@ const TokenContainer = () => {
 
           <Card className="card-token">
             <Typography.Paragraph className="m-b-0 text-danger force-select overflow-wrap-anywhere">
-              {iot_token}
+              {iotToken}
             </Typography.Paragraph>
           </Card>
 
@@ -174,7 +182,7 @@ const TokenContainer = () => {
         afterClose={() => setVerifyPassword(formVerifyPassword)}
         maskStyle={{backgroundColor: "rgba(0, 0, 0, 0.45)"}}
       >
-        {iot_token ? (
+        {iotToken ? (
           <>
             <p className="m-b-0">
               Enter your password to confirm changing your IoT Token.
@@ -184,7 +192,7 @@ const TokenContainer = () => {
               The old IoT Token doesn't work if you change the Token.
             </p>
             <p className="fs-14 m-b-0"><b>Old Token:</b></p>
-            <p className="text-danger">{iot_token}</p>
+            <p className="text-danger">{iotToken}</p>
           </>
         ) : (
           <p className="m-b-0">
