@@ -5,6 +5,7 @@ import reportsReducer from './reports'
 import settingUsersReducer from './settingUsers'
 import blogReducer from './blog'
 import categoryReducer from './category'
+import documentationReducer from './documentation'
 
 const reducers = {
   auth: authReducer,
@@ -13,6 +14,7 @@ const reducers = {
   settingUsers: settingUsersReducer,
   blog: blogReducer,
   categories: categoryReducer,
+  documentations: documentationReducer
 }
 
 export default combineReducers(reducers)

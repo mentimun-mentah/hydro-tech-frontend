@@ -1,23 +1,18 @@
+import { useState } from 'react'
 import { withAuth } from "lib/withAuth";
-import { useState, useEffect } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useSelector, useDispatch } from 'react-redux'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Layout, Card, Row, Col, Form, Button, Input, Select, Upload, Modal, Space, InputNumber, Empty } from 'antd'
+import { Layout, Card, Row, Col, Form, Button, Input, Select } from 'antd'
 
 import { deepCopy } from 'lib/utility'
-import { formImage } from 'formdata/image'
-import { formPlant } from 'formdata/plant'
-import { imageValidation, imagePreview, uploadButton } from 'lib/imageUploader'
-import { formHeaderHandler, formErrorMessage, signature_exp, resNotification, jsonHeaderHandler } from 'lib/axios'
+import { formDocs, formDescription, formDocsIsValid } from 'formdata/documentation'
+import { formErrorMessage, signature_exp, resNotification, jsonHeaderHandler } from 'lib/axios'
 
 import _ from 'lodash'
 import axios from 'lib/axios'
 import dynamic from 'next/dynamic'
 import isIn from 'validator/lib/isIn'
 import * as actions from 'store/actions'
-import Pagination from 'components/Pagination'
-import PlantCard from 'components/Card/PlantAdmin'
 import ErrorMessage from 'components/ErrorMessage'
 import pageStyle from 'components/Dashboard/pageStyle'
 import addPlantStyle from 'components/Dashboard/addPlantStyle'
@@ -27,9 +22,103 @@ const Editor = dynamic(import('components/Editor'), { ssr: false })
 const AddDocumentation = () => {
   const dispatch = useDispatch()
 
+  const categories = useSelector(state => state.categories.categories)
+
   const [loading, setLoading] = useState(false)
-  const [isUpdate, setIsUpdate] = useState(false)
-  const [imageList, setImageList] = useState(formImage)
+  const [desc, setDesc] = useState(formDescription)
+  const [documentation, setDocumentation] = useState(formDocs)
+
+  const { description } = desc
+  const { title, category_doc_id } = documentation
+
+  /* INPUT CHANGE FUNCTION */
+  const onChangeHandler = (e, item) => {
+    const name = !item && e.target.name;
+    const value = !item && e.target.value;
+    if(item){
+      const data = {
+        ...documentation,
+        [item]: { ...documentation[item], value: e, isValid: true, message: null }
+      }
+      setDocumentation(data)
+    }
+    else {
+      const data = {
+        ...documentation,
+        [name]: { ...documentation[name], value: value, isValid: true, message: null }
+      }
+      setDocumentation(data)
+    }
+  }
+
+  const onDescChangeHandler = val => {
+    const data = {
+      ...desc,
+      description: { ...desc.description, value: val, isValid: true, message: null }
+    }
+    setDesc(data)
+  }
+  /* INPUT CHANGE FUNCTION */
+
+  /* SUBMIT FORM FUNCTION */
+  const onSubmitHandler = e => {
+    e.preventDefault()
+    if(formDocsIsValid(documentation, setDocumentation, desc, setDesc)) {
+      const data = {
+        title: title.value,
+        description: description.value,
+        category_doc_id: category_doc_id.value
+      }
+      setLoading(true)
+      axios.post('/documentations/create', data, jsonHeaderHandler())
+        .then(res => {
+          setLoading(false)
+          resNotification("success", "Success", res.data.detail)
+          resetInputField()
+        })
+        .catch(err => {
+          setLoading(false)
+          const stateDesc = deepCopy(desc)
+          const state = deepCopy(documentation)
+          const errDetail = err.response.data.detail
+          const errName = ["The name has already been taken.", "Nama sudah dipakai."]
+
+          if(errDetail == signature_exp){
+            resetInputField()
+            resNotification("success", "Success", "Successfully add a new documentation.")
+          }
+          else if(typeof(errDetail) === "string" && isIn(errDetail, errName)){
+            state.title.value = state.title.value
+            state.title.isValid = false
+            state.title.message = errDetail
+          }
+          else if(typeof(errDetail) === "string" && !isIn(errDetail, errName)){
+            formErrorMessage("error", errDetail)
+          }
+          else {
+            errDetail.map((data) => {
+              const key = data.loc[data.loc.length - 1];
+              if(key === "description"){
+                stateDesc[key].isValid = false
+                stateDesc[key].message = data.msg
+              }
+              if(state[key]){
+                state[key].isValid = false
+                state[key].message = data.msg
+              }
+            });
+          }
+          setDesc(stateDesc)
+          setDocumentation(state)
+        })
+    }
+  }
+  /* SUBMIT FORM FUNCTION */
+
+  const resetInputField = () => {
+    setDesc(formDescription)
+    setDocumentation(formDocs)
+  }
 
   return(
     <>
@@ -38,8 +127,8 @@ const AddDocumentation = () => {
 
           <Row gutter={[20, 20]}>
             <Col span={24}>
-              <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <div className="header-dashboard">
+              <Card className="radius1rem shadow1 h-100 card-add-docs" bordered={false}>
+                <div className="header-dashboard m-b-0">
                   <h2 className="h2 bold">Add Documentation</h2>
                   <Form name="AddDocs" layout="vertical">
                     <Row gutter={[20, 20]}>
@@ -47,22 +136,48 @@ const AddDocumentation = () => {
                         <Form.Item 
                           label="Category"
                           className="m-b-0"
-                          // validateStatus={!name.isValid && name.message && "error"}
+                          validateStatus={!category_doc_id.isValid && category_doc_id.message && "error"}
                         >
                           <Select
                             showSearch
                             size="large"
                             placeholder="Select category"
                             optionFilterProp="children"
+                            value={category_doc_id.value}
+                            onChange={e => onChangeHandler(e, "category_doc_id")}
+                            onSearch={val => dispatch(actions.getCategory({q:val}))}
+                            onFocus={() => dispatch(actions.getCategory({q:""}))}
                             filterOption={(input, option) =>
                               option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                             }
                           >
-                            <Select.Option value="jack">Learn ESP32</Select.Option>
-                            <Select.Option value="lucy">Protocols</Select.Option>
-                            <Select.Option value="asd">Arduino Modules</Select.Option>
+                            {categories && categories.length > 0 && categories.map(category => (
+                              <Select.Option 
+                                key={category.category_docs_id}
+                                value={category.category_docs_id}
+                              >
+                                {category.category_docs_name}
+                              </Select.Option>
+                            ))}
                           </Select>
-                          {/* <ErrorMessage item={name} /> */}
+                          <ErrorMessage item={category_doc_id} />
+                        </Form.Item>
+                      </Col>
+
+                      <Col span={24}>
+                        <Form.Item 
+                          label="Title"
+                          className="m-b-0"
+                          validateStatus={!title.isValid && title.message && "error"}
+                        >
+                          <Input
+                            size="large"
+                            name="title"
+                            value={title.value}
+                            onChange={onChangeHandler}
+                            placeholder="Title"
+                          />
+                          <ErrorMessage item={title} />
                         </Form.Item>
                       </Col>
 
@@ -70,10 +185,14 @@ const AddDocumentation = () => {
                         <Form.Item 
                           label="Description"
                           className="m-b-0"
-                          // validateStatus={!name.isValid && name.message && "error"}
+                          validateStatus={!description.isValid && description.message && "error"}
                         >
-                          <Editor setContent={() => {}} height="200" />
-                          {/* <ErrorMessage item={name} /> */}
+                          <Editor
+                            initialValue={description.value}
+                            setContent={onDescChangeHandler}
+                            height="200"
+                          />
+                          <ErrorMessage item={description} />
                         </Form.Item>
                       </Col>
 
@@ -84,7 +203,7 @@ const AddDocumentation = () => {
                             type="primary" 
                             className="p-l-30 p-r-30" 
                             disabled={loading}
-                            // onClick={onSubmitHandler}
+                            onClick={onSubmitHandler}
                           >
                             {loading ? <LoadingOutlined /> : <b>Save</b>}
                           </Button>
@@ -102,6 +221,11 @@ const AddDocumentation = () => {
 
       <style jsx>{pageStyle}</style>
       <style jsx>{addPlantStyle}</style>
+      <style jsx>{`
+        :global(body .card-add-docs) {
+          font-weight: normal;
+        }
+      `}</style>
     </>
   )
 }

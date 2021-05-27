@@ -31,11 +31,9 @@ export const getCategory = ({ q = "" }) => {
 
     axios.get("/category-docs/all-category-docs", { params: queryString })
       .then(res => {
-        console.log(res.data)
         dispatch(getCategorySuccess(res.data))
       })
       .catch(err => {
-        console.log(err.response)
         dispatch(getCategoryFail(err.response))
       })
   }
