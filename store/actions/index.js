@@ -11,3 +11,4 @@ export { getTdsChartReportSuccess, getTdsChartReport } from './reports'
 export { getGrowthPlantChartReportSuccess, getGrowthPlantChartReport } from './reports'
 
 export { getBlogSuccess, getBlog } from './blog'
+export { getCategorySuccess, getCategory } from './category'
