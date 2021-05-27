@@ -1,16 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SearchOutlined } from '@ant-design/icons'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Row, Col, Card, Button, Divider, Input, Select, Form, Grid } from 'antd'
+import { useSelector, useDispatch } from 'react-redux'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Navigation, Pagination as PagiSwiper, Scrollbar, A11y } from 'swiper'
+import { Row, Col, Divider, Input, Select, Form, Grid, Empty } from 'antd'
 
 import React from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
+import axios from 'lib/axios'
 import SwiperCore from 'swiper'
 import dynamic from 'next/dynamic'
+import * as actions from 'store/actions'
 import Pagination from 'components/Pagination'
 import CardLoading from 'components/Card/CardLoading'
+import CardHorizontal from 'components/Card/HorizontalBlog'
+import CardSmallHorizontal from 'components/Card/SmallHorizontalBlog'
 
 const CardLoadingMemo = React.memo(CardLoading)
 const CardBlog = dynamic(() => import('components/Card/Blog'), { ssr: false, loading: () => <CardLoadingMemo />  })
@@ -19,9 +23,44 @@ const useBreakpoint = Grid.useBreakpoint
 
 SwiperCore.use([Navigation, PagiSwiper, Scrollbar, A11y]);
 
+const per_page = 3
+
 const Blog = () => {
   const { lg }= useBreakpoint()
-  const [page, setPage] = useState(2)
+  const dispatch = useDispatch()
+
+  const blogs = useSelector(state => state.blog.blog)
+
+  const [q, setQ] = useState("")
+  const [page, setPage] = useState(1)
+  const [orderBy, setOrderBy] = useState("newest")
+  const [mostViewed1, setMostViewed1] = useState([])
+  const [mostViewed2, setMostViewed2] = useState([])
+
+  useEffect(() => {
+    let queryString = {}
+    queryString["page"] = page
+    queryString["per_page"] = per_page
+    queryString["order_by"] = orderBy
+
+    if(q) queryString["q"] = q
+    else delete queryString["q"]
+
+    dispatch(actions.getBlog({...queryString}))
+
+  }, [page, orderBy, q])
+
+  useEffect(() => {
+    if(blogs && blogs.data && blogs.data.length < 1 && blogs.page > 1 && blogs.total > 1) {
+      setPage(blogs.page - 1)
+    }
+  }, [blogs])
+
+  useEffect(async () => {
+    const resMostViewed = await axios.get("/blogs/all-blogs", { params: { page: 1, per_page: 10, order_by: 'visitor' }})
+    setMostViewed2(resMostViewed.data.data.slice(0, 4))
+    setMostViewed1(resMostViewed.data.data.slice(5, 10))
+  }, [])
 
   return (
     <>
@@ -34,58 +73,48 @@ const Blog = () => {
             <Row gutter={[20, 20]}>
               <Col xl={14} lg={14} md={24} sm={24} xs={24}>
                 <Swiper loop autoplay navigation slidesPerView={1}>
-                  <SwiperSlide>
-                    <Card
-                      bordered={false}
-                      bodyStyle={{ padding: 0 }}
-                      className="w-100 card-blog" 
-                      cover={<Image alt="blog" src="/static/images/arduino-boards.jpeg" width={350} height={450} />}
+                  {mostViewed1 && mostViewed1.length > 0 ? (
+                    <>
+                      {mostViewed1.map(blog => (
+                        <SwiperSlide key={blog.blogs_id}>
+                          <CardHorizontal blog={blog} />
+                        </SwiperSlide>
+                      ))}
+                    </>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: ".2" }}
+                      className="w-100 text-center"
                     >
-                    </Card>
-                    <div className="overlay">
-                      <div className="centered text-center">
-                        <h2 className="h2 bold truncate-2 text-white">What Are Hydroponic Systems and How Do They Work?</h2>
-                        <p className="truncate-4">Known for being versatile, hydroponics is appropriate for use in developing countries as it efficiently produces food in arid and mountainous regions, on city rooftops, or, in other words, pretty much anywhere.</p>
-                        <Button className="btn-white" ghost>Read more</Button>
-                      </div>
-                    </div>
-                  </SwiperSlide>
+                      <Empty className="m-t-150 m-b-150" description={<span className="text-grey">No Data</span>} />
+                    </motion.div>
+                  )}
                 </Swiper>
               </Col>
 
               <Col xl={10} lg={10} md={24} sm={24} xs={24}>
                 <h2 className="h2 bold">Most Viewed</h2>
                 <Row gutter={[10,10]}>
-                  {[...Array(4)].map((_, i) => (
-                    <Col span={24} key={i}>
-                      <Row gutter={[10,10]}>
-                        <Col xl={8} lg={8} md={8} sm={8} xs={10}>
-                          <Link href="/blog/1" as="/blog/1">
-                            <a className="text-reset">
-                              <Image 
-                                alt="blog" 
-                                width={350}
-                                height={180}
-                                objectFit="cover"
-                                className="border-radius--5rem" 
-                                src="/static/images/arduino-boards.jpeg"
-                              />
-                            </a>
-                          </Link>
-                        </Col>
-                        <Col xl={16} lg={16} md={16} sm={16} xs={14}>
-                          <Link href="/blog/1" as="/blog/1">
-                            <a className="text-reset">
-                              <h4 className="h4 bold truncate m-b-2">
-                                What Are Hydroponic Systems and How Do They Work?
-                              </h4>
-                              <p className="truncate-2 m-b-0">Known for being versatile, hydroponics is appropriate for use in developing countries as it efficiently produces food in arid and mountainous regions, on city rooftops, or, in other words, pretty much anywhere.</p>
-                            </a>
-                          </Link>
-                        </Col>
-                      </Row>
-                    </Col>
-                  ))}
+                  {mostViewed2 && mostViewed2.length > 0 ? (
+                    <>
+                      {mostViewed2.map(blog => (
+                        <CardSmallHorizontal key={blog.blogs_id} blog={blog} />
+                      ))}
+                    </>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: ".2" }}
+                      className="w-100 text-center"
+                    >
+                      <Empty className="m-t-150 m-b-150" description={<span className="text-grey">No Data</span>} />
+                    </motion.div>
+                  )}
                 </Row>
               </Col>
 
@@ -101,41 +130,66 @@ const Blog = () => {
 
               <Row gutter={[10,10]} className="m-b-0" justify="space-between">
                 <Col xl={10} lg={14} md={14} sm={14} xs={14}>
-                  <Input placeholder="Search article" prefix={<SearchOutlined />} />
+                  <Input 
+                    value={q}
+                    onChange={e => setQ(e.target.value)}
+                    placeholder="Search article" 
+                    prefix={<SearchOutlined />}
+                  />
                 </Col>
                 <Col xl={5} lg={5} md={10} sm={10} xs={10}>
                   <Form name="basic">
                     <Form.Item label={`${lg ? 'Order by: ' : ''}`}>
-                      <Select defaultValue="Newest" className="w-100">
-                        <Select.Option value="Newest">Newest</Select.Option>
-                        <Select.Option value="Oldest">Oldest</Select.Option>
+                      <Select value={orderBy} onChange={val => setOrderBy(val)} className="w-100">
+                        <Select.Option value="newest">Newest</Select.Option>
+                        <Select.Option value="oldest">Oldest</Select.Option>
                       </Select>
                     </Form.Item>
                   </Form>
                 </Col>
               </Row>
 
-              <Row gutter={[20, 20]}>
-                {[...Array(8)].map((_, i) => (
-                  <Col xl={6} lg={6} md={8} sm={12} xs={24} key={i}>
-                    <CardBlogMemo />
-                  </Col>
-                ))}
-              </Row>
+
+              <AnimatePresence>
+                <Row gutter={[20, 20]} align={blogs.data && blogs.data.length == 0 && "middle"}>
+                  {blogs && blogs.data && blogs.data.length > 0 ? (
+                    <>
+                      {blogs.data.map(blog => (
+                        <Col xl={8} lg={12} md={12} sm={24} xs={24} key={blog.blogs_id}>
+                          <CardBlogMemo
+                            blog={blog}
+                          />
+                        </Col>
+                      ))}
+
+                      <Col xl={24} lg={24} md={24} sm={24}>
+                        <div className="text-center m-t-20 m-b-20">
+                          <Pagination
+                            total={blogs.total}
+                            goTo={val => setPage(val)}
+                            current={page}
+                            hideOnSinglePage
+                            pageSize={per_page}
+                          />
+                        </div>
+                      </Col>
+                    </>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: ".2" }}
+                      className="w-100 text-center"
+                    >
+                      <Empty className="m-t-150 m-b-150" description={<span className="text-grey">No Data</span>} />
+                    </motion.div>
+                  )}
+                </Row>
+              </AnimatePresence>
             </div>
           </Col>
 
-          <Col span={24}>
-            <div className="text-center m-t-20 m-b-20">
-              <Pagination 
-                total={30} 
-                goTo={val => setPage(val)} 
-                current={page} 
-                hideOnSinglePage 
-                pageSize={10}
-              />
-            </div>
-          </Col>
         </Row>
 
       </div>
@@ -143,7 +197,7 @@ const Blog = () => {
       <Divider className="p-b-10" />
 
       <style jsx>{`
-      :global(.ant-card.card-blog .ant-card-cover, .ant-card.card-blog .ant-card-cover > div) {
+        :global(.ant-card.card-blog .ant-card-cover, .ant-card.card-blog .ant-card-cover > div) {
           border-radius: .5rem;
         }
         :global(.ant-card.card-blog .ant-card-cover img) {

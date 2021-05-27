@@ -9,3 +9,5 @@ export { getAlertReportSuccess, getAlertReport } from './reports'
 export { getPhChartReportSuccess, getPhChartReport } from './reports'
 export { getTdsChartReportSuccess, getTdsChartReport } from './reports'
 export { getGrowthPlantChartReportSuccess, getGrowthPlantChartReport } from './reports'
+
+export { getBlogSuccess, getBlog } from './blog'

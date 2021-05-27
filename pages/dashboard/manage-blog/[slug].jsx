@@ -1,11 +1,12 @@
+import Router, { useRouter } from 'next/router'
 import { withAuth } from "lib/withAuth";
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
 import { Layout, Card, Row, Col, Form, Button, Input, Upload } from 'antd'
 
 import { deepCopy } from 'lib/utility'
-import { formImage } from 'formdata/image'
 import { formBlog, formDescription, formBlogIsValid } from 'formdata/blog'
+import { formImage } from 'formdata/image'
 import { imageValidation, imagePreview, uploadButton } from 'lib/imageUploader'
 import { formHeaderHandler, formErrorMessage, signature_exp, resNotification } from 'lib/axios'
 
@@ -19,15 +20,45 @@ import addPlantStyle from 'components/Dashboard/addPlantStyle'
 
 const Editor = dynamic(import('components/Editor'), { ssr: false })
 
-const AddBlog = () => {
+const ManageBlogSlug = ({ blogData }) => {
+  const router = useRouter()
+
+  const [blogId, setBlogId] = useState("")
   const [blog, setBlog] = useState(formBlog)
   const [desc, setDesc] = useState(formDescription)
-
   const [loading, setLoading] = useState(false)
   const [imageList, setImageList] = useState(formImage)
 
   const { title } = blog
   const { description } = desc
+
+  useEffect(() => {
+    if(blogData) {
+      const { blogs_id, blogs_title, blogs_image, blogs_description } = blogData
+      const stateBlog = deepCopy(blog)
+      const stateDesc = deepCopy(desc)
+
+      setBlogId(blogs_id)
+
+      if(blogs_image) {
+        const imageData = {
+          uid: -Math.abs(Math.random()),
+          url: `${process.env.NEXT_PUBLIC_API_URL}/static/blogs/${blogs_image}`
+        }
+        const data = {
+          ...imageList,
+          file: {value: [imageData], isValid: true, message: null}
+        }
+        setImageList(data)
+      }
+
+      stateBlog["title"].value = blogs_title
+      stateDesc["description"].value = blogs_description
+
+      setBlog(stateBlog)
+      setDesc(stateDesc)
+    }
+  }, [blogData])
 
   /* INPUT CHANGE FUNCTION */
   const onChangeHandler = (e) => {
@@ -62,7 +93,6 @@ const AddBlog = () => {
   /* SUBMIT FORM FUNCTION */
   const onSubmitHandler = e => {
     e.preventDefault()
-
     if(formBlogIsValid(blog, setBlog, desc, setDesc)) {
       const formData = new FormData()
       formData.append("title", title.value)
@@ -74,12 +104,13 @@ const AddBlog = () => {
       })
 
       setLoading(true)
-      axios.post('/blogs/create', formData, formHeaderHandler())
+      axios.put(`/blogs/update/${blogId}`, formData, formHeaderHandler())
         .then(res => {
           setLoading(false)
           resetInputField()
           setDesc(formDescription)
           resNotification("success", "Success", res.data.detail)
+          router.replace('/dashboard/manage-blog')
         })
         .catch(err => {
           setLoading(false)
@@ -87,10 +118,10 @@ const AddBlog = () => {
           const stateDesc = deepCopy(desc)
           const errDetail = err.response.data.detail;
           const errName = ["The name has already been taken.", "Nama sudah dipakai."]
-
           if(errDetail == signature_exp){
             resetInputField()
-            resNotification("success", "Success", "Successfully add a new blog.")
+            resNotification("success", "Success", "Successfully update the blog.")
+            router.replace('/dashboard/manage-blog')
           }
           else if(typeof(errDetail) === "string" && isIn(errDetail, errName)){
             state.title.value = state.title.value
@@ -137,7 +168,8 @@ const AddBlog = () => {
             <Col span={24}>
               <Card className="radius1rem shadow1 h-100 card-add-blog" bordered={false}>
                 <div className="header-dashboard">
-                  <h2 className="h2 bold">Add Blog</h2>
+                  <h2 className="h2 bold">Update Blog</h2>
+
                   <Form name="AddBlog" layout="vertical">
                     <Row gutter={[20, 20]}>
                       <Col xl={24} lg={24} md={24} sm={24} xs={24}>
@@ -153,7 +185,7 @@ const AddBlog = () => {
                             onPreview={imagePreview}
                             onChange={imageChangeHandler}
                             fileList={imageList.file.value}
-                            beforeUpload={(f) => imageValidation(f, "image", "/blogs/create ", "post", setLoading, () => {}, "")}
+                            beforeUpload={(f) => imageValidation(f, "image", `/blogs/update/${blogId}`, "put", setLoading, () => {}, "")}
                           >
                             {imageList.file.value.length >= 1 ? null : uploadButton(loading)}
                           </Upload>
@@ -161,7 +193,7 @@ const AddBlog = () => {
                       </Col>
 
                       <Col span={24}>
-                        <Form.Item 
+                        <Form.Item
                           label="Title"
                           className="m-b-0"
                           validateStatus={!title.isValid && title.message && "error"}
@@ -178,14 +210,14 @@ const AddBlog = () => {
                       </Col>
 
                       <Col span={24}>
-                        <Form.Item 
+                        <Form.Item
                           label="Description"
                           className="m-b-0"
                           validateStatus={!description.isValid && description.message && "error"}
                         >
-                          <Editor 
+                          <Editor
                             initialValue={description.value}
-                            setContent={onDescChangeHandler} 
+                            setContent={onDescChangeHandler}
                             height="200"
                           />
                           <ErrorMessage item={description} />
@@ -194,10 +226,10 @@ const AddBlog = () => {
 
                       <Col xl={24} lg={24} md={24} sm={24} xs={24}>
                         <Form.Item className="m-b-0">
-                          <Button 
+                          <Button
                             size="large"
-                            type="primary" 
-                            className="p-l-30 p-r-30" 
+                            type="primary"
+                            className="p-l-30 p-r-30"
                             disabled={loading}
                             onClick={onSubmitHandler}
                           >
@@ -205,6 +237,7 @@ const AddBlog = () => {
                           </Button>
                         </Form.Item>
                       </Col>
+
                     </Row>
                   </Form>
                 </div>
@@ -226,4 +259,34 @@ const AddBlog = () => {
   )
 }
 
-export default withAuth(AddBlog)
+ManageBlogSlug.getInitialProps = async ctx => {
+  const { slug } = ctx.query
+  try{
+    const res = await axios.get(`/blogs/${slug}`)
+    if(res.status == 404){
+      process.browser
+        ? Router.replace("/dashboard/manage-blog", "/dashboard/manage-blog") //Redirec from Client Side
+        : ctx.res.writeHead(302, { Location: "/dashboard/manage-blog" }); //Redirec from Server Side
+      !process.browser && ctx.res.end()
+    } else {
+      return {
+        blogData: res.data
+      }
+    }
+  }
+  catch (err) {
+    const res = await axios.get(`/blogs/${slug}`)
+    if(res.status == 404){
+      process.browser
+        ? Router.replace("/dashboard/manage-blog", "/dashboard/manage-blog") //Redirec from Client Side
+        : ctx.res.writeHead(302, { Location: "/dashboard/manage-blog" }); //Redirec from Server Side
+      !process.browser && ctx.res.end()
+    } else {
+      return {
+        blogData: res.data
+      }
+    }
+  }
+}
+
+export default withAuth(ManageBlogSlug)
