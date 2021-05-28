@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Layout, Row, Col, Form, Input, Empty } from 'antd'
+import { jsonHeaderHandler, resNotification, signature_exp } from 'lib/axios'
 
 import _ from 'lodash'
 import React from 'react'
+import axios from 'lib/axios'
 import dynamic from 'next/dynamic'
 import * as actions from 'store/actions'
 import CardLoading from 'components/Card/CardLoading'
@@ -31,6 +33,26 @@ const ManageDocumentation = () => {
 
     dispatch(actions.getAllDocumentation({...queryString}))
   }, [q])
+
+
+  const onDeleteHandler = id => {
+    axios.delete(`/documentations/delete/${id}`, jsonHeaderHandler())
+      .then(res => {
+        dispatch(actions.getAllDocumentation({q: q}))
+        resNotification("success", "Success", res.data.detail)
+      })
+      .catch(err => {
+        const errDetail = err.response.data.detail
+        if(errDetail == signature_exp){
+          dispatch(actions.getAllDocumentation())
+          resNotification("success", "Success", "Successfully delete the documentation.")
+        } else if(typeof(errDetail) === "string") {
+          resNotification("error", "Error", errDetail)
+        } else {
+          resNotification("error", "Error", errDetail[0].msg)
+        }
+      })
+  }
 
 
   return(
@@ -70,7 +92,10 @@ const ManageDocumentation = () => {
                           <>
                             {documentations.map(doc => (
                               <Col xl={8} lg={12} md={12} sm={24} xs={24} key={doc.documentations_id}>
-                                <CardDocsMemo doc={doc} />
+                                <CardDocsMemo 
+                                  doc={doc} 
+                                  onDelete={() => onDeleteHandler(doc.documentations_id)}
+                                />
                               </Col>
                             ))}
                           </>

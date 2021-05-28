@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 const SmallHorizontalBlog = ({ blog }) => {
-  let plainText = blog.blogs_description.replace(/<[^>]+>/g, '');
+  let plainText = blog.blogs_description.replace(/<[^>]+>/g, ' ');
   let finalText = plainText.replace(/&nbsp;/g, " ");
 
   return (

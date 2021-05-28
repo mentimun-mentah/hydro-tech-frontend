@@ -4,8 +4,8 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 
 import Link from 'next/link'
 
-const CardDocs = ({ doc }) => {
-  let plainText = doc.documentations_description.replace(/<[^>]+>/g, '');
+const CardDocs = ({ doc, onDelete }) => {
+  let plainText = doc.documentations_description.replace(/<[^>]+>/g, ' ');
   let finalText = plainText.replace(/&nbsp;/g, " ");
 
   return(
@@ -27,7 +27,7 @@ const CardDocs = ({ doc }) => {
             </Link>,
             <Popconfirm
               okText="Delete"
-              onConfirm={() => {}}
+              onConfirm={onDelete}
               title={`Delete documentation?`}
             >
               <DeleteOutlined key="delete" />

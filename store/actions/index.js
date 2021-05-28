@@ -13,3 +13,4 @@ export { getGrowthPlantChartReportSuccess, getGrowthPlantChartReport } from './r
 export { getBlogSuccess, getBlog } from './blog'
 export { getCategorySuccess, getCategory } from './category'
 export { getAllDocumentationSuccess, getAllDocumentation } from './documentation'
+export { getDocumentationByNameSuccess, getDocumentationByName } from './documentation'
