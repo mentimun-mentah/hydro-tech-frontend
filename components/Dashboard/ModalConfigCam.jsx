@@ -1,29 +1,13 @@
 import { motion } from "framer-motion";
-import { useState, useEffect } from 'react'
+import { useSelector } from "react-redux"
 import { Modal, Image as AntImage, Row, Col, Button } from "antd";
 
 import Image from "next/image";
 
 const Loader1 = "/static/images/loader-1.gif";
-const TestImage = "/static/images/vga.png";
 
-const ModalConfigCam = ({ visible, onClose }) => {
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoading(false)
-    }, 3000)
-
-    return () => clearTimeout(timeout)
-  }, [])
-
-  const onRetake = () => {
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-    }, 3000)
-  }
+const ModalConfigCam = ({ loading, image, onRetakeHandler, visible, onClose }) => {
+  const user = useSelector(state => state.auth.user)
 
   return(
     <>
@@ -51,20 +35,26 @@ const ModalConfigCam = ({ visible, onClose }) => {
             <Row gutter={[10, 10]}>
               <Col span={12}>
                 <div className="text-center live-img">
-                  <AntImage src={TestImage} preview={false} />
+                  <AntImage 
+                    src={`${process.env.NEXT_PUBLIC_API_URL}/static/camera_module/${user && user.id}/${image}`}
+                    preview={false} 
+                  />
                   <p>Original</p>
                 </div>
               </Col>
               <Col span={12}>
                 <div className="text-center live-img">
-                  <AntImage src={TestImage} preview={false} />
+                  <AntImage 
+                    src={`${process.env.NEXT_PUBLIC_API_URL}/static/camera_module_output/${user && user.id}/${image}`}
+                    preview={false} 
+                  />
                   <p>Measurement</p>
                 </div>
               </Col>
             </Row>
             <Row gutter={[10, 10]}>
               <Col span={24}>
-                <Button type="primary" onClick={onRetake}>Retake</Button>
+                <Button type="primary" onClick={onRetakeHandler}>Retake</Button>
               </Col>
             </Row>
           </motion.div>

@@ -39,6 +39,8 @@ const steps = [ { title: 'Plant', }, { title: 'Camera', }, { title: 'Token', }, 
 
 const MIN = 0, MAX = 180, DELAY = 200, COUNT = 3
 
+let calibrInterval = null
+
 const Dashboard = () => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -54,6 +56,7 @@ const Dashboard = () => {
   const [x, setX] = useState(90)
   const [y, setY] = useState(90)
   const [image, setImage] = useState("");
+  const [imageCalibr, setImageCalibr] = useState("")
   const [loading, setLoading] = useState(false);
   const [heightPh, setHeightPh] = useState(465);
   const [plantData, setPlantData] = useState({})
@@ -174,11 +177,15 @@ const Dashboard = () => {
 
   /*MODAL CAMERA*/
   const onShowModalCamConfigHandler = () => {
+    onCalibrHandler()
     setShowModalCamConfig(true);
   };
 
   const onCloseModalCamConfigHandler = () => {
     setShowModalCamConfig(false);
+    console.log(`kind:image_cal_false`)
+    ws.send(`kind:image_cal_false`);
+    clearInterval(calibrInterval)
   };
 
   const onShowModalCamHandler = () => {
@@ -187,6 +194,47 @@ const Dashboard = () => {
       ws.send(`kind:live_cam_true`);
     }
   };
+
+  const fetchImageCalibr = async () => {
+    try {
+      let res = await axios.get('/growth-plants/recent-plant-image')
+      if(res && res.data && res.data.image){
+        setImageCalibr(res.data.image)
+      }
+    }
+    catch(err) {}
+  }
+
+  const onCalibrHandler = () => {
+    if(ws && ws.send && ws.readyState == 1) {
+      calibrInterval = setInterval(() => {
+        fetchImageCalibr()
+      }, 5000)
+      setLoading(true)
+      ws.send(`kind:image_cal_true`);
+      console.log(`kind:image_cal_true`);
+    }
+  }
+
+  const onRetakeCalibrHandler = () => {
+    setImageCalibr("")
+    onCalibrHandler()
+  }
+
+  useEffect(() => {
+    // let copyImageCalibr = [...imageCalibr]
+    // console.log("+=> ", copyImageCalibr)
+    // copyImageCalibr = _.uniq(copyImageCalibr)
+
+    // console.log(copyImageCalibr)
+    // if(copyImageCalibr && copyImageCalibr.length > 1) {
+    if(imageCalibr && imageCalibr !== "") {
+      clearInterval(calibrInterval)
+      setLoading(false)
+      console.log(`kind:image_cal_false`)
+      ws.send(`kind:image_cal_false`);
+    }
+  }, [imageCalibr])
 
   /* function for reset servo value acter closing modal */
   const onResetServoSetting = () => {
@@ -478,9 +526,11 @@ const Dashboard = () => {
       />
 
       <ModalConfigCam
-        image={image}
+        image={imageCalibr}
+        loading={loading}
         visible={showModalCamConfig}
         onClose={onCloseModalCamConfigHandler}
+        onRetakeHandler={onRetakeCalibrHandler}
       />
 
       <Modal

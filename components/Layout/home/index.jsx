@@ -36,7 +36,7 @@ const HomeLayout = ({ children }) => {
         </div>
         <div className="menuCon">
           {lg ? (
-            <Menu mode="horizontal" defaultSelectedKeys={[selected]} style={{minWidth: 'max-content'}}>
+            <Menu mode="horizontal" defaultSelectedKeys={[selected]} style={{minWidth: 'max-content'}} forceSubMenuRender={true}>
               <Menu.Item key="home">
                 <Link href="/#home" as="/#home">
                   <a>Home</a>

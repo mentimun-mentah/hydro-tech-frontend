@@ -30,7 +30,7 @@ const headersTableExport = [
   { label: "Light Status", key: "ldr" }, //ldr
   { label: "Water Temp.", key: "temp" }, //tmp
   { label: "Water Level", key: "tank" }, //tank
-  { label: "Time", key: "time" }
+  { label: "Time", key: "created_at" }
 ];
 
 const Reports = () => {

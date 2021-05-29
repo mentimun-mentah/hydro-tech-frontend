@@ -55,10 +55,11 @@ const SidebarContainer = ({ children }) => {
     const cookies = nookies.get()
 
     if(cookies && cookies.csrf_access_token) {
-      const hydroURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`
-      const chatURL = `ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
-      ws = new ReconnectingWebSocket(hydroURL)
-      wsChat = new ReconnectingWebSocket(chatURL)
+      console.log(cookies.csrf_access_token)
+      const hydroURL = `${process.env.NEXT_PUBLIC_WS_URL}/dashboard/ws?csrf_token=${cookies.csrf_access_token}`
+      const chatURL = `${process.env.NEXT_PUBLIC_WS_URL}/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
+      ws = new ReconnectingWebSocket(hydroURL, [], { debug: true })
+      wsChat = new ReconnectingWebSocket(chatURL, [], { debug: true })
 
       wsChat.onmessage = msg => {
         if((msg.data.indexOf("total_online") !== -1) && (msg.data.indexOf("total_offline") !== -1)) {
@@ -92,6 +93,9 @@ const SidebarContainer = ({ children }) => {
   const alertUser = () => {
     if (wsChat && wsChat.send && wsChat.readyState == 1) {
       wsChat.close()
+    }
+    if (ws && ws.send && ws.readyState == 1) {
+      ws.send(`kind:image_cal_false`);
     }
   }
 

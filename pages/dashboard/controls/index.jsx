@@ -80,11 +80,11 @@ const Controls = () => {
     if(checkData === ",") checkData = data.slice(0, -1)
     else checkData = data
 
-    console.log(`${checkData},kind:set_hydro`)
 
     if (ws && ws.send && ws.readyState == 1) {
       setIsSending(true)
       ws.send(`${checkData},kind:set_hydro`)
+      console.log(`${checkData},kind:set_hydro`)
     }
   }
   /* SUBMIT FORM FUNCTION */
@@ -126,6 +126,7 @@ const Controls = () => {
 
   const sendWsHandler = (data) => { 
     ws.send(data) 
+    console.log(data)
   }
 
   const onLampChange = val => {
@@ -386,8 +387,24 @@ const Controls = () => {
       dispatch(actions.getSettingUsersMySetting())
     }, 2000)
 
-    return () => clearTimeout(timeout)
+    window.addEventListener("beforeunload", resetPomp);
+
+    return () => {
+      if (ws && ws.send && ws.readyState == 1) {
+        console.log(`phup:off,phdown:off,nutrition:off,solenoid:off,kind:set_hydro`)
+        ws.send(`phup:off,phdown:off,nutrition:off,solenoid:off,kind:set_hydro`);
+      }
+      clearTimeout(timeout)
+      window.removeEventListener("beforeunload", resetPomp)
+    }
   }, [])
+
+  const resetPomp = () => {
+    if (ws && ws.send && ws.readyState == 1) {
+      console.log(`phup:off,phdown:off,nutrition:off,solenoid:off,kind:set_hydro`)
+      ws.send(`phup:off,phdown:off,nutrition:off,solenoid:off,kind:set_hydro`);
+    }
+  }
 
   useEffect(() => {
     if(settingUsers && settingUsers.mySetting) {
@@ -689,8 +706,7 @@ const Controls = () => {
                           type="primary"
                           size="large"
                           className="p-l-30 p-r-30"
-                          // disabled={isSending || ws.readyState !== 1}
-                          // onClick={onSubmitHandler}
+                          disabled={isSending}
                           onClick={onSubmitControlSetting}
                         >
                           <b>Save</b>
