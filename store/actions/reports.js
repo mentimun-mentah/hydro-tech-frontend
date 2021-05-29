@@ -33,7 +33,7 @@ const getPhChartReportStart = () => {
   }
 }
 
-const getPhChartReportSuccess = payload => {
+export const getPhChartReportSuccess = payload => {
   return {
     type: actionType.GET_PH_CHART_REPORT_SUCCESS,
     payload: payload

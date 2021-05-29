@@ -58,8 +58,8 @@ const Blog = () => {
 
   useEffect(async () => {
     const resMostViewed = await axios.get("/blogs/all-blogs", { params: { page: 1, per_page: 10, order_by: 'visitor' }})
-    setMostViewed2(resMostViewed.data.data.slice(0, 4))
-    setMostViewed1(resMostViewed.data.data.slice(5, 10))
+    setMostViewed1(resMostViewed.data.data.slice(0, 2)
+    setMostViewed2(resMostViewed.data.data.slice(3, 9))
   }, [])
 
   return (

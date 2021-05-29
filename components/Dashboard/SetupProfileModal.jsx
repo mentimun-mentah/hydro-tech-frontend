@@ -63,7 +63,7 @@ const SetupProfileModal = ({ current, onStepChange }) => {
       })
       .catch(err => {
         setLoading(false)
-        console.log()
+        console.log(err.response)
         const errDetail = err.response.data.detail;
         const freshRequired = "Fresh token required";
         if(typeof errDetail === "string" && errDetail === freshRequired) {

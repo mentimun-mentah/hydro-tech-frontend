@@ -10,7 +10,7 @@ import Router from 'next/router'
 const BlogSlug = ({ blogData }) => {
   const { blogs_title, blogs_slug, blogs_created_at, blogs_image, blogs_description, blogs_visitor } = blogData
 
-  const link = `${process.env.NEXT_PUBLIC_HOSTNAME}/blog/${blogs_slug}`
+  const link = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/blog/${blogs_slug}`
               
   return (
     <>

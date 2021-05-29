@@ -42,11 +42,6 @@ const HomeLayout = ({ children }) => {
                   <a>Home</a>
                 </Link>
               </Menu.Item>
-              <Menu.Item key="#service4">
-                <Link href="/#service" as="/#service">
-                  <a>Service</a>
-                </Link>
-              </Menu.Item>
               <Menu.Item key="#service">
                 <Link href="/#service" as="/#service">
                   <a>Service</a>
@@ -107,7 +102,6 @@ const HomeLayout = ({ children }) => {
                   <h3 className="bold h3">Short History</h3>
                   <p>
                     We are a small team, which is engaged in agriculture, especially hydroponics, we use technology to facilitate automatic maintenance of a plantation and will increase the yield of better quality crops.
-                    {/* We are a small team, yang bergerak di bidang pertanian khususnya hydroponic, kita memanfaatkan teknologi untuk memudahkan pemeliharaan suatu perkebunan secara otomatis dan akan meningkatkan hasil kualitas panen menjadi lebih baik. */}
                   </p>
                 </Col>
 

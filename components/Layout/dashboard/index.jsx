@@ -58,8 +58,8 @@ const SidebarContainer = ({ children }) => {
       console.log(cookies.csrf_access_token)
       const hydroURL = `${process.env.NEXT_PUBLIC_WS_URL}/dashboard/ws?csrf_token=${cookies.csrf_access_token}`
       const chatURL = `${process.env.NEXT_PUBLIC_WS_URL}/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
-      ws = new ReconnectingWebSocket(hydroURL, [], { debug: true })
-      wsChat = new ReconnectingWebSocket(chatURL, [], { debug: true })
+      ws = new ReconnectingWebSocket(hydroURL)
+      wsChat = new ReconnectingWebSocket(chatURL)
 
       wsChat.onmessage = msg => {
         if((msg.data.indexOf("total_online") !== -1) && (msg.data.indexOf("total_offline") !== -1)) {
