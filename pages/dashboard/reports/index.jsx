@@ -2,7 +2,7 @@ import { CSVLink } from "react-csv"
 import { withAuth } from "lib/withAuth";
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { optionsGrowth } from 'components/Dashboard/apexOption'
+import { optionsGrowth, optionsPHDataWeek, optionsPHDataMonth } from 'components/Dashboard/apexOption'
 import { Layout, Card, Row, Col, Radio, Tabs, Table, Button, Grid, Select, Space, Dropdown, Menu, Empty } from 'antd'
 
 import { columnsAllReports } from 'columns/sensorReport'
@@ -155,13 +155,13 @@ const Reports = () => {
             const phSeries = res.data.map(x => parseFloat(x.avg).toFixed(2))
 
             const dataPpmOption = {
-              ...optionsPPMWeekData,
+              ...optionsPHDataMonth,
               xaxis: { max: 4, categories: phCategories.reverse() }
             }
             const dataOption = { ...optionsGrowth, ...dataPpmOption }
 
             const seriesPPM30Day = [{
-              name: "PPM",
+              name: "PH",
               data: phSeries.reverse()
             }]
 
@@ -208,13 +208,13 @@ const Reports = () => {
             const phSeries = res.data.map(x => parseFloat(x.avg).toFixed(2))
 
             const dataPpmOption = {
-              ...optionsPPMWeekData,
+              ...optionsPHDataWeek,
               xaxis: { max: 7, categories: phCategories.reverse() }
             }
             const dataOption = { ...optionsGrowth, ...dataPpmOption }
 
             const seriesPPM7Day = [{
-              name: "PPM",
+              name: "PH",
               data: phSeries.reverse()
             }]
 

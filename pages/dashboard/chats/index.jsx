@@ -476,10 +476,6 @@ const Chats = () => {
           background-color: transparent;
           border-radius: 2rem 0 0 0;
         }
-        :global(.chat-content .chat-item:hover) {
-          background-color: rgba(240, 240, 240, 0.9);
-          border-radius: 2rem 0 0 0;
-        }
 
         .chat-input-wrapper {
           margin-top: 10px;

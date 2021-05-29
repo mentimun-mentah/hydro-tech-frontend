@@ -226,6 +226,55 @@ export const optionsPHDayData = {
   }
 }
 
+export const optionsPHDataWeek = {
+  xaxis: {
+    max: 4,
+    categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
+  },
+  tooltip: {
+    enabled: false,
+    custom: ({series, seriesIndex, dataPointIndex}) => {
+      return(
+      '<div class="text-center">'+
+        '<p style="margin-bottom: 0;color:var(--grey-1); font-size: 12px!important; margin-top:5px;">'
+        + series[seriesIndex][dataPointIndex] + 
+        '<span style="color:var(--grey)"></span></p>'+
+      '</div>'
+      )
+    },
+  },
+  dataLabels: {
+    ...dataLabelsOptions,
+    formatter: (val) => {
+      return val
+    },
+  },
+}
+
+export const optionsPHDataMonth = {
+  xaxis: {
+    max: 4,
+    categories: [...Array(4)].map((_, x) => `Week ${x+1}`),
+  },
+  tooltip: {
+    enabled: false,
+    custom: ({series, seriesIndex, dataPointIndex}) => {
+      return(
+      '<div class="text-center">'+
+        '<p style="margin-bottom: 0;color:var(--grey-1); font-size: 12px!important; margin-top:5px;">'
+        + series[seriesIndex][dataPointIndex] + 
+        '<span style="color:var(--grey)"></span></p>'+
+      '</div>'
+      )
+    },
+  },
+  dataLabels: {
+    ...dataLabelsOptions,
+    formatter: (val) => {
+      return val
+    },
+  },
+}
 
 export const optionsPPMWeekData = {
   xaxis: {

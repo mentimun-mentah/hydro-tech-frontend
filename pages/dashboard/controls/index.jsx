@@ -354,6 +354,10 @@ const Controls = () => {
         .then(res => {
           setLoading(false)
           resNotification("success", "Success", res.data.detail)
+          if (ws && ws.send && ws.readyState == 1) {
+            sendWsHandler(`kind:set_value_servo,sh:${servo_horizontal.value},sv:${servo_vertical.value}`);
+            console.log(`kind:set_value_servo,sh:${servo_horizontal.value},sv:${servo_vertical.value}`)
+          }
         })
         .catch(err => {
           setLoading(false)
@@ -361,6 +365,10 @@ const Controls = () => {
           const errDetail = err.response.data.detail;
           if(errDetail == signature_exp) {
             resNotification("success", "Success", "Successfully update the servo setting.")
+            if (ws && ws.send && ws.readyState == 1) {
+              sendWsHandler(`kind:set_value_servo,sh:${servo_horizontal.value},sv:${servo_vertical.value}`);
+              console.log(`kind:set_value_servo,sh:${servo_horizontal.value},sv:${servo_vertical.value}`)
+            }
           }
           else if(typeof(errDetail) === "string" && errDetail !== signature_exp){
             formErrorMessage("error", errDetail)
@@ -387,24 +395,10 @@ const Controls = () => {
       dispatch(actions.getSettingUsersMySetting())
     }, 2000)
 
-    window.addEventListener("beforeunload", resetPomp);
-
     return () => {
-      if (ws && ws.send && ws.readyState == 1) {
-        console.log(`phup:off,phdown:off,nutrition:off,solenoid:off,kind:set_hydro`)
-        ws.send(`phup:off,phdown:off,nutrition:off,solenoid:off,kind:set_hydro`);
-      }
       clearTimeout(timeout)
-      window.removeEventListener("beforeunload", resetPomp)
     }
   }, [])
-
-  const resetPomp = () => {
-    if (ws && ws.send && ws.readyState == 1) {
-      console.log(`phup:off,phdown:off,nutrition:off,solenoid:off,kind:set_hydro`)
-      ws.send(`phup:off,phdown:off,nutrition:off,solenoid:off,kind:set_hydro`);
-    }
-  }
 
   useEffect(() => {
     if(settingUsers && settingUsers.mySetting) {
