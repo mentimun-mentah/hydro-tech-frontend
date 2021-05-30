@@ -39,7 +39,9 @@ body {
   background-color: var(--white-smoke)!important;
 }
 
-.ant-btn, .ant-input-number, .ant-input-number-input, .ant-input, .ant-input-password, .ant-select-selector, .ant-input-affix-wrapper {
+.ant-btn, .ant-input-number, .ant-input-number-input, 
+.ant-input, .ant-input-password, .ant-select-selector, 
+.ant-input-affix-wrapper, .rc-input-number-input, .rc-input-number-input-wrap {
   border-radius: .5rem!important;
 }
 
@@ -239,6 +241,10 @@ body {
 
 .text-green {
   color: var(--green)!important;
+}
+
+.text-white {
+  color: var(--white)!important;
 }
 
 .text-black {
@@ -766,3 +772,4 @@ body {
 .navbar-dark .navbar-text a:hover, .navbar-dark .navbar-text a:focus {
   color: #fff;
 }
+

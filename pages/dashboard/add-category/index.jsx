@@ -1,16 +1,167 @@
-import { useState } from 'react'
+import { withAuth } from "lib/withAuth";
+import { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
 import { EditOutlined, DeleteOutlined, LoadingOutlined } from '@ant-design/icons'
-import { Layout, Card, Row, Col, Form, Button, Input, Popconfirm } from 'antd'
+import { Layout, Card, Row, Col, Form, Button, Input, Popconfirm, Empty } from 'antd'
 
-import Pagination from 'components/Pagination'
+import { deepCopy, enterPressHandler } from 'lib/utility'
+import { formCategory, formCategoryIsValid } from 'formdata/category'
+import { jsonHeaderHandler, signature_exp, formErrorMessage, resNotification } from 'lib/axios'
+
+import axios from 'lib/axios'
+import isIn from 'validator/lib/isIn'
+import * as actions from 'store/actions'
 import ErrorMessage from 'components/ErrorMessage'
 import pageStyle from 'components/Dashboard/pageStyle'
 import addPlantStyle from 'components/Dashboard/addPlantStyle'
 
 const AddCategory = () => {
+  const dispatch = useDispatch()
+
+  const categories = useSelector(state => state.categories.categories)
+
+  const [q, setQ] = useState("")
   const [loading, setLoading] = useState(false)
   const [isUpdate, setIsUpdate] = useState(false)
+  const [category, setCategory] = useState(formCategory)
+
+  const { id, name } = category
+
+  /* INPUT CHANGE FUNCTION */
+  const onChangeHandler = (e) => {
+    const name = e.target.name;
+    const value = e.target.value;
+    const data = {
+      ...category,
+      [name]: { ...category[name], value: value, isValid: true, message: null }
+    }
+    setCategory(data)
+  }
+  /* INPUT CHANGE FUNCTION */
+
+  /* SUBMIT FORM FUNCTION */
+  const onSubmitHandler = e => {
+    e.preventDefault()
+    if(formCategoryIsValid(category, setCategory)) {
+      setLoading(true)
+
+      const data = { name: name.value }
+      
+      let method = 'post'
+      let url = '/category-docs/create'
+      let successResponse = "Successfully add a new category-doc."
+      if(isUpdate) {
+        method = 'put'
+        url = `/category-docs/update/${id}`
+        successResponse = "Successfully update the category-doc."
+      }
+
+      axios[method](url, data, jsonHeaderHandler())
+        .then(res => {
+          setLoading(false)
+          resetInputField()
+          dispatch(actions.getCategory({q: q}))
+          resNotification("success", "Success", res.data.detail)
+          if(isUpdate) setIsUpdate(false)
+        })
+        .catch(err => {
+          setLoading(false)
+          const state = deepCopy(category)
+          const errDetail = err.response.data.detail
+          const errName = ["The name has already been taken.", "Nama sudah dipakai."]
+
+          if(errDetail == signature_exp){
+            resetInputField()
+            dispatch(actions.getCategory({q: q}))
+            resNotification("success", "Success", successResponse)
+            if(isUpdate) setIsUpdate(false)
+          }
+          else if(typeof(errDetail) === "string" && isIn(errDetail, errName)){
+            state.name.value = state.name.value
+            state.name.isValid = false
+            state.name.message = errDetail
+          }
+          else if(typeof(errDetail) === "string" && !isIn(errDetail, errName)){
+            formErrorMessage("error", errDetail)
+          }
+          else {
+            errDetail.map((data) => {
+              const key = data.loc[data.loc.length - 1];
+              if(state[key]){
+                state[key].isValid = false
+                state[key].message = data.msg
+              }
+            });
+          }
+          setCategory(state)
+        })
+    }
+  }
+
+  const resetInputField = () => {
+    setCategory(formCategory)
+  }
+
+  useEffect(() => {
+    dispatch(actions.getCategory({ q: q }))
+  }, [q])
+
+  const onGetEditData = async (id) => {
+    await axios.get(`/category-docs/get-category-doc/${id}`)
+      .then(res => {
+        const state = deepCopy(formCategory)
+        state.id = res.data.category_docs_id
+        state.name.value = res.data.category_docs_name
+        setCategory(state)
+        setIsUpdate(true)
+      })
+      .catch(async err => {
+        const errDetail = err.response.data.detail;
+        if(errDetail === signature_exp) {
+          await axios.get(`/category-docs/get-category-doc/${id}`)
+            .then(res => {
+              const state = deepCopy(formCategory)
+              state.id = res.data.category_docs_id
+              state.name.value = res.data.category_docs_name
+              setCategory(state)
+              setIsUpdate(true)
+            })
+        }
+        else if(typeof(errDetail) === "string" && errDetail !== signature_exp){
+          formErrorMessage("error", errDetail)
+        }
+        else {
+          formErrorMessage("error", "Something was wrong!")
+        }
+      })
+
+    setTimeout(() => {
+      window.scrollTo(0, 0)
+    }, 100)
+  }
+
+  const onDeleteCategory = async (id) => {
+    await axios.delete(`/category-docs/delete/${id}`, jsonHeaderHandler())
+      .then(res => {
+        formErrorMessage("success", res.data.detail)
+        dispatch(actions.getCategory({q: q}))
+      })
+      .catch(err => {
+        const errDetail = err.response.data.detail;
+        if(errDetail === signature_exp) {
+          formErrorMessage("success", res.data.detail)
+          dispatch(actions.getCategory({q: q}))
+        }
+        else if(typeof(errDetail) === "string" && errDetail !== signature_exp){
+          formErrorMessage("error", errDetail)
+        }
+        else {
+          formErrorMessage("error", "Something was wrong!")
+        }
+      })
+
+  }
 
   return(
     <>
@@ -20,24 +171,24 @@ const AddCategory = () => {
           <Row gutter={[20, 20]}>
             <Col span={24}>
               <Card className="radius1rem shadow1 h-100" bordered={false}>
-                <div className="header-dashboard">
+                <div className="header-dashboard m-b-0">
                   <h2 className="h2 bold">{isUpdate ? "Update" : "Add"} Category</h2>
-                  <Form name="AddPlants" layout="vertical">
+                  <Form name="Add Category" layout="vertical" onKeyUp={e => enterPressHandler(e, onSubmitHandler)}>
                     <Row gutter={[20, 20]}>
                       <Col span={24}>
                         <Form.Item 
                           label="Name"
                           className="m-b-0"
-                          // validateStatus={!name.isValid && name.message && "error"}
+                          validateStatus={!name.isValid && name.message && "error"}
                         >
                           <Input
                             size="large"
                             name="name"
-                            // value={name.value}
-                            // onChange={onChangeHandler}
+                            value={name.value}
+                            onChange={onChangeHandler}
                             placeholder="Category"
                           />
-                          {/* <ErrorMessage item={name} /> */}
+                          <ErrorMessage item={name} />
                         </Form.Item>
                       </Col>
 
@@ -47,8 +198,8 @@ const AddCategory = () => {
                             size="large"
                             type="primary" 
                             className="p-l-30 p-r-30" 
-                            // disabled={loading}
-                            // onClick={onSubmitHandler}
+                            disabled={loading}
+                            onClick={onSubmitHandler}
                           >
                             {loading ? <LoadingOutlined /> : <b>Save</b>}
                           </Button>
@@ -74,8 +225,8 @@ const AddCategory = () => {
                     <Form.Item className="">
                       <Input
                         size="large"
-                        // value={q}
-                        // onChange={e => setQ(e.target.value)}
+                        value={q}
+                        onChange={e => setQ(e.target.value)}
                         placeholder="Search category"
                         prefix={<i className="far fa-search text-grey" />}
                       />
@@ -86,44 +237,52 @@ const AddCategory = () => {
 
               <AnimatePresence>
                 <Row gutter={[20, 20]}>
-                  {[...Array(12)].map((category, i) => (
-                    <Col xl={6} lg={8} md={8} sm={12} xs={12} key={i}>
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: ".2" }}
-                      >
-                        <Card 
-                          bordered={false}
-                          className="radius1rem shadow1 h-100 hover-pointer rounded-card-actions"
-                          actions={[
-                            <EditOutlined key="edit" />,
-                            <Popconfirm
-                              okText="Delete"
-                              title={`Delete Learn ESP32?`}
-                            >
-                              <DeleteOutlined key="delete" />
-                            </Popconfirm>
-                          ]}
+                  {categories && categories.length > 0 ? (
+                    <>
+                    {categories.map(category => (
+                      <Col xl={6} lg={8} md={8} sm={12} xs={12} key={category.category_docs_id}>
+                        <motion.div 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: ".2" }}
+                          className="w-100"
                         >
-                          <h2 className="h3 bold text-center text-grey-1 m-b-0">Learn ESP32</h2>
-                        </Card>
-                      </motion.div>
-                    </Col>
-                  ))}
-                <Col xl={24} lg={24} md={24} sm={24}>
-                  <div className="text-center m-t-20 m-b-20">
-                    <Pagination 
-                      total={17} 
-                      goTo={val => (val)} 
-                      current={3} 
-                      hideOnSinglePage 
-                      pageSize={5}
-                    />
-                  </div>
-                </Col>
-              </Row>
+                          <Card 
+                            bordered={false}
+                            className="radius1rem shadow1 h-100 hover-pointer rounded-card-actions"
+                            actions={[
+                              <EditOutlined 
+                                key="edit" 
+                                onClick={() => onGetEditData(category.category_docs_id)}
+                              />,
+                              <Popconfirm
+                                okText="Delete"
+                                onConfirm={() => onDeleteCategory(category.category_docs_id)}
+                                title={`${category.category_docs_name} ?`}
+                              >
+                                <DeleteOutlined key="delete" />
+                              </Popconfirm>
+                            ]}
+                          >
+                            <h2 className="h3 bold text-center text-grey-1 m-b-0">{category.category_docs_name}</h2>
+                          </Card>
+                        </motion.div>
+                      </Col>
+                    ))}
+                    </>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: ".2" }}
+                      className="w-100"
+                    >
+                      <Empty className="m-t-100 m-b-100" description={<span className="text-grey">No Result</span>} /> 
+                    </motion.div>
+                  )}
+                </Row>
               </AnimatePresence>
 
 
@@ -138,4 +297,4 @@ const AddCategory = () => {
   )
 }
 
-export default AddCategory
+export default withAuth(AddCategory)

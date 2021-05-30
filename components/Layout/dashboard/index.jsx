@@ -7,6 +7,7 @@ import { useState, useEffect, createContext } from 'react'
 import nookies from 'nookies'
 import isIn from 'validator/lib/isIn'
 import * as actions from 'store/actions'
+import ReconnectingWebSocket from 'reconnecting-websocket'
 
 import Style from './style'
 import SplitText from './SplitText'
@@ -14,11 +15,12 @@ import SplitText from './SplitText'
 const useBreakpoint = Grid.useBreakpoint
 const HOME = "HOME", REPORTS = "REPORTS", LOGOUT = "LOGOUT", DASHBOARD = "DASHBOARD", CONTROLS = "CONTROLS", PLANTS = "PLANTS", 
   ACCOUNTS = "ACCOUNTS", ADD_PLANTS = "ADD-PLANTS", ADD_BLOG = "ADD-BLOG", MANAGE_BLOG = "MANAGE-BLOG",
-  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS", CHAT = "CHAT", ADMIN = "ADMIN", ADD_CATEGORY = "ADD-CATEGORY"
+  ADD_DOCS = "ADD-DOCS", MANAGE_DOCS = "MANAGE-DOCS", CHAT = "CHATS", ADMIN = "ADMIN", ADD_CATEGORY = "ADD-CATEGORY"
 
 export const WebSocketContext = createContext()
 
-let ws = {};
+let ws = {}
+let wsChat = {}
 
 const SidebarContainer = ({ children }) => {
   const router = useRouter()
@@ -27,13 +29,19 @@ const SidebarContainer = ({ children }) => {
 
   const user = useSelector(state => state.auth.user)
 
+  const [activeUser, setActiveUser] = useState({total_online: 0, total_offline: 0, online_user: [], offline_user: []})
   const [collapsed, setCollapsed] = useState(false)
   const [selected, setSelected] = useState(DASHBOARD)
   const [isMenuAdmin, setIsMenuAdmin] = useState(false)
 
   const onLogoutHandler = () => {
     dispatch(actions.logout())
-    ws.close()
+    if (ws && ws.send && ws.readyState == 1) {
+      ws.close()
+    }
+    if (wsChat && wsChat.send && wsChat.readyState == 1) {
+      wsChat.close()
+    }
     router.replace('/')
   }
 
@@ -43,38 +51,53 @@ const SidebarContainer = ({ children }) => {
     else setCollapsed(false)
   }, [screens])
 
-  /*WEBSOCKET*/
-  const wsConnect = () => {
+  useEffect(() => {
     const cookies = nookies.get()
+
     if(cookies && cookies.csrf_access_token) {
-      ws = new WebSocket(`ws://${process.env.NEXT_PUBLIC_HOSTNAME}:8000/dashboard/ws?csrf_token=${cookies.csrf_access_token}`);
+      console.log(cookies.csrf_access_token)
+      const hydroURL = `${process.env.NEXT_PUBLIC_WS_URL}/dashboard/ws?csrf_token=${cookies.csrf_access_token}`
+      const chatURL = `${process.env.NEXT_PUBLIC_WS_URL}/dashboard/ws-chat?csrf_token=${cookies.csrf_access_token}`
+      ws = new ReconnectingWebSocket(hydroURL)
+      wsChat = new ReconnectingWebSocket(chatURL)
+
+      wsChat.onmessage = msg => {
+        if((msg.data.indexOf("total_online") !== -1) && (msg.data.indexOf("total_offline") !== -1)) {
+          setActiveUser(JSON.parse(msg.data))
+        }
+      }
 
       ws.onopen = () => {
-        ws.send("Connected");
-        ws.send(`kind:live_cam_false`);
+        if (ws.readyState == 1) {
+          console.log("Hydro Connected");
+          ws.send(`kind:live_cam_false`);
+        }
       };
 
-      ws.onclose = () => {
-        ws.close()
-        setTimeout(() => {
-          wsConnect()
-        }, 3000);
+      wsChat.onopen = () => {
+        wsChat.send('kind:get_list_user_status')
+        console.log("Chat Connected");
       };
+
     }
 
-    ws.onerror = () => {
+    window.addEventListener("beforeunload", alertUser);
+
+    return () => {
+      window.removeEventListener("beforeunload", alertUser)
       ws.close()
-    };
-  };
-  /*WEBSOCKET*/
-
-  /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
-  useEffect(() => {
-    if (ws.readyState !== 1) {
-      wsConnect();
+      wsChat.close()
     }
-  }, []);
-  /*CONNECT TO WEBSOCKET WHEN MOUNTED*/
+  }, [])
+
+  const alertUser = () => {
+    if (wsChat && wsChat.send && wsChat.readyState == 1) {
+      wsChat.close()
+    }
+    if (ws && ws.send && ws.readyState == 1) {
+      ws.send(`kind:image_cal_false`);
+    }
+  }
 
   useEffect(() => {
     let routeNow = router.pathname.split("/")[router.pathname.split("/").length - 1]
@@ -166,13 +189,6 @@ const SidebarContainer = ({ children }) => {
                 onClick={() => router.push('/')}
               >
                 Home
-              </Menu.Item>
-              <Menu.Item 
-                key={DASHBOARD} 
-                icon={<i className="far fa-house-flood" />}
-                onClick={() => router.push('/dashboard')}
-              >
-                Dashboard
               </Menu.Item>
 
               <AnimatePresence>
@@ -268,6 +284,13 @@ const SidebarContainer = ({ children }) => {
                     selectedKeys={[selected]}
                   >
                     <Menu.Item 
+                      key={DASHBOARD} 
+                      icon={<i className="far fa-house-flood" />}
+                      onClick={() => router.push('/dashboard')}
+                    >
+                      Dashboard
+                    </Menu.Item>
+                    <Menu.Item 
                       key={CONTROLS} 
                       icon={<i className="far fa-cog" />} 
                       onClick={() => router.push('/dashboard/controls')}
@@ -326,7 +349,7 @@ const SidebarContainer = ({ children }) => {
           </div>
         </Layout.Sider>
         <Layout className="main-layout">
-          <WebSocketContext.Provider value={ws}>
+          <WebSocketContext.Provider value={{ws: ws, wsChat: wsChat, activeUser: activeUser}}>
             {children}
           </WebSocketContext.Provider>
         </Layout>

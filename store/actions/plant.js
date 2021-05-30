@@ -1,5 +1,3 @@
-import { jsonHeaderHandler, refreshHeader, signature_exp } from 'lib/axios'
-
 import axios from 'lib/axios'
 import * as actionType from './actionTypes'
 

@@ -1,76 +1,17 @@
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Layout, Menu, Row, Col, Button, Drawer, Affix, AutoComplete, Input } from 'antd'
 import { SearchOutlined, MenuOutlined } from '@ant-design/icons'
 
 import React from 'react'
 import Link from 'next/link'
-import slugify from 'react-slugify'
+import * as actions from 'store/actions'
 import SplitText from '../dashboard/SplitText'
 
-export const menuItems = [
-  {
-    category: 'Learn ESP32', 
-    items: [
-      {title: 'ESP32 Introduction'},
-      {title: 'ESP32 Arduino IDE'},
-      {title: 'VS Code and PlatformIO'},
-      {title: 'ESP32 Pinout'},
-      {title: 'ESP32 Inputs Outputs'},
-      {title: 'ESP32 PWM'},
-      {title: 'ESP32 Analog Inputs'},
-      {title: 'ESP32 Interrupts Timers'},
-      {title: 'ESP32 Deep Sleep'},
-    ]
-  },
-  {
-    category: 'Protocols', 
-    items: [
-      {title: 'ESP32 Web Server'},
-      {title: 'ESP32 LoRa'},
-      {title: 'ESP32 BLE'},
-      {title: 'ESP32 Bluetooth'},
-      {title: 'ESP32 MQTT'},
-      {title: 'ESP32 ESP-NOW'},
-      {title: 'ESP32 Wi-Fi'},
-      {title: 'ESP32 WebSocket'},
-      {title: 'ESP32 ESP-MESH'},
-      {title: 'ESP32 Email'},
-      {title: 'ESP32 Text Messages'},
-    ]
-  },
-  {
-    category: 'Arduino Modules', 
-    items: [
-      {title: 'Arduino Relay Module'},
-      {title: 'Arduino WS2812B'},
-      {title: 'Arduino IR Receiver'},
-      {title: 'Arduino Reed Switch'},
-      {title: 'Arduino Ultrasonic Sensor'},
-      {title: 'Arduino SD Card'},
-      {title: 'Arduino Fingerprint Sensor'},
-      {title: 'Arduino Membrane Keypad'},
-    ]
-  },
-  {
-    category: 'Arduino Sensors', 
-    items: [
-      {title: 'Arduino DHT11/DHT22'},
-      {title: 'Arduino BME280'},
-      {title: 'Arduino BMP180'},
-      {title: 'Arduino BME680'},
-      {title: 'Arduino DS18B20'},
-      {title: 'Arduino LM35 Sensor'},
-      {title: 'Arduino Tilt Sensor'},
-      {title: 'Arduino Microphone'},
-      {title: 'Arduino Color Sensor'},
-    ]
-  },
-]
-
 const Logo = () => (
-    <Link href="/" as="/">
+  <Link href="/" as="/">
     <motion.a initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="hover-pointer text-reset">
       <SplitText
         animate="visible"
@@ -87,22 +28,22 @@ const renderTitle = (title) => (
   <span> {title} </span>
 );
 
-const renderItem = (label) => ({
+const renderItem = (value, label, docId, onRedirect) => ({
   value: label,
   label: (
-    <p className="m-b-0 fw-600"> {label} </p>
+    <p className="m-b-0 fw-600" onClick={() => onRedirect(value, docId)}> {label} </p>
   ),
 })
 
-const renderOption = () => {
+const renderOption = (arr, redirectFunc) => {
   let res = []
-  for(let menu of menuItems) {
+  for(let menu of arr) {
     let data = {
-      label: renderTitle(menu.category),
+      label: renderTitle(menu.category_docs_name),
       options: []
     }
-    for(let item of menu.items) {
-      data.options.push(renderItem(item.title))
+    for(let item of menu.childs) {
+      data.options.push(renderItem(item.documentations_slug, item.documentations_title, item.documentations_id, redirectFunc))
     }
     res.push(data)
   }
@@ -110,18 +51,30 @@ const renderOption = () => {
 }
 
 
+const limit = 20
 const LayoutDocs = ({ children }) => {
   const router = useRouter()
-  const [selected, setSelected] = useState("#esp32-introduction")
+  const dispatch = useDispatch()
+
+  const [q, setQ] = useState("")
+  const [selected, setSelected] = useState("")
   const [collapsed, setCollapsed] = useState(false)
   const [showButton, setShowButton] = useState(false)
+
+  const allDocumentations = useSelector(state => state.documentations.allDocumentations)
+  const docsByName = useSelector(state => state.documentations.docsByName)
 
   useEffect(() => {
     setSelected(router.asPath.split('#')[1])
   }, [router])
 
-  const onSelectSuggestionHandler = val => {
-    router.push(`/docs/#${slugify(val)}`)
+  useEffect(() => {
+    dispatch(actions.getDocumentationByName({q: q, limit: limit}))
+  }, [q])
+
+  const onRedirect = (val) => {
+    setSelected(val)
+    router.push(`/docs/#${val}`)
   }
 
   return(
@@ -166,12 +119,12 @@ const LayoutDocs = ({ children }) => {
                     selectedKeys={[selected]}
                     className="aside-container menu-site ant-menu-root ant-menu-inline ant-menu-scroll"
                   >
-                    {menuItems.map(menu => (
-                      <Menu.ItemGroup title={menu.category} key={slugify(menu.category)}>
-                        {menu.items.map(item => (
-                          <Menu.Item key={slugify(item.title)}>
-                            <Link href={`/docs/#${slugify(item.title)}`} as={`/docs/#${slugify(item.title)}`}>
-                              <a>{item.title}</a>
+                    {allDocumentations && allDocumentations.length > 0 && allDocumentations.map(docs => (
+                      <Menu.ItemGroup title={docs.category_docs_name} key={docs.category_docs_id}>
+                        {docs && docs.childs && docs.childs.length > 0 && docs.childs.map(child => (
+                          <Menu.Item key={child.documentations_slug}>
+                            <Link href={`/docs/#${child.documentations_slug}`} as={`/docs/#${child.documentations_slug}`}>
+                              <a>{child.documentations_title}</a>
                             </Link>
                           </Menu.Item>
                         ))}
@@ -191,14 +144,14 @@ const LayoutDocs = ({ children }) => {
                 <div className="w-100 nav-search">
                   <AutoComplete 
                     className="w-100" 
-                    options={renderOption()}
                     dropdownClassName="fixed top-65" 
-                    onSelect={onSelectSuggestionHandler}
+                    options={renderOption(docsByName, onRedirect)}
                   >
                     <Input
                       size="large"
                       placeholder="Search"
                       className="h-65"
+                      onChange={e => setQ(e.target.value)}
                       prefix={<SearchOutlined className="text-grey"/>}
                     />
                   </AutoComplete>
@@ -234,12 +187,12 @@ const LayoutDocs = ({ children }) => {
           selectedKeys={[selected]}
           className="aside-container-drawer menu-site ant-menu-root ant-menu-inline ant-menu-scroll"
         >
-          {menuItems.map(menu => (
-            <Menu.ItemGroup title={menu.category} key={slugify(menu.category)}>
-              {menu.items.map(item => (
-                <Menu.Item key={slugify(item.title)}>
-                  <Link href={`/docs/#${slugify(item.title)}`} as={`/docs/#${slugify(item.title)}`}>
-                    <a>{item.title}</a>
+          {allDocumentations && allDocumentations.length > 0 && allDocumentations.map(docs => (
+            <Menu.ItemGroup title={docs.category_docs_name} key={docs.category_docs_id}>
+              {docs && docs.childs && docs.childs.length > 0 && docs.childs.map(child => (
+                <Menu.Item key={child.documentations_id}>
+                  <Link href={`/docs/#${child.documentations_slug}`} as={`/docs/#${child.documentations_slug}`}>
+                    <a>{child.documentations_title}</a>
                   </Link>
                 </Menu.Item>
               ))}

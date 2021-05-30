@@ -1,10 +1,10 @@
 import { withAuth } from 'lib/withAuth'
 import { useRouter } from 'next/router'
-import { formErrorMessage } from 'lib/axios'
 import { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Layout, Row, Col, Drawer, Grid, Form, Input, Button, Modal, Space, Select, Empty } from 'antd'
+import { formErrorMessage, jsonHeaderHandler, signature_exp } from 'lib/axios'
+import { Layout, Row, Col, Drawer, Grid, Form, Input, Button, Modal, Space, Select, Empty, message } from 'antd'
 
 import _ from 'lodash'
 import React from 'react'
@@ -26,6 +26,8 @@ const useBreakpoint = Grid.useBreakpoint
 const Badge = '/static/images/badge.svg'
 const Sprout = '/static/images/sprout.svg'
 
+message.config({ maxCount: 2 });
+
 const per_page = 12
 
 const Plants = () => {
@@ -35,6 +37,7 @@ const Plants = () => {
   const screens = useBreakpoint()
 
   const plants = useSelector(state => state.plant.plant)
+  const settingUsers = useSelector(state => state.settingUsers)
 
   const [q, setQ] = useState("")
   const [page, setPage] = useState(plants.page)
@@ -47,50 +50,131 @@ const Plants = () => {
   const [showModalBackup, setShowModalBackup] = useState(false)
   const [showModalPlanted, setShowModalPlanted] = useState(false)
   const [progressPlant, setProgressPlant] = useState({id: "", start: false})
+  const [percentage, setPercentage] = useState(0)
 
   const onShowDrawer = () => {
     setVisibleDrawer(true)
   }
   const onCloseDrawer = () => {
-    // setPlantData({})
     setVisibleDrawer(false)
     setShowModalPlanted(true)
   }
 
+
+  /* function for changing plant status */
+  const onChangePlantStatus = () => {
+    axios.put('/setting-users/change-plants-status', null, jsonHeaderHandler())
+      .then(res => {
+        formErrorMessage("success", res.data.detail)
+        dispatch(actions.getSettingUsersMySetting())
+        dispatch(actions.getSettingUsersProgressPlant())
+      })
+      .catch(err => {
+        const errDetail = err.response.data.detail;
+        if(errDetail == signature_exp) {
+          axios.put('/setting-users/change-plants-status', null, jsonHeaderHandler())
+            .then(res => {
+              formErrorMessage("success", res.data.detail)
+              dispatch(actions.getSettingUsersMySetting())
+              dispatch(actions.getSettingUsersProgressPlant())
+            })
+            .catch(() => { })
+        }
+        else if(typeof(errDetail) === "string" && errDetail !== signature_exp){
+          formErrorMessage("error", errDetail)
+        }
+        else {
+          formErrorMessage("error", "Something was wrong!")
+        }
+      })
+  }
+
+  /* function for changing user plant */
+  const onChangePlantHandler = (plants_id, plants_status) => {
+    axios.put(`/setting-users/change-plants/${plants_id}`, null, jsonHeaderHandler())
+      .then(res => {
+        dispatch(actions.getSettingUsersMySetting())
+        dispatch(actions.getSettingUsersProgressPlant())
+        formErrorMessage("success", res.data.detail)
+        setProgressPlant({id: plants_id, start: plants_status})
+        setShowModalPlanted(false)
+        if(plants_status) {
+          onChangePlantStatus()
+        }
+      })
+      .catch(err => {
+        console.log(err.response)
+        const errDetail = err.response.data.detail;
+        if(errDetail == signature_exp) {
+          dispatch(actions.getSettingUsersMySetting())
+          dispatch(actions.getSettingUsersProgressPlant())
+          formErrorMessage("success", `Successfully change the user plants.`)
+          setProgressPlant({id: plants_id, start: plants_status})
+          setShowModalPlanted(false)
+        }
+        else if(typeof(errDetail) === "string" && errDetail !== signature_exp){
+          formErrorMessage("error", errDetail)
+          setProgressPlant({})
+          setShowModalPlanted(false)
+        }
+        else {
+          formErrorMessage("error", "Something was wrong!")
+          setProgressPlant({})
+          setShowModalPlanted(false)
+        }
+      })
+  }
+
+
+  /* function for changing user plant and plant already planted */
   const onOkModalPlantedHandler = () => {
-    setProgressPlant({id: plantData.plants_id, start: true})
-    setShowModalPlanted(false)
+    onChangePlantHandler(plantData.plants_id, true)
   }
+
+
+  /* function for changing user plant and not planted */
   const onCancelModalPlantedHandler = () => {
-    setProgressPlant({id: plantData.plants_id, start: false})
-    setShowModalPlanted(false)
-    // setPlantData({})
+    onChangePlantHandler(plantData.plants_id, false)
   }
+
+
   const onPlantedHandler = () => {
-    const data = {...progressPlant, start: true}
+    onChangePlantStatus()
+    const data = { ...progressPlant, start: true }
     setProgressPlant(data)
   }
+
+
   const onCancelPlantedHandler = () => {
     setPlantData({})
     setProgressPlant({id: "", start: false})
   }
+
+
+  /* function for complete planting */
   const onCongratsHandler = () => {
-    // setProgressPlant({id: plantData.plants_id, start: false})
-    // setPlantData({})
-    // // setProgressPlant({id: "", start: false})
-    setShowModal(true)
+    setShowModal(true) //showing modal reward
+    onChangePlantStatus() //for changing planted status
+
+    if(settingUsers && settingUsers.mySetting) {
+      const { plants_id } = settingUsers.mySetting
+      setProgressPlant({id: plants_id, start: false})
+    }
+
     setTimeout(() => {
       reward.current.rewardMe();
     }, 1000)
-    setProgressPlant({id: plantData.plants_id, start: false})
+    
     setShowModalPlanted(false)
     setShowModalBackup(false)
   }
+
 
   const onBackupHandler = () => {
     router.push('/dashboard/reports')
     setShowModalBackup(false)
   }
+
 
   useEffect(() => {
     let mounted = true
@@ -99,6 +183,7 @@ const Plants = () => {
 
     return () => mounted = false
   }, [screens])
+
 
   const getPlantData = (id) => {
     setLoading(true)
@@ -113,6 +198,7 @@ const Plants = () => {
         formErrorMessage("error", "Something was wrong when fetching data")
       })
   }
+
 
   useEffect(() => {
     let queryString = {}
@@ -148,6 +234,30 @@ const Plants = () => {
       setPage(plants.page - 1)
     }
   }, [plants])
+
+
+
+  useEffect(() => {
+    dispatch(actions.getSettingUsersMySetting())
+    dispatch(actions.getSettingUsersProgressPlant())
+    const timeout = setTimeout(() => {
+      dispatch(actions.getSettingUsersMySetting())
+      dispatch(actions.getSettingUsersProgressPlant())
+    }, 2000)
+
+    return () => clearTimeout(timeout)
+  }, [])
+
+  useEffect(() => {
+    if(settingUsers && settingUsers.mySetting) {
+      const { plants_id, setting_users_planted } = settingUsers.mySetting
+      setProgressPlant({id: plants_id, start: setting_users_planted})
+    }
+    if(settingUsers && settingUsers.progressPlant) {
+      const { percentage } = settingUsers.progressPlant
+      setPercentage(percentage)
+    }
+  }, [settingUsers])
 
   return (
     <>
@@ -220,6 +330,7 @@ const Plants = () => {
                   <Col xl={6} lg={8} md={8} sm={12} xs={12} key={plant.plants_id}>
                     <PlantCardMemo 
                       plant={plant} 
+                      percentage={percentage}
                       onPlantedHandler={onPlantedHandler}
                       onCancelPlantedHandler={onCancelPlantedHandler}
                       ongoing={{ongoing: progressPlant.id == plant.plants_id, start: progressPlant.start}}
@@ -400,8 +511,17 @@ const Plants = () => {
 }
 
 Plants.getInitialProps = async ctx => {
+  if(ctx.req) axios.defaults.headers.get.Cookie = ctx.req.headers.cookie;
   let res = await axios.get(`/plants/all-plants?page=1&per_page=${per_page}`)
   ctx.store.dispatch(actions.getPlantSuccess(res.data))
+  try {
+    const resUserSetting = await axios.get("/setting-users/my-setting")
+    ctx.store.dispatch(actions.getSettingUsersMySettingSuccess(resUserSetting.data))
+
+    const resProgressPlant = await axios.get("/setting-users/progress-plant")
+    ctx.store.dispatch(actions.getSettingUsersProgressPlantSuccess(resProgressPlant.data))
+  }
+  catch(err) {}
 }
 
 export default withAuth(Plants)

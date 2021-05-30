@@ -1,6 +1,7 @@
 import { withAuth } from "lib/withAuth";
 import { useRouter } from "next/router";
-import { useSelector } from 'react-redux'
+import { formErrorMessage } from 'lib/axios'
+import { useSelector, useDispatch } from 'react-redux'
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect, useContext } from "react";
 import { Layout, Card, Row, Col, Tag, Modal, Grid, Steps, Divider, Space } from "antd";
@@ -10,7 +11,6 @@ import { WebSocketContext } from 'components/Layout/dashboard';
 
 import _ from 'lodash'
 import moment from "moment";
-import nookies from 'nookies'
 import axios from 'lib/axios'
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -28,7 +28,6 @@ const Sun = "/static/images/sun-outline.gif";
 const Moon = "/static/images/moon.gif";
 const Plant = "/static/images/leaf-outline.gif";
 const WaterTank = "/static/images/water-tank.svg";
-const Sawi = "/static/images/plant/sawi.png";
 const Temperature = "/static/images/temperature.gif";
 
 const max_width_height = 90;
@@ -40,31 +39,38 @@ const steps = [ { title: 'Plant', }, { title: 'Camera', }, { title: 'Token', }, 
 
 const MIN = 0, MAX = 180, DELAY = 200, COUNT = 3
 
+let calibrInterval = null
+
 const Dashboard = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const screens = useBreakpoint();
-  const ws = useContext(WebSocketContext)
+  const { ws } = useContext(WebSocketContext)
 
   const user = useSelector(state => state.auth.user)
+  const settingUsers = useSelector(state => state.settingUsers)
 
   const [current, setCurrent] = useState(0)
-  const [plantSelected, setPlantSelected] = useState("")
   const [showModalSetup, setShowModalSetup] = useState(false)
 
   const [x, setX] = useState(90)
   const [y, setY] = useState(90)
   const [image, setImage] = useState("");
+  const [imageCalibr, setImageCalibr] = useState("")
+  const [loading, setLoading] = useState(false);
   const [heightPh, setHeightPh] = useState(465);
+  const [plantData, setPlantData] = useState({})
   const [joyStatus, setJoyStatus] = useState("stop")
   const [joyDirection, setJoyDirection] = useState("")
   const [showModalCam, setShowModalCam] = useState(false);
-  const [showModalCamConfig, setShowModalCamConfig] = useState(false);
   const [seriesPh, setSeriesPh] = useState(initDataSeries);
   const [statistic, setStatistic] = useState([initialStatistic]);
+  const [showModalCamConfig, setShowModalCamConfig] = useState(false);
   const [size, setSize] = useState({ imgWidth1: 100, imgWidth2: 120, imgWidth3: 140, });
 
   const statisticLength = statistic.length;
 
+  const { mySetting } = settingUsers
   const { imgWidth1, imgWidth2, imgWidth3 } = size;
 
   const onStepChange = val => {
@@ -90,36 +96,38 @@ const Dashboard = () => {
 
   if(ws && ws.readyState == 1) {
     let urlObject;
-    ws.onmessage = (msg) => {
-      if(typeof msg.data == "string") {
-        let obj = {}
-        let msgSplit = msg.data.split(",")
+    if(router && router.pathname === "/dashboard") {
+      ws.onmessage = (msg) => {
+        if(typeof msg.data == "string") {
+          let obj = {}
+          let msgSplit = msg.data.split(",")
 
-        for(let val of msgSplit){
-          let newVal = val.split(":")
-          obj[newVal[0]] = newVal[1]
-        }
-
-        if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
-          const { ph, temp, tank, tds, ldr } = obj
-          const dataHydro = { ph: ph, temp: temp, tank: tank, tds: tds, ldr: ldr };
-          setStatistic((oldState) => [...oldState, dataHydro]);
-          
-          const x = Math.floor(new Date().getTime() / 1000);
-          const y = +dataHydro["ph"];
-
-          let { data } = seriesPh[0];
-          data.push({ x, y });
-          setSeriesPh([{ ...seriesPh[0], data }]);
-
-          if (ApexCharts && ApexCharts.exec) {
-            ApexCharts && ApexCharts.exec && ApexCharts.exec("realtime", "updateSeries", seriesPh);
+          for(let val of msgSplit){
+            let newVal = val.split(":")
+            obj[newVal[0]] = newVal[1]
           }
+
+          if(obj && obj.hasOwnProperty("kind") && obj.kind.toLowerCase() === "hydro") {
+            const { ph, temp, tank, tds, ldr } = obj
+            const dataHydro = { ph: ph, temp: temp, tank: tank, tds: tds, ldr: ldr };
+            setStatistic((oldState) => [...oldState, dataHydro]);
+            
+            const x = Math.floor(new Date().getTime() / 1000);
+            const y = +dataHydro["ph"];
+
+            let { data } = seriesPh[0];
+            data.push({ x, y });
+            setSeriesPh([{ ...seriesPh[0], data }]);
+
+            if (ApexCharts && ApexCharts.exec) {
+              ApexCharts && ApexCharts.exec && ApexCharts.exec("realtime", "updateSeries", seriesPh);
+            }
+          }
+        } else {
+          if(urlObject) URL.revokeObjectURL(urlObject);
+          urlObject = URL.createObjectURL(new Blob([msg.data]));
+          setImage(urlObject);
         }
-      } else {
-        if(urlObject) URL.revokeObjectURL(urlObject);
-        urlObject = URL.createObjectURL(new Blob([msg.data]));
-        setImage(urlObject);
       }
     }
   }
@@ -169,11 +177,15 @@ const Dashboard = () => {
 
   /*MODAL CAMERA*/
   const onShowModalCamConfigHandler = () => {
+    onCalibrHandler()
     setShowModalCamConfig(true);
   };
 
   const onCloseModalCamConfigHandler = () => {
     setShowModalCamConfig(false);
+    console.log(`kind:image_cal_false`)
+    ws.send(`kind:image_cal_false`);
+    clearInterval(calibrInterval)
   };
 
   const onShowModalCamHandler = () => {
@@ -183,18 +195,75 @@ const Dashboard = () => {
     }
   };
 
+  const fetchImageCalibr = async () => {
+    try {
+      let res = await axios.get('/growth-plants/recent-plant-image')
+      if(res && res.data && res.data.image){
+        setImageCalibr(res.data.image)
+      }
+    }
+    catch(err) {}
+  }
+
+  const onCalibrHandler = () => {
+    if(ws && ws.send && ws.readyState == 1) {
+      calibrInterval = setInterval(() => {
+        fetchImageCalibr()
+      }, 5000)
+      setLoading(true)
+      ws.send(`kind:image_cal_true`);
+      console.log(`kind:image_cal_true`);
+    }
+  }
+
+  const onRetakeCalibrHandler = () => {
+    setImageCalibr("")
+    onCalibrHandler()
+  }
+
+  useEffect(() => {
+    // let copyImageCalibr = [...imageCalibr]
+    // console.log("+=> ", copyImageCalibr)
+    // copyImageCalibr = _.uniq(copyImageCalibr)
+
+    // console.log(copyImageCalibr)
+    // if(copyImageCalibr && copyImageCalibr.length > 1) {
+    if(imageCalibr && imageCalibr !== "") {
+      clearInterval(calibrInterval)
+      setLoading(false)
+      console.log(`kind:image_cal_false`)
+      ws.send(`kind:image_cal_false`);
+    }
+  }, [imageCalibr])
+
+  /* function for reset servo value acter closing modal */
+  const onResetServoSetting = () => {
+    if(settingUsers && mySetting && mySetting.setting_users_servo_horizontal && mySetting.setting_users_servo_horizontal) {
+      const { setting_users_servo_horizontal: horizontal, setting_users_servo_vertical: vertical } = mySetting
+      ws.send(`kind:set_value_servo,sh:${horizontal},sv:${vertical}`);
+    } else {
+      ws.send(`kind:set_value_servo,sh:90,sv:90`);
+    }
+  }
+
   const onCloseModalCamHandler = () => {
     setShowModalCam(false);
     if (ws && ws.send && ws.readyState == 1) {
       ws.send(`kind:live_cam_false`);
+      onResetServoSetting();
       setImage("");
     }
   };
 
   useEffect(() => {
     if (ws && ws.send && ws.readyState == 1) {
-      if (showModalCam) ws.send(`kind:live_cam_true`);
-      else ws.send(`kind:live_cam_false`);
+      if (showModalCam) {
+        ws.send(`kind:live_cam_true`);
+      }
+      else {
+        ws.send(`kind:live_cam_false`);
+        onResetServoSetting();
+      }
     }
 
     if (showModalCam) document.body.classList.add("overflow-hidden");
@@ -211,19 +280,6 @@ const Dashboard = () => {
     if(direction) setJoyDirection(direction)
   };
   /*MODAL CAMERA*/
-
-  useEffect(() => {
-    const cookies = nookies.get()
-    if(user && user.role !== "admin" && !Boolean(cookies.final_setup)){
-      setShowModalSetup(true)
-    }
-  }, [user])
-
-  useEffect(() => {
-    if(user && user.role === "admin") {
-      setShowModalSetup(false)
-    }
-  }, [user])
 
   useEffect(() => {
     let interval
@@ -248,6 +304,49 @@ const Dashboard = () => {
     return () => clearInterval(interval)
   }, [joyStatus, joyDirection])
 
+
+  const berforeReloadPage = () => {
+    if (ws && ws.send && ws.readyState == 1) {
+      ws.send(`kind:live_cam_false`);
+      onResetServoSetting();
+    }
+  }
+
+  useEffect(() => {
+    dispatch(actions.getSettingUsersMySetting())
+    dispatch(actions.getSettingUsersProgressPlant())
+
+    window.addEventListener("beforeunload", berforeReloadPage);
+    return () => {
+      window.removeEventListener("beforeunload", berforeReloadPage)
+    }
+  }, [])
+
+  /*MODAL SETUP ACCOUNT*/
+  useEffect(() => {
+    if(user && user.role !== "admin") {
+      setShowModalSetup(mySetting === null)
+    }
+    if(user && settingUsers && mySetting && mySetting.plants_id) {
+      getPlantData(mySetting.plants_id)
+    }
+  }, [settingUsers, user])
+  /*MODAL SETUP ACCOUNT*/
+
+  const getPlantData = (id) => {
+    setLoading(true)
+    axios.get(`/plants/get-plant/${id}`)
+      .then(res => {
+        setLoading(false)
+        setPlantData(res.data)
+      })
+      .catch(() => {
+        setLoading(false)
+        formErrorMessage("error", "Something was wrong when fetching data")
+      })
+  }
+
+
   return (
     <>
       <div className="header-dashboard">
@@ -256,6 +355,7 @@ const Dashboard = () => {
           {moment().format("dddd, DD MMMM YYYY")}
         </span>
       </div>
+
 
       <Layout>
         <Layout.Content>
@@ -271,6 +371,7 @@ const Dashboard = () => {
                 </div>
               </Card>
             </Col>
+
 
             <Col lg={8} md={24} sm={24} xs={24}>
               <Row gutter={[20, 20]}>
@@ -288,6 +389,7 @@ const Dashboard = () => {
                     </div>
                   </Card>
                 </Col>
+
 
                 <Col lg={24} md={12} sm={24} xs={24}>
                   <Card className="radius1rem shadow1 card-dashboard h-100" bordered={false}>
@@ -317,29 +419,40 @@ const Dashboard = () => {
             </Col>
           </Row>
 
+
           <Row gutter={[20, 20]} style={{ marginTop: "20px" }}>
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100 card-plant-dashboard" bordered={false}>
                 <h2 className="h2 bold mb0 line-height-1 flex justify-between">
                   Plant
-                  <Space>
-                    <span onClick={onShowModalCamConfigHandler}>
-                      <Image width={25} height={25} src={Camera} alt="camera" className="hover-pointer" />
-                    </span>
-                    <Divider type="vertical" className="divider-cam" />
-                    <span onClick={onShowModalCamHandler}>
-                      <Image width={24} height={24} src={Play} alt="camera" className="hover-pointer" />
-                    </span>
-                  </Space>
+                  {mySetting && mySetting.setting_users_camera && (
+                    <Space>
+                      <span onClick={onShowModalCamConfigHandler}>
+                        <Image width={25} height={25} src={Camera} alt="camera" className="hover-pointer" />
+                      </span>
+                      <Divider type="vertical" className="divider-cam" />
+                      <span onClick={onShowModalCamHandler}>
+                        <Image width={24} height={24} src={Play} alt="camera" className="hover-pointer" />
+                      </span>
+                    </Space>
+                  )}
                 </h2>
-                <div className="text-center items-center m-t-17">
-                  <Image width={imgWidth1} height={imgWidth1} src={Sawi} alt="plant" />
-                  <h3 className="h2 bold mb0">
-                    <span className="regular header-date">Sawi Manis</span>
-                  </h3>
-                </div>
+                {plantData && plantData.plants_image && (
+                  <div className="text-center items-center m-t-17">
+                    <Image 
+                      width={imgWidth1} 
+                      height={imgWidth1}
+                      src={`${process.env.NEXT_PUBLIC_API_URL}/static/plants/${plantData.plants_image}`}
+                      alt="plant"
+                    />
+                    <h3 className="h2 bold mb0">
+                      <span className="regular header-date">{plantData.plants_name}</span>
+                    </h3>
+                  </div>
+                )}
               </Card>
             </Col>
+
 
             <Col xl={8} lg={8} md={12} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100 monitor-card" bordered={false}>
@@ -357,6 +470,7 @@ const Dashboard = () => {
                 </div>
               </Card>
             </Col>
+
 
             <Col xl={8} lg={8} md={24} sm={24} xs={24}>
               <Card className="radius1rem shadow1 h-100 monitor-card" bordered={false}>
@@ -401,19 +515,22 @@ const Dashboard = () => {
         </Layout.Content>
       </Layout>
 
+
       <ModalLiveCam
         image={image}
         visible={showModalCam}
         onMove={onJoyStickMoved}
         onClose={onCloseModalCamHandler}
         onStart={e => setJoyStatus(e.type)}
-        onStart={e => setJoyStatus(e.type)}
+        onStop={e => setJoyStatus(e.type)}
       />
 
       <ModalConfigCam
-        image={image}
+        image={imageCalibr}
+        loading={loading}
         visible={showModalCamConfig}
         onClose={onCloseModalCamConfigHandler}
+        onRetakeHandler={onRetakeCalibrHandler}
       />
 
       <Modal
@@ -421,8 +538,8 @@ const Dashboard = () => {
         title={" "}
         zIndex="1030"
         footer={null}
-        maskClosable={false}
         closable={false}
+        maskClosable={false}
         visible={showModalSetup}
         className="modal-setting-profile noselect"
         maskStyle={{ backgroundColor: "rgba(0, 0, 0, 0.45)" }}
@@ -439,8 +556,6 @@ const Dashboard = () => {
         <SetupProfileModal
           current={current}
           onStepChange={onStepChange}
-          plantSelected={plantSelected}
-          setPlantSelected={setPlantSelected}
         />
       </Modal>
 
@@ -545,7 +660,9 @@ const Dashboard = () => {
 };
 
 Dashboard.getInitialProps = async ctx => {
-  let res = await axios.get(`/plants/all-plants?page=1&per_page=100`)
+  if(ctx.req) axios.defaults.headers.get.Cookie = ctx.req.headers.cookie;
+
+  let res = await axios.get(`/plants/all-plants?page=1&per_page=200`)
   ctx.store.dispatch(actions.getPlantSuccess(res.data))
 }
 

@@ -104,6 +104,7 @@ export const getUser = () => {
             })
         }
         else {
+          dispatch(logout())
           axios.delete("/users/delete-cookies")
           dispatch(getUserFail(err.response))
         }
@@ -143,7 +144,6 @@ export const logout = () => {
         .then(() => {
           axios.delete("/users/delete-cookies")
           dispatch(authLogout())
-          // process.browser && Router.reload()
         })
     } 
     else {
@@ -155,7 +155,6 @@ export const logout = () => {
       }
       axios.delete("/users/delete-cookies")
       dispatch(authLogout())
-      // process.browser && Router.reload()
     }
   };
 };

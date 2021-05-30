@@ -1,3 +1,50 @@
+import moment from 'moment'
+
+export const columnsAllReports = [
+  {
+    key: "ph",
+    align: "center",
+    title: "PH",
+    dataIndex: "ph",
+    render: (item) => <span>{item}</span>,
+  },
+  {
+    key: "tds",
+    align: "center",
+    title: "Nutrition",
+    dataIndex: "tds",
+    render: (item) => <span>{item} ppm</span>,
+  },
+  {
+    key: "ldr",
+    align: "center",
+    title: "Light Status",
+    dataIndex: "ldr",
+    render: (item) => <span className="text-capitalize">{item}</span>,
+  },
+  {
+    key: "sh",
+    align: "center",
+    title: "Water Temp.",
+    dataIndex: "temp",
+    render: (item) => <span>{item}°C</span>,
+  },
+  {
+    key: "ta",
+    align: "center",
+    title: "Water Level",
+    dataIndex: "tank",
+    render: (item) => <span>{item}%</span>,
+  },
+  {
+    key: "time",
+    align: "center",
+    title: "Time",
+    dataIndex: "created_at",
+    render: (item) => <span>{moment(item).format('lll')}</span>,
+  },
+];
+
 export const columns = [
   {
     key: "ph",

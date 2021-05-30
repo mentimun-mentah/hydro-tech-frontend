@@ -140,7 +140,7 @@ const style = css`
 
 @media (max-width: 961px), (max-height: 730px) {
   .auth-sidebar .artwork .artwork-image {
-    display: none;
+    display: block;
   }
 }
 

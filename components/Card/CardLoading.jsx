@@ -1,10 +1,9 @@
 import { Card, Skeleton } from 'antd'
 import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
 
 import Image from 'next/image'
 
-const PlantCardLoading = () => {
+const PlantCardLoading = (noImage) => {
   return (
     <>
       <motion.div 
@@ -16,7 +15,7 @@ const PlantCardLoading = () => {
         <Card 
           className="w-100 card-loading"
           bordered={false}
-          cover={<Image src="/static/images/loader.gif" width={350} height={250} alt="card-loading" />}
+          cover={noImage ? false : <Image src="/static/images/loader.gif" width={350} height={250} alt="card-loading" />}
         >
           <Skeleton className="loading-card" active paragraph={{ rows: 2 }} loading={true} />
         </Card>

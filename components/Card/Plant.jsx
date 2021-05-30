@@ -3,7 +3,7 @@ import { Card, Button, Row, Col, Progress } from 'antd'
 
 import Image from 'next/image'
 
-const PlantCard = ({ plant, ongoing, onCongrats, getPlantData, onPlantedHandler, onCancelPlantedHandler }) => {
+const PlantCard = ({ plant, percentage, ongoing, onCongrats, getPlantData, onPlantedHandler, onCancelPlantedHandler }) => {
   return (
     <>
       <motion.div 
@@ -36,7 +36,7 @@ const PlantCard = ({ plant, ongoing, onCongrats, getPlantData, onPlantedHandler,
               {ongoing.ongoing && ongoing.start && (
                 <>
                   <Progress 
-                    percent={0} 
+                    percent={percentage} 
                     status="active" 
                     className="p-r-5 p-l-5 m-b-10" 
                     strokeColor="#ffc19e" 

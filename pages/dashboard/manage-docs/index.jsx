@@ -1,11 +1,15 @@
 import { withAuth } from 'lib/withAuth'
-import { AnimatePresence } from 'framer-motion'
-import { Layout, Row, Col, Form, Input } from 'antd'
+import { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Layout, Row, Col, Form, Input, Empty } from 'antd'
+import { jsonHeaderHandler, resNotification, signature_exp } from 'lib/axios'
 
 import _ from 'lodash'
 import React from 'react'
+import axios from 'lib/axios'
 import dynamic from 'next/dynamic'
-import Pagination from 'components/Pagination'
+import * as actions from 'store/actions'
 import CardLoading from 'components/Card/CardLoading'
 import pageStyle from 'components/Dashboard/pageStyle'
 import addPlantStyle from 'components/Dashboard/addPlantStyle'
@@ -14,9 +18,43 @@ const CardLoadingMemo = React.memo(CardLoading)
 const CardDocs = dynamic(() => import('components/Card/DocsAdmin'), { ssr: false, loading: () => <CardLoadingMemo />  })
 const CardDocsMemo = React.memo(CardDocs)
 
-const per_page = 12
-
 const ManageDocumentation = () => {
+  const dispatch = useDispatch()
+  
+  const documentations = useSelector(state => state.documentations.documentation)
+
+  const [q, setQ] = useState("")
+
+  useEffect(() => {
+    let queryString = {}
+
+    if(q) queryString["q"] = q
+    else delete queryString["q"]
+
+    dispatch(actions.getAllDocumentation({...queryString}))
+  }, [q])
+
+
+  const onDeleteHandler = id => {
+    axios.delete(`/documentations/delete/${id}`, jsonHeaderHandler())
+      .then(res => {
+        dispatch(actions.getAllDocumentation({q: q}))
+        resNotification("success", "Success", res.data.detail)
+      })
+      .catch(err => {
+        const errDetail = err.response.data.detail
+        if(errDetail == signature_exp){
+          dispatch(actions.getAllDocumentation())
+          resNotification("success", "Success", "Successfully delete the documentation.")
+        } else if(typeof(errDetail) === "string") {
+          resNotification("error", "Error", errDetail)
+        } else {
+          resNotification("error", "Error", errDetail[0].msg)
+        }
+      })
+  }
+
+
   return(
     <>
       <Layout>
@@ -31,11 +69,11 @@ const ManageDocumentation = () => {
               <Form layout="vertical">
                 <Row gutter={[20, 20]}>
                   <Col lg={12} md={12} sm={12} xs={24}>
-                    <Form.Item className="">
+                    <Form.Item>
                       <Input
                         size="large"
-                        // value={q}
-                        // onChange={e => setQ(e.target.value)}
+                        value={q}
+                        onChange={e => setQ(e.target.value)}
                         placeholder="Search documentation"
                         prefix={<i className="far fa-search text-grey" />}
                       />
@@ -50,26 +88,31 @@ const ManageDocumentation = () => {
 
                     <AnimatePresence>
                       <Row gutter={[20, 20]}>
-                        {[...Array(12)].map((_, i) => (
-                          <Col xl={8} lg={12} md={12} sm={24} xs={24} key={i}>
-                            <CardDocsMemo />
-                          </Col>
-                        ))}
+                        {documentations && documentations.length > 0 ? (
+                          <>
+                            {documentations.map(doc => (
+                              <Col xl={8} lg={12} md={12} sm={24} xs={24} key={doc.documentations_id}>
+                                <CardDocsMemo 
+                                  doc={doc} 
+                                  onDelete={() => onDeleteHandler(doc.documentations_id)}
+                                />
+                              </Col>
+                            ))}
+                          </>
+                        ) : (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: ".2" }}
+                            className="w-100 text-center"
+                          >
+                            <Empty className="m-t-150 m-b-150" description={<span className="text-grey">No Data</span>} /> 
+                          </motion.div>
+                        )}
                       </Row>
                     </AnimatePresence>
 
-                  </Col>
-
-                  <Col xl={24} lg={24} md={24} sm={24}>
-                    <div className="text-center m-t-20 m-b-20">
-                      <Pagination 
-                        total={45} 
-                        goTo={() => {}} 
-                        current={3} 
-                        hideOnSinglePage 
-                        pageSize={per_page}
-                      />
-                    </div>
                   </Col>
                 </Row>
               </AnimatePresence>

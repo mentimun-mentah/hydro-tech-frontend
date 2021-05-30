@@ -4,7 +4,10 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 
 import Link from 'next/link'
 
-const CardDocs = () => {
+const CardDocs = ({ doc, onDelete }) => {
+  let plainText = doc.documentations_description.replace(/<[^>]+>/g, ' ');
+  let finalText = plainText.replace(/&nbsp;/g, " ");
+
   return(
     <>
       <motion.div 
@@ -17,25 +20,23 @@ const CardDocs = () => {
           className="w-100 card-blog rounded-card-actions"
           bordered={false}
           actions={[
-            <Link href="/dashboard/manage-docs/asd">
+            <Link href="/dashboard/manage-docs/[slug]" as={`/dashboard/manage-docs/${doc.documentations_slug}`}>
               <a>
-                <EditOutlined key="edit" onClick={() => {}} />
+                <EditOutlined key="edit" />
               </a>
             </Link>,
             <Popconfirm
               okText="Delete"
-              onConfirm={() => {}}
+              onConfirm={onDelete}
               title={`Delete documentation?`}
             >
               <DeleteOutlined key="delete" />
             </Popconfirm>
           ]}
         >
-          <h1 className="h3 bold truncate line-height-3 m-b-5">Set-up your IoT devkit</h1>
-          <Tag className="m-b-5" color="#B6B9C7">Learn ESP32</Tag>
-          <p className="truncate-2 m-b-0">
-            For sending your first Hello World on NB-IoT you can use an embedded developer kit (devkit). Devkits are available for all NB-IoT modules from different manufactures such as Quectel or ublox.
-          </p>
+          <h1 className="h3 bold truncate line-height-3 m-b-5">{doc.documentations_title}</h1>
+          <Tag className="m-b-5" color="#B6B9C7">{doc.category_docs_name}</Tag>
+          <p className="truncate-2 m-b-0">{finalText}</p>
         </Card>
       </motion.div>
 
